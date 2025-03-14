@@ -1,0 +1,71 @@
+
+import React from 'react';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { cn } from "@/lib/utils";
+
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  change: number;
+  isPositive?: boolean;
+  isNegative?: boolean;
+  status?: "on-track" | "off-track";
+  className?: string;
+  children?: React.ReactNode;
+}
+
+const MetricCard: React.FC<MetricCardProps> = ({ 
+  title, 
+  value, 
+  change, 
+  isPositive = true, 
+  isNegative = false,
+  status,
+  className,
+  children 
+}) => {
+  const changeText = `${change > 0 ? '+' : ''}${change}%`;
+  const changeClass = isNegative 
+    ? "text-buzzaroo-red" 
+    : "text-buzzaroo-green";
+
+  return (
+    <div 
+      className={cn(
+        "bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow duration-300 animate-scale-in", 
+        className
+      )}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-sm text-gray-500 font-medium">{title}</h3>
+        <span className={cn(
+          "text-xs font-medium px-2 py-0.5 rounded-full", 
+          isNegative ? "bg-red-50 text-buzzaroo-red" : "bg-green-50 text-buzzaroo-green"
+        )}>
+          {changeText}
+        </span>
+      </div>
+      <div className="flex items-end justify-between">
+        <span className="text-3xl font-bold text-gray-900">{value}</span>
+        {status && (
+          <div className="flex items-center gap-1 text-sm">
+            {status === "on-track" ? (
+              <>
+                <CheckCircle size={16} className="text-buzzaroo-green" />
+                <span className="text-buzzaroo-green font-medium">On track</span>
+              </>
+            ) : (
+              <>
+                <XCircle size={16} className="text-buzzaroo-red" />
+                <span className="text-buzzaroo-red font-medium">Off track</span>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+};
+
+export default MetricCard;
