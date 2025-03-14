@@ -18,7 +18,18 @@ export type Stats = {
   total_in_proces: number
 }
 
+export type StatsHistory = {
+  id: number
+  total: number
+  total_15: number
+  total_in_proces: number
+  created_at: string
+}
+
 export const supabase = supabaseClient;
+
+// Maximum number of historical records to fetch for charts
+export const MAX_HISTORY_RECORDS = 10;
 
 export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
@@ -52,6 +63,22 @@ export async function getStats(): Promise<Stats | null> {
     total_15: data.total_15,
     total_in_proces: data.total_in_proces
   }
+}
+
+export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Promise<StatsHistory[]> {
+  const { data, error } = await supabase
+    .from('cct_stats_hist')
+    .select('id, total, total_15, total_in_proces, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  
+  if (error) {
+    console.error('Error fetching stats history:', error)
+    return []
+  }
+  
+  // Return the data in ascending order for charts (oldest to newest)
+  return (data || []).reverse()
 }
 
 export async function getCustomerCount(): Promise<number> {

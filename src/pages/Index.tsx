@@ -5,10 +5,10 @@ import SearchBar from '@/components/SearchBar';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import DataTable from '@/components/DataTable';
-import { getStats, getCustomerCount, Stats } from '@/lib/supabase';
+import { getStats, getCustomerCount, getStatsHistory, Stats, StatsHistory, MAX_HISTORY_RECORDS } from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
 
-// Generate random chart data
+// Fallback function for generating chart data if no data is available
 const generateChartData = (length: number, isNegative = false) => {
   const startValue = isNegative ? 80 : 20;
   const endValue = isNegative ? 20 : 80;
@@ -21,29 +21,50 @@ const generateChartData = (length: number, isNegative = false) => {
   });
 };
 
+// Format history data for charts
+const formatHistoryData = (data: StatsHistory[], key: keyof Pick<StatsHistory, 'total' | 'total_15' | 'total_in_proces'>) => {
+  return data.map(item => ({ value: Number(item[key]) || 0 }));
+};
+
 const Index: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Generate data for charts
-  const clientsChartData = generateChartData(20);
-  const documentsChartData = generateChartData(20, true);
-  const topChartData = generateChartData(20);
-  const facturesChartData = generateChartData(20);
+  // Default chart data (used as fallback)
+  const defaultClientsChartData = generateChartData(MAX_HISTORY_RECORDS);
+  const defaultDocumentsChartData = generateChartData(MAX_HISTORY_RECORDS, true);
+  const defaultTopChartData = generateChartData(MAX_HISTORY_RECORDS);
+  const defaultFacturesChartData = generateChartData(MAX_HISTORY_RECORDS);
+
+  // Prepare chart data from history or use defaults
+  const documentsChartData = statsHistory.length > 0 
+    ? formatHistoryData(statsHistory, 'total')
+    : defaultDocumentsChartData;
+  
+  const topChartData = statsHistory.length > 0 
+    ? formatHistoryData(statsHistory, 'total_15')
+    : defaultTopChartData;
+  
+  const facturesChartData = statsHistory.length > 0 
+    ? formatHistoryData(statsHistory, 'total_in_proces')
+    : defaultFacturesChartData;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [statsData, countData] = await Promise.all([
+        const [statsData, countData, historyData] = await Promise.all([
           getStats(),
-          getCustomerCount()
+          getCustomerCount(),
+          getStatsHistory(MAX_HISTORY_RECORDS)
         ]);
         
         setStats(statsData);
         setCustomerCount(countData);
+        setStatsHistory(historyData);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
         toast({
@@ -77,7 +98,7 @@ const Index: React.FC = () => {
             change={24.45} 
             status="on-track"
           >
-            <StatisticChart data={clientsChartData} color="#4CAF50" />
+            <StatisticChart data={defaultClientsChartData} color="#4CAF50" />
           </MetricCard>
           
           <MetricCard 
