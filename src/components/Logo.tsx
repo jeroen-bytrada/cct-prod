@@ -10,7 +10,7 @@ const Logo: React.FC<LogoProps> = ({ className }) => {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <img 
-        src="/lovable-uploads/449f1fa6-512a-451f-a273-6bee8e975fd7.png" 
+        src="/lovable-uploads/f0607a96-450c-47fc-a124-e2182cd51624.png" 
         alt="Buzzaroo Logo" 
         className="h-8 w-auto animate-fade-in" 
         style={{ animationDelay: '0.1s' }} 
