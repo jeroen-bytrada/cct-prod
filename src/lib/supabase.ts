@@ -1,8 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js'
+import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
 export type Customer = {
-  id: number
+  id: string
   customer_name: string
   cs_documents_total: number
   cs_documents_in_process: number
@@ -14,14 +15,10 @@ export type Stats = {
   id: number
   total: number
   total_15: number
-  total_in_process: number
+  total_in_proces: number
 }
 
-// Create a single supabase client for interacting with your database
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = supabaseClient;
 
 export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
@@ -38,8 +35,9 @@ export async function getCustomers(): Promise<Customer[]> {
 
 export async function getStats(): Promise<Stats | null> {
   const { data, error } = await supabase
-    .from('cct_stats')
+    .from('cct_stats_hist')
     .select('*')
+    .order('created_at', { ascending: false })
     .limit(1)
     .single()
   
@@ -48,7 +46,12 @@ export async function getStats(): Promise<Stats | null> {
     return null
   }
   
-  return data
+  return {
+    id: data.id,
+    total: data.total,
+    total_15: data.total_15,
+    total_in_proces: data.total_in_proces
+  }
 }
 
 export async function getCustomerCount(): Promise<number> {

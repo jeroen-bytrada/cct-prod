@@ -101,7 +101,7 @@ const Index: React.FC = () => {
           
           <MetricCard 
             title="Totaal Snelstart Facturen" 
-            value={loading ? "..." : (stats?.total_in_process || 0).toString()} 
+            value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
             change={24.45} 
             status="on-track"
           >
