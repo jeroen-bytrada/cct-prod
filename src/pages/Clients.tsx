@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -32,7 +31,6 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 
-// Define the Customer type based on the database schema, excluding cs_ fields
 type Customer = {
   id: string;
   customer_name: string;
@@ -44,7 +42,6 @@ type Customer = {
   created_at: string | null;
 };
 
-// Empty customer for new customer form
 const emptyCustomer: Customer = {
   id: '',
   customer_name: '',
@@ -69,12 +66,10 @@ const Clients: React.FC = () => {
   
   const { toast } = useToast();
 
-  // Fetch customers
   useEffect(() => {
     fetchCustomers();
   }, []);
   
-  // Filter customers when search text changes
   useEffect(() => {
     if (searchText.trim() === '') {
       setFilteredCustomers(customers);
@@ -163,7 +158,6 @@ const Clients: React.FC = () => {
   };
 
   const handleSaveCustomer = async () => {
-    // Validation
     if (!editingCustomer.id.trim() || !editingCustomer.customer_name.trim()) {
       toast({
         title: "Error",
@@ -175,12 +169,10 @@ const Clients: React.FC = () => {
 
     try {
       if (isNewCustomer) {
-        // Insert new customer
         const { error } = await supabase
           .from('customers')
           .insert([{
             ...editingCustomer,
-            // Exclude cs_ fields which should be null when inserting
             cs_documents_in_process: null,
             cs_documents_other: null,
             cs_last_update: null
@@ -193,7 +185,6 @@ const Clients: React.FC = () => {
           description: "New customer added successfully",
         });
       } else {
-        // Update existing customer
         const { error } = await supabase
           .from('customers')
           .update({
@@ -214,7 +205,6 @@ const Clients: React.FC = () => {
         });
       }
       
-      // Refresh customer list
       fetchCustomers();
       setIsDialogOpen(false);
     } catch (error) {
@@ -229,7 +219,6 @@ const Clients: React.FC = () => {
     }
   };
 
-  // Update form field values
   const updateField = (field: keyof Customer, value: any) => {
     setEditingCustomer(prev => ({ ...prev, [field]: value }));
   };
@@ -374,14 +363,13 @@ const Clients: React.FC = () => {
         </div>
       </div>
 
-      {/* Edit/Add Customer Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{isNewCustomer ? 'Nieuwe Klant' : 'Klant Bewerken'}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="id" className="text-right font-medium">
                 Klantnr
               </label>
@@ -390,10 +378,10 @@ const Clients: React.FC = () => {
                 value={editingCustomer.id}
                 onChange={(e) => updateField('id', e.target.value)}
                 disabled={!isNewCustomer}
-                className="col-span-3"
+                className="col-span-4"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="customer_name" className="text-right font-medium">
                 Klantnaam
               </label>
@@ -401,10 +389,10 @@ const Clients: React.FC = () => {
                 id="customer_name"
                 value={editingCustomer.customer_name}
                 onChange={(e) => updateField('customer_name', e.target.value)}
-                className="col-span-3"
+                className="col-span-4"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="administration_name" className="text-right font-medium">
                 Administratienaam
               </label>
@@ -412,10 +400,10 @@ const Clients: React.FC = () => {
                 id="administration_name"
                 value={editingCustomer.administration_name || ''}
                 onChange={(e) => updateField('administration_name', e.target.value)}
-                className="col-span-3"
+                className="col-span-4"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="administration_mail" className="text-right font-medium">
                 Email
               </label>
@@ -423,10 +411,10 @@ const Clients: React.FC = () => {
                 id="administration_mail"
                 value={editingCustomer.administration_mail || ''}
                 onChange={(e) => updateField('administration_mail', e.target.value)}
-                className="col-span-3"
+                className="col-span-4"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="source" className="text-right font-medium">
                 Bron
               </label>
@@ -434,10 +422,10 @@ const Clients: React.FC = () => {
                 id="source"
                 value={editingCustomer.source || ''}
                 onChange={(e) => updateField('source', e.target.value)}
-                className="col-span-3"
+                className="col-span-4"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="source_root" className="text-right font-medium">
                 Bronpad
               </label>
@@ -445,14 +433,14 @@ const Clients: React.FC = () => {
                 id="source_root"
                 value={editingCustomer.source_root || ''}
                 onChange={(e) => updateField('source_root', e.target.value)}
-                className="col-span-3"
+                className="col-span-4"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <label htmlFor="is_active" className="text-right font-medium">
                 Actief
               </label>
-              <div className="col-span-3 flex items-center">
+              <div className="col-span-4 flex items-center">
                 <input
                   type="checkbox"
                   id="is_active"
@@ -474,7 +462,6 @@ const Clients: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
