@@ -271,7 +271,7 @@ const Clients: React.FC = () => {
                       Klantnaam
                     </TableHead>
                     <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Administratienaam
+                      Administratie
                     </TableHead>
                     <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
@@ -364,13 +364,13 @@ const Clients: React.FC = () => {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-4xl w-full">
           <DialogHeader>
             <DialogTitle>{isNewCustomer ? 'Nieuwe Klant' : 'Klant Bewerken'}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="id" className="text-right font-medium">
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="id" className="text-right font-medium col-span-1">
                 Klantnr
               </label>
               <Input
@@ -378,69 +378,69 @@ const Clients: React.FC = () => {
                 value={editingCustomer.id}
                 onChange={(e) => updateField('id', e.target.value)}
                 disabled={!isNewCustomer}
-                className="col-span-4"
+                className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="customer_name" className="text-right font-medium">
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="customer_name" className="text-right font-medium col-span-1">
                 Klantnaam
               </label>
               <Input
                 id="customer_name"
                 value={editingCustomer.customer_name}
                 onChange={(e) => updateField('customer_name', e.target.value)}
-                className="col-span-4"
+                className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="administration_name" className="text-right font-medium">
-                Administratienaam
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="administration_name" className="text-right font-medium col-span-1">
+                Administratie
               </label>
               <Input
                 id="administration_name"
                 value={editingCustomer.administration_name || ''}
                 onChange={(e) => updateField('administration_name', e.target.value)}
-                className="col-span-4"
+                className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="administration_mail" className="text-right font-medium">
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="administration_mail" className="text-right font-medium col-span-1">
                 Email
               </label>
               <Input
                 id="administration_mail"
                 value={editingCustomer.administration_mail || ''}
                 onChange={(e) => updateField('administration_mail', e.target.value)}
-                className="col-span-4"
+                className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="source" className="text-right font-medium">
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="source" className="text-right font-medium col-span-1">
                 Bron
               </label>
               <Input
                 id="source"
                 value={editingCustomer.source || ''}
                 onChange={(e) => updateField('source', e.target.value)}
-                className="col-span-4"
+                className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="source_root" className="text-right font-medium">
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="source_root" className="text-right font-medium col-span-1">
                 Bronpad
               </label>
               <Input
                 id="source_root"
                 value={editingCustomer.source_root || ''}
                 onChange={(e) => updateField('source_root', e.target.value)}
-                className="col-span-4"
+                className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-5 items-center gap-4">
-              <label htmlFor="is_active" className="text-right font-medium">
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="is_active" className="text-right font-medium col-span-1">
                 Actief
               </label>
-              <div className="col-span-4 flex items-center">
+              <div className="col-span-5 flex items-center">
                 <input
                   type="checkbox"
                   id="is_active"
