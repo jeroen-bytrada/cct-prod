@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
             )}
           >
             <Home size={20} className="transition-transform duration-200 group-hover:scale-110" />
-            <span>Overview</span>
+            <span>Dashboard</span>
           </NavLink>
           <NavLink
             to="/clients"
@@ -33,7 +33,7 @@ const Sidebar: React.FC = () => {
             )}
           >
             <Users size={20} className="transition-transform duration-200 group-hover:scale-110" />
-            <span>Clients</span>
+            <span>Klanten</span>
           </NavLink>
         </nav>
       </div>
