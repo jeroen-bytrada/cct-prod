@@ -1,36 +1,53 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Filter, 
   ChevronDown, 
   RotateCcw, 
-  MoreVertical,
+  FileText,
   ChevronLeft,
   ChevronRight,
-  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
-interface Client {
-  id: number;
-  name: string;
-  total: number;
-  faststart: number;
-  overview: number;
-  date: string;
-}
-
-const mockClients: Client[] = [
-  { id: 1, name: "John Doe", total: 200, faststart: 200, overview: 100, date: "12.09.2019 - 12.53 PM" },
-  { id: 2, name: "John Doe", total: 200, faststart: 200, overview: 100, date: "12.09.2019 - 12.53 PM" },
-  { id: 3, name: "John Doe", total: 200, faststart: 200, overview: 100, date: "12.09.2019 - 12.53 PM" },
-  { id: 4, name: "John Doe", total: 200, faststart: 200, overview: 100, date: "12.09.2019 - 12.53 PM" },
-  { id: 5, name: "John Doe", total: 200, faststart: 200, overview: 100, date: "12.09.2019 - 12.53 PM" },
-];
+import { getCustomers, Customer } from '@/lib/supabase';
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const DataTable: React.FC = () => {
-  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+        const data = await getCustomers();
+        setCustomers(data);
+      } catch (error) {
+        console.error('Failed to fetch customers:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load customer data. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, [toast]);
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd.MM.yyyy - HH:mm');
+    } catch (e) {
+      return dateString;
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm animate-slide-up" 
@@ -70,68 +87,80 @@ const DataTable: React.FC = () => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Klantnr
-              </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Klantnaam
-              </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Totaal
-              </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Snelstart
-              </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Overzicht
-              </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Bijgewerkt
-              </th>
-              <th className="py-3 px-4"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {mockClients.map((client) => (
-              <tr 
-                key={client.id} 
-                className="hover:bg-gray-50 transition-colors duration-150"
-              >
-                <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {client.id}
-                </td>
-                <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                  {client.name}
-                </td>
-                <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                  {client.total}
-                </td>
-                <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                  {client.faststart}
-                </td>
-                <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                  {client.overview}
-                </td>
-                <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500">
-                  {client.date}
-                </td>
-                <td className="py-4 px-4 whitespace-nowrap text-sm text-right">
-                  <button className="text-green-600 hover:text-green-800 transition-colors">
-                    <FileText size={18} />
-                  </button>
-                </td>
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">Loading customer data...</div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50/50">
+                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Klantnr
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Klantnaam
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Totaal
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Snelstart
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Overzicht
+                </th>
+                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Bijgewerkt
+                </th>
+                <th className="py-3 px-4"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {customers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-4 px-4 text-center text-gray-500">
+                    No customer data available
+                  </td>
+                </tr>
+              ) : (
+                customers.map((customer) => (
+                  <tr 
+                    key={customer.id} 
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {customer.id}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                      {customer.customer_name}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                      {customer.cs_documents_total}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                      {customer.cs_documents_in_process}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                      {customer.cs_documents_other}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(customer.cs_last_update)}
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-sm text-right">
+                      <button className="text-green-600 hover:text-green-800 transition-colors">
+                        <FileText size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
         <div className="text-sm text-gray-500">
-          Showing 1-09 of 78
+          Showing {customers.length > 0 ? `1-${Math.min(customers.length, 10)} of ${customers.length}` : '0 of 0'}
         </div>
         <div className="flex items-center space-x-2">
           <Button 
