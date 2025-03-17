@@ -134,7 +134,7 @@ export async function getCustomerDocuments(
     query = query.lte('created_at', dateTo.toISOString());
   }
   
-  // Apply document type filters if provided
+  // Apply document type filters if provided - now only handling 'invoice' and 'other'
   if (filters.documentTypes && filters.documentTypes.length > 0) {
     query = query.in('document_type', filters.documentTypes);
   }

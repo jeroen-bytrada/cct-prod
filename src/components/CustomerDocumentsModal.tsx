@@ -18,8 +18,6 @@ import {
   PopoverContent,
   PopoverTrigger 
 } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { 
@@ -51,8 +49,8 @@ interface CustomerDocumentsModalProps {
   customerId: string | null;
 }
 
-// Document types available for filtering
-const DOCUMENT_TYPES = ['invoice', 'receipt', 'contract', 'report', 'other'];
+// Document types available for filtering - only Factuur and Overig now
+const DOCUMENT_TYPES = ['invoice', 'other'];
 
 const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({ 
   isOpen, 
@@ -158,9 +156,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const getDocumentTypeColor = (type: string) => {
     const types: Record<string, string> = {
       'invoice': 'bg-blue-100 text-blue-800',
-      'receipt': 'bg-green-100 text-green-800',
-      'contract': 'bg-purple-100 text-purple-800',
-      'report': 'bg-amber-100 text-amber-800',
+      'other': 'bg-gray-100 text-gray-800',
     };
     
     return types[type?.toLowerCase()] || 'bg-gray-100 text-gray-800';
@@ -272,8 +268,9 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         <div className="py-4 flex-1 overflow-hidden flex flex-col">
           {/* Filters section */}
           <div className="mb-6 space-y-4">
-            {/* Date filters */}
-            <div className="flex flex-wrap items-center gap-4">
+            {/* Filters row with date and type filters */}
+            <div className="flex items-center justify-between">
+              {/* Date filters - aligned to the left */}
               <div className="flex items-center">
                 <span className="text-sm font-medium mr-2">Filter op Toegevoegd:</span>
                 
@@ -328,42 +325,49 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                 </Popover>
               </div>
               
-              {/* Document type filter */}
-              <div className="flex items-center flex-wrap">
+              {/* Document type filter - aligned to the right */}
+              <div className="flex items-center">
                 <span className="text-sm font-medium mr-2">Document type:</span>
-                <div className="flex flex-wrap gap-2">
-                  {DOCUMENT_TYPES.map((type) => (
-                    <Badge 
-                      key={type}
-                      variant={selectedDocumentTypes.includes(type) ? "default" : "outline"}
-                      className={cn(
-                        "cursor-pointer hover:bg-opacity-90 px-3 py-1",
-                        selectedDocumentTypes.includes(type) ? "bg-primary" : "bg-transparent"
-                      )}
-                      onClick={() => toggleDocumentType(type)}
-                    >
-                      {type === 'invoice' ? 'Factuur' : 
-                       type === 'receipt' ? 'Kwitantie' :
-                       type === 'contract' ? 'Contract' :
-                       type === 'report' ? 'Rapport' : 'Overig'}
-                    </Badge>
-                  ))}
+                <div className="flex gap-2">
+                  <Badge 
+                    key="invoice"
+                    variant={selectedDocumentTypes.includes('invoice') ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer hover:bg-opacity-90 px-3 py-1",
+                      selectedDocumentTypes.includes('invoice') ? "bg-primary" : "bg-transparent"
+                    )}
+                    onClick={() => toggleDocumentType('invoice')}
+                  >
+                    Factuur
+                  </Badge>
+                  <Badge 
+                    key="other"
+                    variant={selectedDocumentTypes.includes('other') ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer hover:bg-opacity-90 px-3 py-1",
+                      selectedDocumentTypes.includes('other') ? "bg-primary" : "bg-transparent"
+                    )}
+                    onClick={() => toggleDocumentType('other')}
+                  >
+                    Overig
+                  </Badge>
                 </div>
               </div>
-              
-              {/* Reset filters button */}
-              {(dateFrom || dateTo || selectedDocumentTypes.length > 0) && (
+            </div>
+            
+            {/* Reset filters button - only show when filters are active */}
+            {(dateFrom || dateTo || selectedDocumentTypes.length > 0) && (
+              <div className="flex justify-end">
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={resetFilter}
-                  className="ml-auto"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Reset filters
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
             
             {/* Search bar */}
             <div className="w-full">
@@ -380,8 +384,8 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
             </div>
           </div>
           
-          {/* Documents table */}
-          <div className="flex-1 overflow-auto">
+          {/* Documents table with fixed height to maintain modal size */}
+          <div className="flex-1 overflow-auto" style={{ minHeight: "400px" }}>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -421,7 +425,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                           )}
                           variant="outline"
                         >
-                          {doc.document_type}
+                          {doc.document_type === 'invoice' ? 'Factuur' : 'Overig'}
                         </Badge>
                       </TableCell>
                       <TableCell>
