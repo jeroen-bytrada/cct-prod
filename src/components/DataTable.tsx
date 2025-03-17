@@ -12,12 +12,15 @@ import { Input } from '@/components/ui/input';
 import { getCustomers, Customer } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import CustomerDocumentsModal from '@/components/CustomerDocumentsModal';
 
 const DataTable: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,6 +68,11 @@ const DataTable: React.FC = () => {
     } catch (e) {
       return dateString;
     }
+  };
+
+  const handleViewDocuments = (customerId: string) => {
+    setSelectedCustomerId(customerId);
+    setDocumentsModalOpen(true);
   };
 
   return (
@@ -143,7 +151,10 @@ const DataTable: React.FC = () => {
                       {formatDate(customer.cs_last_update)}
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap text-sm text-right">
-                      <button className="text-green-600 hover:text-green-800 transition-colors">
+                      <button 
+                        className="text-green-600 hover:text-green-800 transition-colors"
+                        onClick={() => handleViewDocuments(customer.id)}
+                      >
                         <FileText size={18} />
                       </button>
                     </td>
@@ -157,7 +168,7 @@ const DataTable: React.FC = () => {
 
       <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
         <div className="text-sm text-gray-500">
-          Showing {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
+          Getoond {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
         </div>
         <div className="flex items-center space-x-2">
           <Button 
@@ -176,6 +187,13 @@ const DataTable: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Customer Documents Modal */}
+      <CustomerDocumentsModal
+        isOpen={documentsModalOpen}
+        onClose={() => setDocumentsModalOpen(false)}
+        customerId={selectedCustomerId}
+      />
     </div>
   );
 };

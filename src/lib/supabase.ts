@@ -11,6 +11,16 @@ export type Customer = {
   cs_last_update: string
 }
 
+export type CustomerDocument = {
+  id: number
+  customer_id: number
+  document_name: string
+  document_path: string
+  document_type: string
+  created_at: string
+  uuid?: string
+}
+
 export type Stats = {
   id: number
   total: number
@@ -92,4 +102,19 @@ export async function getCustomerCount(): Promise<number> {
   }
   
   return count || 0
+}
+
+export async function getCustomerDocuments(customerId: string): Promise<CustomerDocument[]> {
+  const { data, error } = await supabase
+    .from('customer_documents')
+    .select('*')
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false })
+  
+  if (error) {
+    console.error('Error fetching customer documents:', error)
+    return []
+  }
+  
+  return data || []
 }
