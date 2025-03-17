@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -12,7 +13,7 @@ export type Customer = {
 
 export type CustomerDocument = {
   id: number
-  customer_id: string
+  customer_id: string | number  // Allow both string and number types
   document_name: string
   document_path: string
   document_type: string
@@ -114,5 +115,9 @@ export async function getCustomerDocuments(customerId: string | number): Promise
     return []
   }
   
-  return data || []
+  // Ensure returned data matches our type by converting customer_id to string if needed
+  return (data || []).map(doc => ({
+    ...doc,
+    customer_id: String(doc.customer_id) // Convert to string to match our type
+  }))
 }
