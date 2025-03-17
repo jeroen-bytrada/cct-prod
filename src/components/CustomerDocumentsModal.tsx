@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Search, ExternalLink, X, Calendar, Filter } from 'lucide-react';
+import { Search, ExternalLink, X, Calendar } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -50,7 +51,6 @@ interface CustomerDocumentsModalProps {
   customerId: string | null;
 }
 
-const DOCUMENT_TYPES = ['invoice', 'other'];
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   'invoice': 'Factuur',
   'other': 'Overig'
@@ -73,8 +73,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   
-  const [selectedDocumentTypes, setSelectedDocumentTypes] = useState<string[]>([]);
-  
   const { toast } = useToast();
 
   useEffect(() => {
@@ -94,7 +92,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     if (isOpen && customerId) {
       fetchDocuments();
     }
-  }, [isOpen, customerId, currentPage, dateFrom, dateTo, selectedDocumentTypes]);
+  }, [isOpen, customerId, currentPage, dateFrom, dateTo]);
 
   useEffect(() => {
     applySearchFilter();
@@ -106,20 +104,16 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     try {
       setLoading(true);
       
-      console.log('Fetching with document types:', selectedDocumentTypes);
-      
       const result = await getCustomerDocuments(
         customerId, 
         currentPage,
         DOCUMENTS_PER_PAGE,
         {
           dateFrom,
-          dateTo,
-          documentTypes: selectedDocumentTypes.length > 0 ? selectedDocumentTypes : undefined
+          dateTo
         }
       );
       
-      console.log('Fetched documents result:', result);
       setDocuments(result.documents);
       setTotalDocuments(result.total);
       setTotalPages(Math.ceil(result.total / DOCUMENTS_PER_PAGE));
@@ -154,7 +148,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     setSearchText('');
     setDateFrom(null);
     setDateTo(null);
-    setSelectedDocumentTypes([]);
     setCurrentPage(0);
   };
 
@@ -181,14 +174,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
 
   const getDocumentTypeLabel = (type: string) => {
     return DOCUMENT_TYPE_LABELS[type] || type;
-  };
-
-  const toggleDocumentType = (type: string) => {
-    setSelectedDocumentTypes(prev => 
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    );
   };
 
   const renderPaginationItems = () => {
@@ -281,113 +266,83 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         
         <div className="py-4 flex-1 overflow-hidden flex flex-col">
           <div className="mb-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <span className="text-sm font-medium mr-2">Filter op Toegevoegd:</span>
-                
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className={cn(
-                        "w-[180px] justify-start text-left font-normal",
-                        !dateFrom && "text-muted-foreground"
-                      )}
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, 'dd-MM-yyyy', { locale: nl }) : "Van datum"}
-                      {dateFrom && (
-                        <Button
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDateFrom(null);
-                          }}
-                          className="h-4 w-4 ml-auto p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={dateFrom}
-                      onSelect={setDateFrom}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className={cn(
-                        "ml-2 w-[180px] justify-start text-left font-normal",
-                        !dateTo && "text-muted-foreground"
-                      )}
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, 'dd-MM-yyyy', { locale: nl }) : "Tot datum"}
-                      {dateTo && (
-                        <Button
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDateTo(null);
-                          }}
-                          className="h-4 w-4 ml-auto p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={dateTo}
-                      onSelect={setDateTo}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+            <div className="flex items-center">
+              <span className="text-sm font-medium mr-2">Filter op Toegevoegd:</span>
               
-              <div className="flex items-center">
-                <span className="text-sm font-medium mr-2">Document type:</span>
-                <div className="flex gap-2">
-                  <Badge 
-                    key="invoice"
-                    variant={selectedDocumentTypes.includes('invoice') ? "default" : "outline"}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
                     className={cn(
-                      "cursor-pointer hover:bg-opacity-90 px-3 py-1",
-                      selectedDocumentTypes.includes('invoice') ? "bg-primary" : "bg-transparent"
+                      "w-[180px] justify-start text-left font-normal",
+                      !dateFrom && "text-muted-foreground"
                     )}
-                    onClick={() => toggleDocumentType('invoice')}
                   >
-                    Factuur
-                  </Badge>
-                  <Badge 
-                    key="other"
-                    variant={selectedDocumentTypes.includes('other') ? "default" : "outline"}
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {dateFrom ? format(dateFrom, 'dd-MM-yyyy', { locale: nl }) : "Van datum"}
+                    {dateFrom && (
+                      <Button
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDateFrom(null);
+                        }}
+                        className="h-4 w-4 ml-auto p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateFrom}
+                    onSelect={setDateFrom}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
                     className={cn(
-                      "cursor-pointer hover:bg-opacity-90 px-3 py-1",
-                      selectedDocumentTypes.includes('other') ? "bg-primary" : "bg-transparent"
+                      "ml-2 w-[180px] justify-start text-left font-normal",
+                      !dateTo && "text-muted-foreground"
                     )}
-                    onClick={() => toggleDocumentType('other')}
                   >
-                    Overig
-                  </Badge>
-                </div>
-              </div>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {dateTo ? format(dateTo, 'dd-MM-yyyy', { locale: nl }) : "Tot datum"}
+                    {dateTo && (
+                      <Button
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDateTo(null);
+                        }}
+                        className="h-4 w-4 ml-auto p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateTo}
+                    onSelect={setDateTo}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             
-            {(dateFrom || dateTo || selectedDocumentTypes.length > 0) && (
+            {(dateFrom || dateTo) && (
               <div className="flex justify-end">
                 <Button 
                   variant="ghost" 

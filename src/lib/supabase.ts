@@ -125,7 +125,6 @@ export async function getCustomerDocuments(
   filters: {
     dateFrom?: Date | null,
     dateTo?: Date | null,
-    documentTypes?: string[]
   } = {}
 ): Promise<{ documents: CustomerDocument[], total: number }> {
   const id = typeof customerId === 'string' ? customerId : String(customerId);
@@ -149,13 +148,6 @@ export async function getCustomerDocuments(
     query = query.lte('created_at', dateTo.toISOString());
   }
   
-  // Apply document type filters if provided
-  if (filters.documentTypes && filters.documentTypes.length > 0) {
-    // Log what we're filtering to debug
-    console.log('Filtering by document types:', filters.documentTypes);
-    query = query.in('document_type', filters.documentTypes);
-  }
-  
   // Get total count with filters
   const countQuery = await query;
   const total = countQuery.count || 0;
@@ -168,12 +160,6 @@ export async function getCustomerDocuments(
   if (error) {
     console.error('Error fetching customer documents:', error);
     return { documents: [], total: 0 };
-  }
-  
-  // Log the returned documents
-  console.log('Retrieved documents:', data?.length, 'documents');
-  if (data && data.length > 0) {
-    console.log('Document types in results:', data.map(d => d.document_type));
   }
   
   return { 
