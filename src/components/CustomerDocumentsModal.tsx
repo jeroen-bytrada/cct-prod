@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Search, ExternalLink, X } from 'lucide-react';
+import { Search, ExternalLink, X, Calendar, Filter } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -11,6 +11,15 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger 
+} from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { 
@@ -42,6 +51,9 @@ interface CustomerDocumentsModalProps {
   customerId: string | null;
 }
 
+// Document types available for filtering
+const DOCUMENT_TYPES = ['invoice', 'receipt', 'contract', 'report', 'other'];
+
 const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({ 
   isOpen, 
   onClose,
@@ -54,14 +66,22 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [totalDocuments, setTotalDocuments] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  
+  // Date filter states
+  const [dateFrom, setDateFrom] = useState<Date | null>(null);
+  const [dateTo, setDateTo] = useState<Date | null>(null);
+  
+  // Document type filter state
+  const [selectedDocumentTypes, setSelectedDocumentTypes] = useState<string[]>([]);
+  
   const { toast } = useToast();
 
-  // Fetch documents whenever the modal opens, customerId changes, or the page changes
+  // Fetch documents whenever the modal opens, customerId changes, filters change, or the page changes
   useEffect(() => {
     if (isOpen && customerId) {
       fetchDocuments();
     }
-  }, [isOpen, customerId, currentPage]);
+  }, [isOpen, customerId, currentPage, dateFrom, dateTo, selectedDocumentTypes]);
 
   // Apply search filter when search text changes
   useEffect(() => {
@@ -74,7 +94,17 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     try {
       setLoading(true);
       
-      const result = await getCustomerDocuments(customerId, currentPage);
+      const result = await getCustomerDocuments(
+        customerId, 
+        currentPage,
+        DOCUMENTS_PER_PAGE,
+        {
+          dateFrom,
+          dateTo,
+          documentTypes: selectedDocumentTypes.length > 0 ? selectedDocumentTypes : undefined
+        }
+      );
+      
       setDocuments(result.documents);
       setTotalDocuments(result.total);
       setTotalPages(Math.ceil(result.total / DOCUMENTS_PER_PAGE));
@@ -107,6 +137,10 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
 
   const resetFilter = () => {
     setSearchText('');
+    setDateFrom(null);
+    setDateTo(null);
+    setSelectedDocumentTypes([]);
+    setCurrentPage(0);
   };
 
   const handlePageChange = (page: number) => {
@@ -130,6 +164,14 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     };
     
     return types[type?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  };
+
+  const toggleDocumentType = (type: string) => {
+    setSelectedDocumentTypes(prev => 
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
   };
 
   // Generate pagination items
@@ -228,17 +270,113 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         </DialogHeader>
         
         <div className="py-4 flex-1 overflow-hidden flex flex-col">
-          {/* Search bar styled like the Klanten screen */}
-          <div className="w-full mb-4">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <Input
-                type="text"
-                placeholder="Zoek op document"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-200 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-buzzaroo-blue/20"
-              />
+          {/* Filters section */}
+          <div className="mb-6 space-y-4">
+            {/* Date filters */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center">
+                <span className="text-sm font-medium mr-2">Filter op Toegevoegd:</span>
+                
+                {/* From date */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className={cn(
+                        "w-[180px] justify-start text-left font-normal",
+                        !dateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(dateFrom, 'dd-MM-yyyy') : "Van datum"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={dateFrom}
+                      onSelect={setDateFrom}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                
+                {/* To date */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className={cn(
+                        "ml-2 w-[180px] justify-start text-left font-normal",
+                        !dateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateTo ? format(dateTo, 'dd-MM-yyyy') : "Tot datum"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={dateTo}
+                      onSelect={setDateTo}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              {/* Document type filter */}
+              <div className="flex items-center flex-wrap">
+                <span className="text-sm font-medium mr-2">Document type:</span>
+                <div className="flex flex-wrap gap-2">
+                  {DOCUMENT_TYPES.map((type) => (
+                    <Badge 
+                      key={type}
+                      variant={selectedDocumentTypes.includes(type) ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer hover:bg-opacity-90 px-3 py-1",
+                        selectedDocumentTypes.includes(type) ? "bg-primary" : "bg-transparent"
+                      )}
+                      onClick={() => toggleDocumentType(type)}
+                    >
+                      {type === 'invoice' ? 'Factuur' : 
+                       type === 'receipt' ? 'Kwitantie' :
+                       type === 'contract' ? 'Contract' :
+                       type === 'report' ? 'Rapport' : 'Overig'}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Reset filters button */}
+              {(dateFrom || dateTo || selectedDocumentTypes.length > 0) && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={resetFilter}
+                  className="ml-auto"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Reset filters
+                </Button>
+              )}
+            </div>
+            
+            {/* Search bar */}
+            <div className="w-full">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Input
+                  type="text"
+                  placeholder="Zoek op document"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full border border-gray-200 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-buzzaroo-blue/20"
+                />
+              </div>
             </div>
           </div>
           

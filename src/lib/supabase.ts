@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -105,23 +106,45 @@ export async function getCustomerCount(): Promise<number> {
 export async function getCustomerDocuments(
   customerId: string | number, 
   page: number = 0, 
-  pageSize: number = DOCUMENTS_PER_PAGE
+  pageSize: number = DOCUMENTS_PER_PAGE,
+  filters: {
+    dateFrom?: Date | null,
+    dateTo?: Date | null,
+    documentTypes?: string[]
+  } = {}
 ): Promise<{ documents: CustomerDocument[], total: number }> {
-  const id = typeof customerId === 'string' ? parseInt(customerId, 10) : customerId;
+  const id = typeof customerId === 'string' ? customerId : String(customerId);
   const from = page * pageSize;
   const to = from + pageSize - 1;
   
-  const countQuery = await supabase
+  let query = supabase
     .from('customer_documents')
-    .select('*', { count: 'exact', head: true })
+    .select('*', { count: 'exact' })
     .eq('customer_id', id);
-    
+  
+  // Apply date filters if provided
+  if (filters.dateFrom) {
+    query = query.gte('created_at', filters.dateFrom.toISOString());
+  }
+  
+  if (filters.dateTo) {
+    // Set time to end of day for the "to" date
+    const dateTo = new Date(filters.dateTo);
+    dateTo.setHours(23, 59, 59, 999);
+    query = query.lte('created_at', dateTo.toISOString());
+  }
+  
+  // Apply document type filters if provided
+  if (filters.documentTypes && filters.documentTypes.length > 0) {
+    query = query.in('document_type', filters.documentTypes);
+  }
+  
+  // Get total count with filters
+  const countQuery = await query;
   const total = countQuery.count || 0;
   
-  const { data, error } = await supabase
-    .from('customer_documents')
-    .select('*')
-    .eq('customer_id', id)
+  // Get paginated results with filters and ordering
+  const { data, error } = await query
     .order('created_at', { ascending: false })
     .range(from, to);
   
