@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -103,11 +102,12 @@ export async function getCustomerCount(): Promise<number> {
 }
 
 export async function getCustomerDocuments(customerId: string | number): Promise<CustomerDocument[]> {
-  // Convert customerId to string to avoid type issues
+  const id = typeof customerId === 'string' ? parseInt(customerId, 10) : customerId;
+  
   const { data, error } = await supabase
     .from('customer_documents')
     .select('*')
-    .eq('customer_id', String(customerId))
+    .eq('customer_id', id)
     .order('created_at', { ascending: false })
   
   if (error) {
@@ -115,7 +115,6 @@ export async function getCustomerDocuments(customerId: string | number): Promise
     return []
   }
   
-  // Ensure returned data matches our type by converting customer_id to string if needed
   return (data || []).map(doc => ({
     ...doc,
     customer_id: String(doc.customer_id) // Convert to string to match our type
