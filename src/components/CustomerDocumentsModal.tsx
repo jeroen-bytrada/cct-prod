@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Search, Calendar, Tag, ExternalLink } from 'lucide-react';
+import { Search, ExternalLink } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -8,18 +9,7 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { CustomerDocument, getCustomerDocuments } from '@/lib/supabase';
@@ -39,10 +29,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [filteredDocuments, setFilteredDocuments] = useState<CustomerDocument[]>([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [documentTypes, setDocumentTypes] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
-  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
 
   // Fetch documents whenever the modal opens or customerId changes
@@ -52,10 +38,10 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     }
   }, [isOpen, customerId]);
 
-  // Apply filters when any filter value changes
+  // Apply search filter when search text changes
   useEffect(() => {
-    applyFilters();
-  }, [searchText, selectedType, dateFrom, dateTo, documents]);
+    applySearchFilter();
+  }, [searchText, documents]);
 
   const fetchDocuments = async () => {
     if (!customerId) return;
@@ -66,10 +52,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
       // Now we use the imported function that handles both string and number types
       const data = await getCustomerDocuments(customerId);
       setDocuments(data);
-      
-      // Extract unique document types
-      const types = [...new Set(data?.map(doc => doc.document_type).filter(Boolean))];
-      setDocumentTypes(types as string[]);
       
     } catch (error) {
       console.error('Error fetching customer documents:', error);
@@ -83,43 +65,22 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...documents];
-    
-    // Apply search filter
-    if (searchText) {
-      const search = searchText.toLowerCase();
-      filtered = filtered.filter(doc => 
-        doc.document_name?.toLowerCase().includes(search)
-      );
+  const applySearchFilter = () => {
+    if (!searchText.trim()) {
+      setFilteredDocuments(documents);
+      return;
     }
     
-    // Apply type filter
-    if (selectedType) {
-      filtered = filtered.filter(doc => doc.document_type === selectedType);
-    }
-    
-    // Apply date range filter
-    if (dateFrom) {
-      filtered = filtered.filter(doc => 
-        new Date(doc.created_at) >= new Date(dateFrom.setHours(0, 0, 0, 0))
-      );
-    }
-    
-    if (dateTo) {
-      filtered = filtered.filter(doc => 
-        new Date(doc.created_at) <= new Date(dateTo.setHours(23, 59, 59, 999))
-      );
-    }
+    const search = searchText.toLowerCase();
+    const filtered = documents.filter(doc => 
+      doc.document_name?.toLowerCase().includes(search)
+    );
     
     setFilteredDocuments(filtered);
   };
 
-  const resetFilters = () => {
+  const resetFilter = () => {
     setSearchText('');
-    setSelectedType('');
-    setDateFrom(undefined);
-    setDateTo(undefined);
   };
 
   const formatDate = (dateString: string) => {
@@ -149,10 +110,9 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Search and filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Search */}
-            <div className="relative">
+          {/* Search only */}
+          <div className="flex gap-3">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               <Input
                 type="text"
@@ -162,69 +122,12 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                 className="pl-10 w-full"
               />
             </div>
-            
-            {/* Date From-To */}
-            <div className="flex space-x-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {dateFrom ? format(dateFrom, 'dd-MM-yyyy') : 'Van datum'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateFrom}
-                    onSelect={setDateFrom}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {dateTo ? format(dateTo, 'dd-MM-yyyy') : 'Tot datum'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateTo}
-                    onSelect={setDateTo}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            {/* Type filter */}
-            <div className="flex space-x-2">
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="w-full">
-                  <div className="flex items-center">
-                    <Tag className="mr-2 h-4 w-4" />
-                    {selectedType || 'Filter op type'}
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Alle types</SelectItem>
-                  {documentTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Button variant="outline" onClick={resetFilters}>
-                Reset
-              </Button>
-            </div>
+            <button 
+              onClick={resetFilter}
+              className="px-4 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50"
+            >
+              Reset
+            </button>
           </div>
           
           {/* Documents table */}

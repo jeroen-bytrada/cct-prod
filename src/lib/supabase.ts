@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -102,10 +103,11 @@ export async function getCustomerCount(): Promise<number> {
 }
 
 export async function getCustomerDocuments(customerId: string | number): Promise<CustomerDocument[]> {
+  // Convert customerId to string to avoid type issues
   const { data, error } = await supabase
     .from('customer_documents')
     .select('*')
-    .eq('customer_id', customerId.toString())
+    .eq('customer_id', String(customerId))
     .order('created_at', { ascending: false })
   
   if (error) {
