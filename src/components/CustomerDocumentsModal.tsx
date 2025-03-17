@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Search, Calendar, Tag, ExternalLink } from 'lucide-react';
@@ -23,15 +22,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-
-type CustomerDocument = {
-  id: number;
-  customer_id: number | string;
-  document_name: string;
-  document_path: string;
-  document_type: string;
-  created_at: string;
-};
+import { CustomerDocument, getCustomerDocuments } from '@/lib/supabase';
 
 interface CustomerDocumentsModalProps {
   isOpen: boolean;
@@ -72,17 +63,9 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from('customer_documents')
-        .select('*')
-        .eq('customer_id', customerId)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
-      }
-      
-      setDocuments(data || []);
+      // Now we use the imported function that handles both string and number types
+      const data = await getCustomerDocuments(customerId);
+      setDocuments(data);
       
       // Extract unique document types
       const types = [...new Set(data?.map(doc => doc.document_type).filter(Boolean))];
