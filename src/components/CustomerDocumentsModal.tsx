@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { nl } from 'date-fns/locale';
 import { Search, ExternalLink, X, Calendar, Filter } from 'lucide-react';
 import { 
   Dialog, 
@@ -50,7 +50,6 @@ interface CustomerDocumentsModalProps {
   customerId: string | null;
 }
 
-// Document types available for filtering - only Factuur and Overig now
 const DOCUMENT_TYPES = ['invoice', 'other'];
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   'invoice': 'Factuur',
@@ -71,16 +70,13 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [totalPages, setTotalPages] = useState(0);
   const [customerName, setCustomerName] = useState<string>('');
   
-  // Date filter states
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   
-  // Document type filter state
   const [selectedDocumentTypes, setSelectedDocumentTypes] = useState<string[]>([]);
   
   const { toast } = useToast();
 
-  // Fetch customer name when ID changes
   useEffect(() => {
     if (isOpen && customerId) {
       const fetchCustomerName = async () => {
@@ -94,14 +90,12 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     }
   }, [isOpen, customerId]);
 
-  // Fetch documents whenever the modal opens, customerId changes, filters change, or the page changes
   useEffect(() => {
     if (isOpen && customerId) {
       fetchDocuments();
     }
   }, [isOpen, customerId, currentPage, dateFrom, dateTo, selectedDocumentTypes]);
 
-  // Apply search filter when search text changes
   useEffect(() => {
     applySearchFilter();
   }, [searchText, documents]);
@@ -111,6 +105,8 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     
     try {
       setLoading(true);
+      
+      console.log('Fetching with document types:', selectedDocumentTypes);
       
       const result = await getCustomerDocuments(
         customerId, 
@@ -123,6 +119,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         }
       );
       
+      console.log('Fetched documents result:', result);
       setDocuments(result.documents);
       setTotalDocuments(result.total);
       setTotalPages(Math.ceil(result.total / DOCUMENTS_PER_PAGE));
@@ -167,7 +164,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'dd-MM-yyyy HH:mm');
+      return format(new Date(dateString), 'dd-MM-yyyy HH:mm', { locale: nl });
     } catch (e) {
       return dateString;
     }
@@ -194,13 +191,11 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     );
   };
 
-  // Generate pagination items
   const renderPaginationItems = () => {
     const items = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if there are few
       for (let i = 0; i < totalPages; i++) {
         items.push(
           <PaginationItem key={i}>
@@ -214,7 +209,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         );
       }
     } else {
-      // Show first page
       items.push(
         <PaginationItem key={0}>
           <PaginationLink 
@@ -226,7 +220,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         </PaginationItem>
       );
 
-      // Add ellipsis if current page is not near the beginning
       if (currentPage > 2) {
         items.push(
           <PaginationItem key="ellipsis-start">
@@ -235,7 +228,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         );
       }
 
-      // Add pages around current page
       const startPage = Math.max(1, Math.min(currentPage - 1, totalPages - 4));
       const endPage = Math.min(startPage + 2, totalPages - 1);
 
@@ -252,7 +244,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         );
       }
 
-      // Add ellipsis if current page is not near the end
       if (currentPage < totalPages - 3) {
         items.push(
           <PaginationItem key="ellipsis-end">
@@ -261,7 +252,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         );
       }
 
-      // Show last page
       items.push(
         <PaginationItem key={totalPages - 1}>
           <PaginationLink 
@@ -290,15 +280,11 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         </DialogHeader>
         
         <div className="py-4 flex-1 overflow-hidden flex flex-col">
-          {/* Filters section */}
           <div className="mb-6 space-y-4">
-            {/* Filters row with date and type filters */}
             <div className="flex items-center justify-between">
-              {/* Date filters - aligned to the left */}
               <div className="flex items-center">
                 <span className="text-sm font-medium mr-2">Filter op Toegevoegd:</span>
                 
-                {/* From date */}
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button 
@@ -309,7 +295,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                       )}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, 'dd-MM-yyyy') : "Van datum"}
+                      {dateFrom ? format(dateFrom, 'dd-MM-yyyy', { locale: nl }) : "Van datum"}
                       {dateFrom && (
                         <Button
                           variant="ghost"
@@ -335,7 +321,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                   </PopoverContent>
                 </Popover>
                 
-                {/* To date */}
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button 
@@ -346,7 +331,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                       )}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, 'dd-MM-yyyy') : "Tot datum"}
+                      {dateTo ? format(dateTo, 'dd-MM-yyyy', { locale: nl }) : "Tot datum"}
                       {dateTo && (
                         <Button
                           variant="ghost"
@@ -373,7 +358,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                 </Popover>
               </div>
               
-              {/* Document type filter - aligned to the right */}
               <div className="flex items-center">
                 <span className="text-sm font-medium mr-2">Document type:</span>
                 <div className="flex gap-2">
@@ -403,7 +387,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
               </div>
             </div>
             
-            {/* Reset filters button - only show when filters are active */}
             {(dateFrom || dateTo || selectedDocumentTypes.length > 0) && (
               <div className="flex justify-end">
                 <Button 
@@ -417,7 +400,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
               </div>
             )}
             
-            {/* Search bar */}
             <div className="w-full">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -432,7 +414,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
             </div>
           </div>
           
-          {/* Documents table with fixed height to maintain modal size */}
           <div className="flex-1 overflow-auto" style={{ minHeight: "400px" }}>
             <Table>
               <TableHeader>

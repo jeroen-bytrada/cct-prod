@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -148,8 +149,10 @@ export async function getCustomerDocuments(
     query = query.lte('created_at', dateTo.toISOString());
   }
   
-  // Apply document type filters if provided - now only handling 'invoice' and 'other'
+  // Apply document type filters if provided
   if (filters.documentTypes && filters.documentTypes.length > 0) {
+    // Log what we're filtering to debug
+    console.log('Filtering by document types:', filters.documentTypes);
     query = query.in('document_type', filters.documentTypes);
   }
   
@@ -165,6 +168,12 @@ export async function getCustomerDocuments(
   if (error) {
     console.error('Error fetching customer documents:', error);
     return { documents: [], total: 0 };
+  }
+  
+  // Log the returned documents
+  console.log('Retrieved documents:', data?.length, 'documents');
+  if (data && data.length > 0) {
+    console.log('Document types in results:', data.map(d => d.document_type));
   }
   
   return { 
