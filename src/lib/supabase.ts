@@ -108,7 +108,7 @@ export async function getCustomerDocuments(customerId: string | number): Promise
   const { data, error } = await supabase
     .from('customer_documents')
     .select('*')
-    .eq('customer_id', customerId.toString()) // Convert to string to make comparison safe
+    .eq('customer_id', customerId) // Supabase can handle type conversion internally
     .order('created_at', { ascending: false })
   
   if (error) {
