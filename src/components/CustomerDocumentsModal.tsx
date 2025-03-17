@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Search, ExternalLink } from 'lucide-react';
+import { Search, ExternalLink, X } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogClose
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +50,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     try {
       setLoading(true);
       
-      // Now we use the imported function that handles both string and number types
       const data = await getCustomerDocuments(customerId);
       setDocuments(data);
       
@@ -104,30 +104,29 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="max-w-[calc(100vw-200px)] p-0 m-[100px]">
+        <DialogClose className="absolute right-6 top-6 z-10">
+          <X className="h-6 w-6 text-gray-500 hover:text-gray-800 transition-colors" />
+          <span className="sr-only">Close</span>
+        </DialogClose>
+        
+        <DialogHeader className="px-8 pt-8 pb-2">
           <DialogTitle className="text-xl">Klant Documenten</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Search only */}
-          <div className="flex gap-3">
-            <div className="relative flex-1">
+        <div className="p-8 space-y-6">
+          {/* Search bar styled like the Klanten screen */}
+          <div className="w-full mb-4">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               <Input
                 type="text"
-                placeholder="Zoek op document naam"
+                placeholder="Zoek op document"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="pl-10 w-full"
+                className="pl-10 pr-4 py-2 w-full border border-gray-200 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-buzzaroo-blue/20"
               />
             </div>
-            <button 
-              onClick={resetFilter}
-              className="px-4 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50"
-            >
-              Reset
-            </button>
           </div>
           
           {/* Documents table */}

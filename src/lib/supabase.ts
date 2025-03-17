@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -13,7 +12,7 @@ export type Customer = {
 
 export type CustomerDocument = {
   id: number
-  customer_id: string | number
+  customer_id: string
   document_name: string
   document_path: string
   document_type: string
