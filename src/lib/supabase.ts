@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -13,7 +12,7 @@ export type Customer = {
 
 export type CustomerDocument = {
   id: number
-  customer_id: number | string
+  customer_id: string | number
   document_name: string
   document_path: string
   document_type: string
@@ -38,7 +37,6 @@ export type StatsHistory = {
 
 export const supabase = supabaseClient;
 
-// Maximum number of historical records to fetch for charts
 export const MAX_HISTORY_RECORDS = 10;
 
 export async function getCustomers(): Promise<Customer[]> {
@@ -87,7 +85,6 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
     return []
   }
   
-  // Return the data in ascending order for charts (oldest to newest)
   return (data || []).reverse()
 }
 
@@ -108,7 +105,7 @@ export async function getCustomerDocuments(customerId: string | number): Promise
   const { data, error } = await supabase
     .from('customer_documents')
     .select('*')
-    .eq('customer_id', customerId) // Type conversion handled by Supabase
+    .eq('customer_id', customerId.toString())
     .order('created_at', { ascending: false })
   
   if (error) {
