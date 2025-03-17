@@ -22,7 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { 
   CustomerDocument, 
-  getCustomerDocuments, 
+  getCustomerDocuments,
+  getCustomerById,
   DOCUMENTS_PER_PAGE 
 } from '@/lib/supabase';
 import {
@@ -51,6 +52,10 @@ interface CustomerDocumentsModalProps {
 
 // Document types available for filtering - only Factuur and Overig now
 const DOCUMENT_TYPES = ['invoice', 'other'];
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  'invoice': 'Factuur',
+  'other': 'Overig'
+};
 
 const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({ 
   isOpen, 
@@ -64,6 +69,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [totalDocuments, setTotalDocuments] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [customerName, setCustomerName] = useState<string>('');
   
   // Date filter states
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
@@ -73,6 +79,20 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [selectedDocumentTypes, setSelectedDocumentTypes] = useState<string[]>([]);
   
   const { toast } = useToast();
+
+  // Fetch customer name when ID changes
+  useEffect(() => {
+    if (isOpen && customerId) {
+      const fetchCustomerName = async () => {
+        const customer = await getCustomerById(customerId);
+        if (customer) {
+          setCustomerName(customer.customer_name);
+        }
+      };
+      
+      fetchCustomerName();
+    }
+  }, [isOpen, customerId]);
 
   // Fetch documents whenever the modal opens, customerId changes, filters change, or the page changes
   useEffect(() => {
@@ -160,6 +180,10 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     };
     
     return types[type?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getDocumentTypeLabel = (type: string) => {
+    return DOCUMENT_TYPE_LABELS[type] || type;
   };
 
   const toggleDocumentType = (type: string) => {
@@ -262,7 +286,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
         </DialogClose>
         
         <DialogHeader>
-          <DialogTitle>Klant Documenten</DialogTitle>
+          <DialogTitle>Klant Documenten - {customerName}</DialogTitle>
         </DialogHeader>
         
         <div className="py-4 flex-1 overflow-hidden flex flex-col">
@@ -286,6 +310,18 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                     >
                       <Calendar className="mr-2 h-4 w-4" />
                       {dateFrom ? format(dateFrom, 'dd-MM-yyyy') : "Van datum"}
+                      {dateFrom && (
+                        <Button
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDateFrom(null);
+                          }}
+                          className="h-4 w-4 ml-auto p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -311,6 +347,18 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                     >
                       <Calendar className="mr-2 h-4 w-4" />
                       {dateTo ? format(dateTo, 'dd-MM-yyyy') : "Tot datum"}
+                      {dateTo && (
+                        <Button
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDateTo(null);
+                          }}
+                          className="h-4 w-4 ml-auto p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -425,7 +473,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                           )}
                           variant="outline"
                         >
-                          {doc.document_type === 'invoice' ? 'Factuur' : 'Overig'}
+                          {getDocumentTypeLabel(doc.document_type)}
                         </Badge>
                       </TableCell>
                       <TableCell>

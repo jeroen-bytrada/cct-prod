@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -101,6 +100,21 @@ export async function getCustomerCount(): Promise<number> {
   }
   
   return count || 0
+}
+
+export async function getCustomerById(customerId: string): Promise<Customer | null> {
+  const { data, error } = await supabase
+    .from('cct_customers')
+    .select('*')
+    .eq('id', customerId)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching customer by ID:', error);
+    return null;
+  }
+  
+  return data;
 }
 
 export async function getCustomerDocuments(
