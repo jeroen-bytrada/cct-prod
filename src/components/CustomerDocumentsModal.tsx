@@ -104,17 +104,17 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent className="max-w-[calc(100vw-200px)] p-0 m-[100px]">
-        <DialogClose className="absolute right-6 top-6 z-10">
-          <X className="h-6 w-6 text-gray-500 hover:text-gray-800 transition-colors" />
+      <DialogContent className="sm:max-w-4xl w-full">
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogClose>
         
-        <DialogHeader className="px-8 pt-8 pb-2">
-          <DialogTitle className="text-xl">Klant Documenten</DialogTitle>
+        <DialogHeader>
+          <DialogTitle>Klant Documenten</DialogTitle>
         </DialogHeader>
         
-        <div className="p-8 space-y-6">
+        <div className="py-4">
           {/* Search bar styled like the Klanten screen */}
           <div className="w-full mb-4">
             <div className="relative w-full">
@@ -203,7 +203,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
             </table>
           </div>
           
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 mt-4">
             Getoond {filteredDocuments.length > 0 ? `1-${filteredDocuments.length} van ${filteredDocuments.length}` : '0 van 0'} documenten
           </div>
         </div>
