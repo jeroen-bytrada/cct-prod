@@ -13,7 +13,7 @@ export type Customer = {
 
 export type CustomerDocument = {
   id: number
-  customer_id: number
+  customer_id: number | string
   document_name: string
   document_path: string
   document_type: string

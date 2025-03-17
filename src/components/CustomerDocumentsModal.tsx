@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 type CustomerDocument = {
   id: number;
