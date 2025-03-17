@@ -13,7 +13,28 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { CustomerDocument, getCustomerDocuments } from '@/lib/supabase';
+import { 
+  CustomerDocument, 
+  getCustomerDocuments, 
+  DOCUMENTS_PER_PAGE 
+} from '@/lib/supabase';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface CustomerDocumentsModalProps {
   isOpen: boolean;
@@ -30,14 +51,17 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
   const [filteredDocuments, setFilteredDocuments] = useState<CustomerDocument[]>([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalDocuments, setTotalDocuments] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const { toast } = useToast();
 
-  // Fetch documents whenever the modal opens or customerId changes
+  // Fetch documents whenever the modal opens, customerId changes, or the page changes
   useEffect(() => {
     if (isOpen && customerId) {
       fetchDocuments();
     }
-  }, [isOpen, customerId]);
+  }, [isOpen, customerId, currentPage]);
 
   // Apply search filter when search text changes
   useEffect(() => {
@@ -50,8 +74,10 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     try {
       setLoading(true);
       
-      const data = await getCustomerDocuments(customerId);
-      setDocuments(data);
+      const result = await getCustomerDocuments(customerId, currentPage);
+      setDocuments(result.documents);
+      setTotalDocuments(result.total);
+      setTotalPages(Math.ceil(result.total / DOCUMENTS_PER_PAGE));
       
     } catch (error) {
       console.error('Error fetching customer documents:', error);
@@ -83,6 +109,10 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     setSearchText('');
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'dd-MM-yyyy HH:mm');
@@ -102,9 +132,92 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
     return types[type?.toLowerCase()] || 'bg-gray-100 text-gray-800';
   };
 
+  // Generate pagination items
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if there are few
+      for (let i = 0; i < totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink 
+              isActive={currentPage === i}
+              onClick={() => handlePageChange(i)}
+            >
+              {i + 1}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Show first page
+      items.push(
+        <PaginationItem key={0}>
+          <PaginationLink 
+            isActive={currentPage === 0}
+            onClick={() => handlePageChange(0)}
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+
+      // Add ellipsis if current page is not near the beginning
+      if (currentPage > 2) {
+        items.push(
+          <PaginationItem key="ellipsis-start">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Add pages around current page
+      const startPage = Math.max(1, Math.min(currentPage - 1, totalPages - 4));
+      const endPage = Math.min(startPage + 2, totalPages - 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink 
+              isActive={currentPage === i}
+              onClick={() => handlePageChange(i)}
+            >
+              {i + 1}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+
+      // Add ellipsis if current page is not near the end
+      if (currentPage < totalPages - 3) {
+        items.push(
+          <PaginationItem key="ellipsis-end">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Show last page
+      items.push(
+        <PaginationItem key={totalPages - 1}>
+          <PaginationLink 
+            isActive={currentPage === totalPages - 1}
+            onClick={() => handlePageChange(totalPages - 1)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent className="sm:max-w-4xl w-full">
+      <DialogContent className="sm:max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
@@ -114,7 +227,7 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
           <DialogTitle>Klant Documenten</DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-4 flex-1 overflow-hidden flex flex-col">
           {/* Search bar styled like the Klanten screen */}
           <div className="w-full mb-4">
             <div className="relative w-full">
@@ -130,47 +243,39 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
           </div>
           
           {/* Documents table */}
-          <div className="border rounded-md overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b">
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Toegevoegd
-                  </th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Documentnaam
-                  </th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Link
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[180px]">Toegevoegd</TableHead>
+                  <TableHead>Documentnaam</TableHead>
+                  <TableHead className="w-[120px]">Type</TableHead>
+                  <TableHead className="w-[80px]">Link</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {loading ? (
-                  <tr>
-                    <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
                       Documenten laden...
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : filteredDocuments.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
                       Geen documenten gevonden
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredDocuments.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-500 whitespace-nowrap">
+                    <TableRow key={doc.id} className="hover:bg-gray-50">
+                      <TableCell className="whitespace-nowrap text-gray-500">
                         {formatDate(doc.created_at)}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
+                      </TableCell>
+                      <TableCell>
                         {doc.document_name}
-                      </td>
-                      <td className="py-3 px-4">
+                      </TableCell>
+                      <TableCell>
                         <Badge 
                           className={cn(
                             "font-normal",
@@ -180,8 +285,8 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                         >
                           {doc.document_type}
                         </Badge>
-                      </td>
-                      <td className="py-3 px-4">
+                      </TableCell>
+                      <TableCell>
                         {doc.document_path ? (
                           <a 
                             href={doc.document_path} 
@@ -195,16 +300,40 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
           
-          <div className="text-sm text-gray-500 mt-4">
-            Getoond {filteredDocuments.length > 0 ? `1-${filteredDocuments.length} van ${filteredDocuments.length}` : '0 van 0'} documenten
+          <div className="mt-4 flex items-center justify-between border-t pt-4">
+            <div className="text-sm text-gray-500">
+              {totalDocuments > 0 
+                ? `Getoond ${currentPage * DOCUMENTS_PER_PAGE + 1}-${Math.min((currentPage + 1) * DOCUMENTS_PER_PAGE, totalDocuments)} van ${totalDocuments}`
+                : '0 van 0'} documenten
+            </div>
+            
+            {totalPages > 1 && (
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 0 && (
+                    <PaginationItem>
+                      <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+                    </PaginationItem>
+                  )}
+                  
+                  {renderPaginationItems()}
+                  
+                  {currentPage < totalPages - 1 && (
+                    <PaginationItem>
+                      <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         </div>
       </DialogContent>

@@ -38,6 +38,7 @@ export type StatsHistory = {
 export const supabase = supabaseClient;
 
 export const MAX_HISTORY_RECORDS = 10;
+export const DOCUMENTS_PER_PAGE = 25;
 
 export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
@@ -101,22 +102,39 @@ export async function getCustomerCount(): Promise<number> {
   return count || 0
 }
 
-export async function getCustomerDocuments(customerId: string | number): Promise<CustomerDocument[]> {
+export async function getCustomerDocuments(
+  customerId: string | number, 
+  page: number = 0, 
+  pageSize: number = DOCUMENTS_PER_PAGE
+): Promise<{ documents: CustomerDocument[], total: number }> {
   const id = typeof customerId === 'string' ? parseInt(customerId, 10) : customerId;
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  
+  const countQuery = await supabase
+    .from('customer_documents')
+    .select('*', { count: 'exact', head: true })
+    .eq('customer_id', id);
+    
+  const total = countQuery.count || 0;
   
   const { data, error } = await supabase
     .from('customer_documents')
     .select('*')
     .eq('customer_id', id)
     .order('created_at', { ascending: false })
+    .range(from, to);
   
   if (error) {
-    console.error('Error fetching customer documents:', error)
-    return []
+    console.error('Error fetching customer documents:', error);
+    return { documents: [], total: 0 };
   }
   
-  return (data || []).map(doc => ({
-    ...doc,
-    customer_id: String(doc.customer_id) // Convert to string to match our type
-  }))
+  return { 
+    documents: (data || []).map(doc => ({
+      ...doc,
+      customer_id: String(doc.customer_id) // Convert to string to match our type
+    })),
+    total
+  };
 }

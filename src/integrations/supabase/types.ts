@@ -45,7 +45,7 @@ export type Database = {
       customer_documents: {
         Row: {
           created_at: string | null
-          customer_id: number | null
+          customer_id: string | null
           document_name: string | null
           document_path: string | null
           document_type: string | null
@@ -54,7 +54,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          customer_id?: number | null
+          customer_id?: string | null
           document_name?: string | null
           document_path?: string | null
           document_type?: string | null
@@ -63,7 +63,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          customer_id?: number | null
+          customer_id?: string | null
           document_name?: string | null
           document_path?: string | null
           document_type?: string | null
