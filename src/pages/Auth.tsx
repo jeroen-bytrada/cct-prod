@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -24,118 +24,87 @@ const Auth = () => {
   const [registerPassword, setRegisterPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // Form validation state
-  const [formErrors, setFormErrors] = useState<{
-    fullName?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-  }>({});
-
-  const validateLoginForm = () => {
-    const errors: {email?: string; password?: string} = {};
-    let isValid = true;
-    
-    if (!loginEmail) {
-      errors.email = 'Email is required';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(loginEmail)) {
-      errors.email = 'Invalid email address';
-      isValid = false;
-    }
-    
-    if (!loginPassword) {
-      errors.password = 'Password is required';
-      isValid = false;
-    } else if (loginPassword.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-    
-    setFormErrors(errors);
-    return isValid;
-  };
-  
-  const validateRegisterForm = () => {
-    const errors: {fullName?: string; email?: string; password?: string; confirmPassword?: string} = {};
-    let isValid = true;
-    
-    if (!fullName || fullName.trim().length < 2) {
-      errors.fullName = 'Full name must be at least 2 characters';
-      isValid = false;
-    }
-    
-    if (!registerEmail) {
-      errors.email = 'Email is required';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(registerEmail)) {
-      errors.email = 'Invalid email address';
-      isValid = false;
-    }
-    
-    if (!registerPassword) {
-      errors.password = 'Password is required';
-      isValid = false;
-    } else if (registerPassword.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-    
-    if (!confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password';
-      isValid = false;
-    } else if (confirmPassword !== registerPassword) {
-      errors.confirmPassword = "Passwords don't match";
-      isValid = false;
-    }
-    
-    setFormErrors(errors);
-    return isValid;
-  };
+  useEffect(() => {
+    // Clear errors when switching forms
+    setError(null);
+  }, [isLogin]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateLoginForm()) return;
+    
+    // Basic validation
+    if (!loginEmail.trim()) {
+      setError('Email is required');
+      return;
+    }
+    
+    if (!loginPassword) {
+      setError('Password is required');
+      return;
+    }
     
     try {
       setError(null);
       await signIn(loginEmail, loginPassword);
       navigate('/');
-    } catch (err) {
-      setError('Failed to sign in. Please check your credentials.');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error signing in:', err);
+      setError(err?.message || 'Failed to sign in. Please check your credentials.');
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateRegisterForm()) return;
+    
+    // Basic validation
+    if (!fullName.trim() || fullName.trim().length < 2) {
+      setError('Full name must be at least 2 characters');
+      return;
+    }
+    
+    if (!registerEmail.trim() || !registerEmail.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    if (!registerPassword || registerPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (registerPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
     
     try {
       setError(null);
       await signUp(registerEmail, registerPassword, fullName);
       toast.success('Registration successful! Please check your email for confirmation.');
       setIsLogin(true);
-    } catch (err) {
-      setError('Failed to register. The email might already be in use.');
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error signing up:', err);
+      // Get more specific error message from Supabase if available
+      if (err?.message === 'Signups not allowed for this instance') {
+        setError('Signups are currently disabled. Please contact the administrator.');
+      } else if (err?.code === 'invalid_credentials') {
+        setError('Invalid login credentials. Please try again.');
+      } else {
+        setError(err?.message || 'Failed to register. The email might already be in use.');
+      }
     }
   };
 
   const switchForm = () => {
     setIsLogin(!isLogin);
+    // Clear form fields
+    setLoginEmail('');
+    setLoginPassword('');
+    setFullName('');
+    setRegisterEmail('');
+    setRegisterPassword('');
+    setConfirmPassword('');
     setError(null);
-    setFormErrors({});
-    // Reset form fields
-    if (isLogin) {
-      setLoginEmail('');
-      setLoginPassword('');
-    } else {
-      setFullName('');
-      setRegisterEmail('');
-      setRegisterPassword('');
-      setConfirmPassword('');
-    }
   };
 
   // Redirect if already logged in
@@ -173,9 +142,6 @@ const Auth = () => {
                 onChange={(e) => setLoginEmail(e.target.value)}
                 placeholder="your.email@example.com"
               />
-              {formErrors.email && (
-                <p className="text-sm font-medium text-destructive">{formErrors.email}</p>
-              )}
             </div>
             
             <div className="space-y-2">
@@ -189,9 +155,6 @@ const Auth = () => {
                 onChange={(e) => setLoginPassword(e.target.value)}
                 placeholder="••••••••"
               />
-              {formErrors.password && (
-                <p className="text-sm font-medium text-destructive">{formErrors.password}</p>
-              )}
             </div>
             
             <Button type="submit" className="w-full" disabled={loading}>
@@ -211,9 +174,6 @@ const Auth = () => {
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="John Doe"
               />
-              {formErrors.fullName && (
-                <p className="text-sm font-medium text-destructive">{formErrors.fullName}</p>
-              )}
             </div>
             
             <div className="space-y-2">
@@ -227,9 +187,6 @@ const Auth = () => {
                 onChange={(e) => setRegisterEmail(e.target.value)}
                 placeholder="your.email@example.com"
               />
-              {formErrors.email && (
-                <p className="text-sm font-medium text-destructive">{formErrors.email}</p>
-              )}
             </div>
             
             <div className="space-y-2">
@@ -243,9 +200,6 @@ const Auth = () => {
                 onChange={(e) => setRegisterPassword(e.target.value)}
                 placeholder="••••••••"
               />
-              {formErrors.password && (
-                <p className="text-sm font-medium text-destructive">{formErrors.password}</p>
-              )}
             </div>
             
             <div className="space-y-2">
@@ -259,9 +213,6 @@ const Auth = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
               />
-              {formErrors.confirmPassword && (
-                <p className="text-sm font-medium text-destructive">{formErrors.confirmPassword}</p>
-              )}
             </div>
             
             <Button type="submit" className="w-full" disabled={loading}>

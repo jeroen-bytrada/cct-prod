@@ -83,14 +83,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        toast.error(error.message);
+        console.error('Error signing in:', error);
         throw error;
       }
 
       toast.success('Successfully signed in!');
-    } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -99,6 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setLoading(true);
+      
+      // First check if signups are disabled on this instance
       const { error, data } = await supabase.auth.signUp({
         email,
         password,
@@ -110,19 +109,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        toast.error(error.message);
+        console.error('Error signing up:', error);
         throw error;
       }
 
+      // Check if the user already exists
       if (data?.user?.identities?.length === 0) {
-        toast.error('This email is already registered.');
         throw new Error('This email is already registered');
       }
 
       toast.success('Registration successful! Please check your email for confirmation.');
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -134,14 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        toast.error(error.message);
+        console.error('Error signing out:', error);
         throw error;
       }
       
       toast.success('Successfully signed out!');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
     } finally {
       setLoading(false);
     }
