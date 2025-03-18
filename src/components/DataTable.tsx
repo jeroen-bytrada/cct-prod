@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
   ChevronRight,
   FileText,
-  Search
+  Search,
+  ArrowDown,
+  ArrowUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +16,13 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import CustomerDocumentsModal from '@/components/CustomerDocumentsModal';
 
+type SortDirection = 'asc' | 'desc';
+
+type SortConfig = {
+  key: keyof Customer | null;
+  direction: SortDirection;
+};
+
 const DataTable: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
@@ -20,6 +30,10 @@ const DataTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ 
+    key: 'cs_documents_total', 
+    direction: 'desc' 
+  });
   const { toast } = useToast();
 
   const fetchCustomers = async () => {
@@ -27,7 +41,10 @@ const DataTable: React.FC = () => {
       setLoading(true);
       const data = await getCustomers();
       setCustomers(data);
-      setFilteredCustomers(data);
+      
+      // Apply initial sorting
+      const sortedData = sortData(data, sortConfig);
+      setFilteredCustomers(sortedData);
     } catch (error) {
       console.error('Failed to fetch customers:', error);
       toast({
@@ -38,6 +55,65 @@ const DataTable: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Sort function
+  const sortData = (data: Customer[], config: SortConfig): Customer[] => {
+    if (!config.key) return data;
+    
+    return [...data].sort((a, b) => {
+      // Type guard for string values
+      const aValue = a[config.key as keyof Customer];
+      const bValue = b[config.key as keyof Customer];
+
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // Compare based on type
+      let comparison = 0;
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        comparison = aValue.localeCompare(bValue);
+      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+        comparison = aValue - bValue;
+      } else if (aValue instanceof Date && bValue instanceof Date) {
+        comparison = aValue.getTime() - bValue.getTime();
+      } else {
+        // Convert to string as fallback
+        comparison = String(aValue).localeCompare(String(bValue));
+      }
+
+      // Apply direction
+      return config.direction === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  // Handle column header click
+  const handleSort = (key: keyof Customer) => {
+    let direction: SortDirection = 'asc';
+    
+    if (sortConfig.key === key) {
+      direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      direction = 'asc';
+    }
+    
+    const newConfig: SortConfig = { key, direction };
+    setSortConfig(newConfig);
+    
+    // Apply sorting to filtered data
+    const sortedData = sortData(filteredCustomers, newConfig);
+    setFilteredCustomers(sortedData);
+  };
+
+  // Get the sort icon for a column
+  const getSortIcon = (columnKey: keyof Customer) => {
+    if (sortConfig.key !== columnKey) {
+      return null;
+    }
+    
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUp size={14} className="ml-1 inline-block" /> 
+      : <ArrowDown size={14} className="ml-1 inline-block" />;
   };
 
   useEffect(() => {
@@ -66,7 +142,9 @@ const DataTable: React.FC = () => {
 
   useEffect(() => {
     if (searchText.trim() === '') {
-      setFilteredCustomers(customers);
+      // Apply sorting to all customers when search is cleared
+      const sortedData = sortData(customers, sortConfig);
+      setFilteredCustomers(sortedData);
       return;
     }
 
@@ -77,8 +155,10 @@ const DataTable: React.FC = () => {
         customer.customer_name.toLowerCase().includes(searchLower)
     );
     
-    setFilteredCustomers(filtered);
-  }, [searchText, customers]);
+    // Apply sorting to filtered results
+    const sortedFiltered = sortData(filtered, sortConfig);
+    setFilteredCustomers(sortedFiltered);
+  }, [searchText, customers, sortConfig]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -93,6 +173,9 @@ const DataTable: React.FC = () => {
     setSelectedCustomerId(customerId);
     setDocumentsModalOpen(true);
   };
+
+  // Create a style for sortable column headers
+  const columnHeaderStyle = "py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none";
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm animate-slide-up flex flex-col h-full" 
@@ -117,23 +200,41 @@ const DataTable: React.FC = () => {
           <table className="w-full">
             <thead className="sticky top-0 bg-gray-50/95 z-10">
               <tr className="border-b border-gray-100">
-                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Klantnr
+                <th 
+                  className={columnHeaderStyle}
+                  onClick={() => handleSort('id')}
+                >
+                  Klantnr {getSortIcon('id')}
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Klantnaam
+                <th 
+                  className={columnHeaderStyle}
+                  onClick={() => handleSort('customer_name')}
+                >
+                  Klantnaam {getSortIcon('customer_name')}
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Totaal
+                <th 
+                  className={columnHeaderStyle}
+                  onClick={() => handleSort('cs_documents_total')}
+                >
+                  Totaal {getSortIcon('cs_documents_total')}
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Snelstart
+                <th 
+                  className={columnHeaderStyle}
+                  onClick={() => handleSort('cs_documents_in_process')}
+                >
+                  Snelstart {getSortIcon('cs_documents_in_process')}
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Overzicht
+                <th 
+                  className={columnHeaderStyle}
+                  onClick={() => handleSort('cs_documents_other')}
+                >
+                  Overzicht {getSortIcon('cs_documents_other')}
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bijgewerkt
+                <th 
+                  className={columnHeaderStyle}
+                  onClick={() => handleSort('cs_last_update')}
+                >
+                  Bijgewerkt {getSortIcon('cs_last_update')}
                 </th>
                 <th className="py-3 px-4"></th>
               </tr>
