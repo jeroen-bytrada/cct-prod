@@ -25,6 +25,20 @@ const formatHistoryData = (data: StatsHistory[], key: keyof Pick<StatsHistory, '
   return data.map(item => ({ value: Number(item[key]) || 0 }));
 };
 
+// Calculate percentage change between the last two values
+const calculatePercentageChange = (data: StatsHistory[], key: keyof Pick<StatsHistory, 'total' | 'total_15' | 'total_in_proces'>) => {
+  if (data.length < 2) return 0;
+  
+  const current = Number(data[data.length - 1][key]) || 0;
+  const previous = Number(data[data.length - 2][key]) || 0;
+  
+  // Avoid division by zero
+  if (previous === 0) return current > 0 ? 100 : 0;
+  
+  const change = ((current - previous) / previous) * 100;
+  return Number(change.toFixed(2)); // Round to 2 decimal places
+};
+
 const Index: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
@@ -48,6 +62,11 @@ const Index: React.FC = () => {
   const facturesChartData = statsHistory.length > 0 
     ? formatHistoryData(statsHistory, 'total_in_proces')
     : defaultFacturesChartData;
+
+  // Calculate percentage changes
+  const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
+  const topPercentChange = calculatePercentageChange(statsHistory, 'total_15');
+  const facturesPercentChange = calculatePercentageChange(statsHistory, 'total_in_proces');
 
   const fetchData = async () => {
     try {
@@ -143,29 +162,31 @@ const Index: React.FC = () => {
           <MetricCard 
             title="Totaal Documenten" 
             value={loading ? "..." : (stats?.total || 0).toString()} 
-            change={-5.45} 
-            isNegative={true}
-            status="off-track"
+            change={documentsPercentChange} 
+            isNegative={documentsPercentChange < 0}
+            status={documentsPercentChange >= 0 ? "on-track" : "off-track"}
           >
-            <StatisticChart data={documentsChartData} color="#FF5252" isNegative={true} />
+            <StatisticChart data={documentsChartData} color={documentsPercentChange < 0 ? "#FF5252" : "#4CAF50"} isNegative={documentsPercentChange < 0} />
           </MetricCard>
           
           <MetricCard 
             title="Totaal top 1" 
             value={loading ? "..." : (stats?.total_15 || 0).toString()} 
-            change={24.45} 
-            status="on-track"
+            change={topPercentChange} 
+            isNegative={topPercentChange < 0}
+            status={topPercentChange >= 0 ? "on-track" : "off-track"}
           >
-            <StatisticChart data={topChartData} color="#4CAF50" />
+            <StatisticChart data={topChartData} color={topPercentChange < 0 ? "#FF5252" : "#4CAF50"} isNegative={topPercentChange < 0} />
           </MetricCard>
           
           <MetricCard 
             title="Totaal Snelstart Facturen" 
             value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
-            change={24.45} 
-            status="on-track"
+            change={facturesPercentChange} 
+            isNegative={facturesPercentChange < 0}
+            status={facturesPercentChange >= 0 ? "on-track" : "off-track"}
           >
-            <StatisticChart data={facturesChartData} color="#4CAF50" />
+            <StatisticChart data={facturesChartData} color={facturesPercentChange < 0 ? "#FF5252" : "#4CAF50"} isNegative={facturesPercentChange < 0} />
           </MetricCard>
         </div>
         
