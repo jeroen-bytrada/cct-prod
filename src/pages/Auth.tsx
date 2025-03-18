@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,6 +53,11 @@ const Auth = () => {
       confirmPassword: '',
     },
   });
+  
+  // Debug: Log the register form state
+  useEffect(() => {
+    console.log("Register form state:", registerForm);
+  }, [registerForm]);
 
   const onLoginSubmit = async (values: LoginFormValues) => {
     try {
@@ -145,6 +150,7 @@ const Auth = () => {
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
+                      {/* Temporary test with standard HTML input */}
                       <Input placeholder="John Doe" {...field} />
                     </FormControl>
                     <FormMessage />
