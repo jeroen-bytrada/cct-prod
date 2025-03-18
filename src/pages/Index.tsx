@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -94,8 +95,9 @@ const Index: React.FC = () => {
             hideStats={true}
             showIcon={true}
             iconComponent={<Users size={20} />}
-            className="h-[102px]"
-          />
+          >
+            <div className="h-[45px]"></div> {/* Empty div to match chart height */}
+          </MetricCard>
           
           <MetricCard 
             title="Totaal Documenten" 
