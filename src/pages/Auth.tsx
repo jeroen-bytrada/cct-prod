@@ -1,68 +1,105 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Logo from '@/components/Logo';
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const registerSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
-
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
   
-  // Debug: Log the register form state
-  useEffect(() => {
-    console.log("Register form state:", registerForm);
-  }, [registerForm]);
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  
+  // Register form state
+  const [fullName, setFullName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Form validation state
+  const [formErrors, setFormErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
-  const onLoginSubmit = async (values: LoginFormValues) => {
+  const validateLoginForm = () => {
+    const errors: {email?: string; password?: string} = {};
+    let isValid = true;
+    
+    if (!loginEmail) {
+      errors.email = 'Email is required';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(loginEmail)) {
+      errors.email = 'Invalid email address';
+      isValid = false;
+    }
+    
+    if (!loginPassword) {
+      errors.password = 'Password is required';
+      isValid = false;
+    } else if (loginPassword.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+      isValid = false;
+    }
+    
+    setFormErrors(errors);
+    return isValid;
+  };
+  
+  const validateRegisterForm = () => {
+    const errors: {fullName?: string; email?: string; password?: string; confirmPassword?: string} = {};
+    let isValid = true;
+    
+    if (!fullName || fullName.trim().length < 2) {
+      errors.fullName = 'Full name must be at least 2 characters';
+      isValid = false;
+    }
+    
+    if (!registerEmail) {
+      errors.email = 'Email is required';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(registerEmail)) {
+      errors.email = 'Invalid email address';
+      isValid = false;
+    }
+    
+    if (!registerPassword) {
+      errors.password = 'Password is required';
+      isValid = false;
+    } else if (registerPassword.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+      isValid = false;
+    }
+    
+    if (!confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+      isValid = false;
+    } else if (confirmPassword !== registerPassword) {
+      errors.confirmPassword = "Passwords don't match";
+      isValid = false;
+    }
+    
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateLoginForm()) return;
+    
     try {
       setError(null);
-      await signIn(values.email, values.password);
+      await signIn(loginEmail, loginPassword);
       navigate('/');
     } catch (err) {
       setError('Failed to sign in. Please check your credentials.');
@@ -70,15 +107,34 @@ const Auth = () => {
     }
   };
 
-  const onRegisterSubmit = async (values: RegisterFormValues) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateRegisterForm()) return;
+    
     try {
       setError(null);
-      await signUp(values.email, values.password, values.fullName);
+      await signUp(registerEmail, registerPassword, fullName);
       toast.success('Registration successful! Please check your email for confirmation.');
       setIsLogin(true);
     } catch (err) {
       setError('Failed to register. The email might already be in use.');
       console.error(err);
+    }
+  };
+
+  const switchForm = () => {
+    setIsLogin(!isLogin);
+    setError(null);
+    setFormErrors({});
+    // Reset form fields
+    if (isLogin) {
+      setLoginEmail('');
+      setLoginPassword('');
+    } else {
+      setFullName('');
+      setRegisterEmail('');
+      setRegisterPassword('');
+      setConfirmPassword('');
     }
   };
 
@@ -105,120 +161,119 @@ const Auth = () => {
         )}
         
         {isLogin ? (
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-              <FormField
-                control={loginForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="login-email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input 
+                id="login-email"
+                type="email" 
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                placeholder="your.email@example.com"
               />
-              
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {formErrors.email && (
+                <p className="text-sm font-medium text-destructive">{formErrors.email}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="login-password" className="text-sm font-medium">
+                Password
+              </label>
+              <Input 
+                id="login-password"
+                type="password" 
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="••••••••"
               />
-              
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing in...' : 'Sign in'}
-              </Button>
-            </form>
-          </Form>
+              {formErrors.password && (
+                <p className="text-sm font-medium text-destructive">{formErrors.password}</p>
+              )}
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
         ) : (
-          <Form {...registerForm}>
-            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-              <FormField
-                control={registerForm.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      {/* Temporary test with standard HTML input */}
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <form onSubmit={handleRegisterSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="full-name" className="text-sm font-medium">
+                Full Name
+              </label>
+              <Input 
+                id="full-name"
+                type="text" 
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="John Doe"
               />
-              
-              <FormField
-                control={registerForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {formErrors.fullName && (
+                <p className="text-sm font-medium text-destructive">{formErrors.fullName}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="register-email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input 
+                id="register-email"
+                type="email" 
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                placeholder="your.email@example.com"
               />
-              
-              <FormField
-                control={registerForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {formErrors.email && (
+                <p className="text-sm font-medium text-destructive">{formErrors.email}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="register-password" className="text-sm font-medium">
+                Password
+              </label>
+              <Input 
+                id="register-password"
+                type="password" 
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                placeholder="••••••••"
               />
-              
-              <FormField
-                control={registerForm.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {formErrors.password && (
+                <p className="text-sm font-medium text-destructive">{formErrors.password}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="confirm-password" className="text-sm font-medium">
+                Confirm Password
+              </label>
+              <Input 
+                id="confirm-password"
+                type="password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
               />
-              
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creating account...' : 'Create account'}
-              </Button>
-            </form>
-          </Form>
+              {formErrors.confirmPassword && (
+                <p className="text-sm font-medium text-destructive">{formErrors.confirmPassword}</p>
+              )}
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating account...' : 'Create account'}
+            </Button>
+          </form>
         )}
         
         <div className="text-center mt-6">
           <button
             type="button"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError(null); // Clear errors when switching forms
-              if (isLogin) {
-                registerForm.reset();
-              } else {
-                loginForm.reset();
-              }
-            }}
+            onClick={switchForm}
             className="text-sm text-blue-600 hover:underline"
           >
             {isLogin
