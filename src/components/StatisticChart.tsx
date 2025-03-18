@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -16,27 +16,39 @@ const StatisticChart: React.FC<StatisticChartProps> = ({
   className,
   isNegative = false
 }) => {
+  // Determine if the trend is increasing by comparing the last two values
+  const isIncreasing = useMemo(() => {
+    if (data.length < 2) return false;
+    const lastValue = data[data.length - 1].value;
+    const previousValue = data[data.length - 2].value;
+    return lastValue > previousValue;
+  }, [data]);
+
+  // Set color based on the trend (red if increasing, green if decreasing or same)
+  const lineColor = isIncreasing ? "#FF5252" : "#4CAF50";
+  const gradientId = isIncreasing ? "gradientBgNegative" : "gradientBgPositive";
+
   return (
     <div className={cn("h-20 w-full mt-2", className)}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <defs>
-            <linearGradient id={`gradientBg${isNegative ? 'Negative' : 'Positive'}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={isNegative ? "#FF5252" : "#4CAF50"} stopOpacity={0.2} />
-              <stop offset="100%" stopColor={isNegative ? "#FF5252" : "#4CAF50"} stopOpacity={0} />
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={lineColor} stopOpacity={0.2} />
+              <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
             </linearGradient>
           </defs>
           <Line 
             type="monotone" 
             dataKey="value" 
-            stroke={isNegative ? "#FF5252" : "#4CAF50"} 
+            stroke={lineColor} 
             strokeWidth={2}
             dot={false}
             activeDot={false}
             isAnimationActive={true}
             animationDuration={1000}
             animationEasing="ease-in-out"
-            fill={`url(#gradientBg${isNegative ? 'Negative' : 'Positive'})`}
+            fill={`url(#${gradientId})`}
           />
         </LineChart>
       </ResponsiveContainer>
