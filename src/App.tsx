@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Clients from "./pages/Clients";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
               <Route path="/clients" element={<Clients />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
             <Route element={<ProtectedRoute requireAdmin={true} />}>
               <Route path="/settings" element={<Settings />} />

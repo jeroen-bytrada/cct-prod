@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Users, Settings, LogOut } from 'lucide-react';
+import { Home, Users, Settings, LogOut, UserCircle } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Logo from './Logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -55,6 +55,18 @@ const Sidebar: React.FC = () => {
           >
             <Users size={20} className="transition-transform duration-200 group-hover:scale-110" />
             <span>Klanten</span>
+          </NavLink>
+          <NavLink
+            to="/profile"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100"
+            )}
+          >
+            <UserCircle size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            <span>Profile</span>
           </NavLink>
         </nav>
       </div>
