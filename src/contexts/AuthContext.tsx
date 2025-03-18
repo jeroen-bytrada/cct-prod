@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { error, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -112,6 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         toast.error(error.message);
         throw error;
+      }
+
+      if (data?.user?.identities?.length === 0) {
+        toast.error('This email is already registered.');
+        throw new Error('This email is already registered');
       }
 
       toast.success('Registration successful! Please check your email for confirmation.');
