@@ -50,10 +50,10 @@ const Profile = () => {
       
       if (error) throw error;
       
-      toast.success('Profile updated successfully');
+      toast.success('Profiel succesvol bijgewerkt');
       setIsEditing(false);
     } catch (error: any) {
-      toast.error(`Error updating profile: ${error.message}`);
+      toast.error(`Fout bij het bijwerken van profiel: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -90,12 +90,12 @@ const Profile = () => {
       if (updateError) throw updateError;
       
       setAvatarUrl(publicUrl);
-      toast.success('Avatar updated successfully');
+      toast.success('Profielfoto succesvol bijgewerkt');
     } catch (error: any) {
       if (error.message === "The resource already exists") {
-        toast.error("Please try again with a different image name");
+        toast.error("Probeer het opnieuw met een andere afbeeldingsnaam");
       } else {
-        toast.error(`Error uploading avatar: ${error.message}`);
+        toast.error(`Fout bij het uploaden van profielfoto: ${error.message}`);
       }
     } finally {
       setUploadingAvatar(false);
@@ -116,7 +116,7 @@ const Profile = () => {
     return (
       <Layout>
         <div className="flex justify-center items-center h-full">
-          <div className="animate-pulse">Loading profile...</div>
+          <div className="animate-pulse">Profiel laden...</div>
         </div>
       </Layout>
     );
@@ -125,13 +125,13 @@ const Profile = () => {
   return (
     <Layout>
       <div className="container max-w-3xl py-8">
-        <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+        <h1 className="text-3xl font-bold mb-6">Mijn Profiel</h1>
         
         <Card>
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
+            <CardTitle>Profielinformatie</CardTitle>
             <CardDescription>
-              Manage your personal information and how it appears across the platform.
+              Beheer je persoonlijke informatie en hoe deze op het platform wordt weergegeven.
             </CardDescription>
           </CardHeader>
           
@@ -151,7 +151,7 @@ const Profile = () => {
                   className="absolute inset-0 rounded-full bg-black bg-opacity-50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity duration-200"
                 >
                   <Upload size={20} />
-                  <span className="sr-only">Upload avatar</span>
+                  <span className="sr-only">Profielfoto uploaden</span>
                 </label>
                 
                 <input 
@@ -165,19 +165,19 @@ const Profile = () => {
               </div>
               
               <div>
-                <h3 className="text-lg font-medium">Profile Photo</h3>
+                <h3 className="text-lg font-medium">Profielfoto</h3>
                 <p className="text-sm text-gray-500">
-                  Click on the avatar to upload a new photo. 
-                  PNG, JPG or GIF. Max 5MB.
+                  Klik op de avatar om een nieuwe foto te uploaden. 
+                  PNG, JPG of GIF. Max 5MB.
                 </p>
-                {uploadingAvatar && <p className="text-sm text-blue-500 mt-1">Uploading...</p>}
+                {uploadingAvatar && <p className="text-sm text-blue-500 mt-1">Uploaden...</p>}
               </div>
             </div>
             
             {/* Personal Info section */}
             <div>
               <h3 className="text-lg font-medium mb-3 flex items-center">
-                <span>Personal Information</span>
+                <span>Persoonlijke Informatie</span>
                 {!isEditing && (
                   <Button 
                     variant="ghost" 
@@ -186,36 +186,36 @@ const Profile = () => {
                     onClick={() => setIsEditing(true)}
                   >
                     <UserPen size={16} className="mr-1" />
-                    Edit
+                    Bewerken
                   </Button>
                 )}
               </h3>
               
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="fullName">Volledige Naam</Label>
                   {isEditing ? (
                     <Input
                       id="fullName"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Your full name"
+                      placeholder="Je volledige naam"
                       className="mt-1"
                     />
                   ) : (
                     <div className="mt-1 p-2 border border-transparent rounded-md bg-gray-50">
-                      {fullName || 'Not set'}
+                      {fullName || 'Niet ingesteld'}
                     </div>
                   )}
                 </div>
                 
                 <div>
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">E-mailadres</Label>
                   <div className="mt-1 p-2 border border-transparent rounded-md bg-gray-50">
-                    {user?.email || 'No email found'}
+                    {user?.email || 'Geen e-mail gevonden'}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Your email address cannot be changed.
+                    Je e-mailadres kan niet worden gewijzigd.
                   </p>
                 </div>
               </div>
@@ -232,13 +232,13 @@ const Profile = () => {
                   setFullName(user?.user_metadata.full_name || '');
                 }}
               >
-                Cancel
+                Annuleren
               </Button>
               <Button 
                 onClick={handleUpdateProfile} 
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? 'Opslaan...' : 'Wijzigingen Opslaan'}
               </Button>
             </CardFooter>
           )}
