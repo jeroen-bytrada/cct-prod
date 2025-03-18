@@ -75,15 +75,8 @@ const DataTable: React.FC = () => {
         comparison = aValue.localeCompare(bValue);
       } else if (typeof aValue === 'number' && typeof bValue === 'number') {
         comparison = aValue - bValue;
-      } else if (
-        aValue instanceof Date && bValue instanceof Date || 
-        (typeof aValue === 'object' && aValue !== null && 'getTime' in aValue && 
-         typeof bValue === 'object' && bValue !== null && 'getTime' in bValue)
-      ) {
-        // Check if objects have getTime method (Date-like objects)
-        const aTime = 'getTime' in aValue ? aValue.getTime() : 0;
-        const bTime = 'getTime' in bValue ? bValue.getTime() : 0;
-        comparison = aTime - bTime;
+      } else if (aValue instanceof Date && bValue instanceof Date) {
+        comparison = aValue.getTime() - bValue.getTime();
       } else {
         // Convert to string as fallback
         comparison = String(aValue).localeCompare(String(bValue));

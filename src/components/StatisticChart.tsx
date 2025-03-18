@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { LineChart, Line, ResponsiveContainer, Area } from 'recharts';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
 
 interface StatisticChartProps {
@@ -26,7 +26,6 @@ const StatisticChart: React.FC<StatisticChartProps> = ({
 
   // Set color based on the trend (now reversed - red for increasing, green for decreasing)
   const lineColor = isIncreasing ? "#FF5252" : "#4CAF50";
-  const fillColor = isIncreasing ? "rgba(255, 82, 82, 0.1)" : "rgba(76, 175, 80, 0.1)";
   const gradientId = isIncreasing ? "gradientBgNegative" : "gradientBgPositive";
 
   return (
@@ -39,14 +38,6 @@ const StatisticChart: React.FC<StatisticChartProps> = ({
               <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke={lineColor}
-            fill={`url(#${gradientId})`}
-            fillOpacity={1}
-            strokeWidth={0}
-          />
           <Line 
             type="monotone" 
             dataKey="value" 
@@ -57,6 +48,7 @@ const StatisticChart: React.FC<StatisticChartProps> = ({
             isAnimationActive={true}
             animationDuration={1000}
             animationEasing="ease-in-out"
+            fill={`url(#${gradientId})`}
           />
         </LineChart>
       </ResponsiveContainer>
