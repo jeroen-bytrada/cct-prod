@@ -164,9 +164,15 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total || 0).toString()} 
             change={documentsPercentChange} 
             isNegative={documentsPercentChange < 0}
-            status={documentsPercentChange >= 0 ? "on-track" : "off-track"}
+            // Here we reverse the logic - negative is good, positive is bad
+            isPositive={documentsPercentChange < 0}
+            status={documentsPercentChange < 0 ? "on-track" : "off-track"}
           >
-            <StatisticChart data={documentsChartData} color={documentsPercentChange < 0 ? "#FF5252" : "#4CAF50"} isNegative={documentsPercentChange < 0} />
+            <StatisticChart 
+              data={documentsChartData} 
+              color={documentsPercentChange < 0 ? "#4CAF50" : "#FF5252"} 
+              isNegative={documentsPercentChange >= 0} 
+            />
           </MetricCard>
           
           <MetricCard 
@@ -174,9 +180,15 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total_15 || 0).toString()} 
             change={topPercentChange} 
             isNegative={topPercentChange < 0}
-            status={topPercentChange >= 0 ? "on-track" : "off-track"}
+            // Here we reverse the logic - negative is good, positive is bad
+            isPositive={topPercentChange < 0}
+            status={topPercentChange < 0 ? "on-track" : "off-track"}
           >
-            <StatisticChart data={topChartData} color={topPercentChange < 0 ? "#FF5252" : "#4CAF50"} isNegative={topPercentChange < 0} />
+            <StatisticChart 
+              data={topChartData} 
+              color={topPercentChange < 0 ? "#4CAF50" : "#FF5252"} 
+              isNegative={topPercentChange >= 0} 
+            />
           </MetricCard>
           
           <MetricCard 
@@ -184,9 +196,15 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
             change={facturesPercentChange} 
             isNegative={facturesPercentChange < 0}
-            status={facturesPercentChange >= 0 ? "on-track" : "off-track"}
+            // Here we reverse the logic - negative is good, positive is bad
+            isPositive={facturesPercentChange < 0}
+            status={facturesPercentChange < 0 ? "on-track" : "off-track"}
           >
-            <StatisticChart data={facturesChartData} color={facturesPercentChange < 0 ? "#FF5252" : "#4CAF50"} isNegative={facturesPercentChange < 0} />
+            <StatisticChart 
+              data={facturesChartData} 
+              color={facturesPercentChange < 0 ? "#4CAF50" : "#FF5252"} 
+              isNegative={facturesPercentChange >= 0} 
+            />
           </MetricCard>
         </div>
         

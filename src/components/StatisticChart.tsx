@@ -24,7 +24,7 @@ const StatisticChart: React.FC<StatisticChartProps> = ({
     return lastValue > previousValue;
   }, [data]);
 
-  // Set color based on the trend (red if increasing, green if decreasing or same)
+  // Set color based on the trend (now reversed - red for increasing, green for decreasing)
   const lineColor = isIncreasing ? "#FF5252" : "#4CAF50";
   const gradientId = isIncreasing ? "gradientBgNegative" : "gradientBgPositive";
 

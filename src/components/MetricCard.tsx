@@ -31,9 +31,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
   iconComponent
 }) => {
   const changeText = change ? `${change > 0 ? '+' : ''}${change}%` : '';
-  const changeClass = isNegative 
-    ? "text-buzzaroo-red" 
-    : "text-buzzaroo-green";
+  
+  // We're reversing the logic here - negative changes use green color, positive use red
+  const changeClass = isPositive 
+    ? "text-buzzaroo-green" 
+    : "text-buzzaroo-red";
 
   return (
     <div 
@@ -47,7 +49,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         {!hideStats && change !== undefined && (
           <span className={cn(
             "text-xs font-medium px-2 py-0.5 rounded-full", 
-            isNegative ? "bg-red-50 text-buzzaroo-red" : "bg-green-50 text-buzzaroo-green"
+            isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
           )}>
             {changeText}
           </span>
@@ -82,4 +84,3 @@ const MetricCard: React.FC<MetricCardProps> = ({
 };
 
 export default MetricCard;
-
