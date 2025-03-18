@@ -1,17 +1,20 @@
 
 import React from 'react';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, User } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
   title: string;
   value: string | number;
-  change: number;
+  change?: number;
   isPositive?: boolean;
   isNegative?: boolean;
   status?: "on-track" | "off-track";
   className?: string;
   children?: React.ReactNode;
+  showIcon?: boolean;
+  hideStats?: boolean;
+  iconComponent?: React.ReactNode;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ 
@@ -22,9 +25,12 @@ const MetricCard: React.FC<MetricCardProps> = ({
   isNegative = false,
   status,
   className,
-  children 
+  children,
+  showIcon = false,
+  hideStats = false,
+  iconComponent
 }) => {
-  const changeText = `${change > 0 ? '+' : ''}${change}%`;
+  const changeText = change ? `${change > 0 ? '+' : ''}${change}%` : '';
   const changeClass = isNegative 
     ? "text-buzzaroo-red" 
     : "text-buzzaroo-green";
@@ -38,16 +44,23 @@ const MetricCard: React.FC<MetricCardProps> = ({
     >
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-sm text-gray-500 font-medium">{title}</h3>
-        <span className={cn(
-          "text-xs font-medium px-2 py-0.5 rounded-full", 
-          isNegative ? "bg-red-50 text-buzzaroo-red" : "bg-green-50 text-buzzaroo-green"
-        )}>
-          {changeText}
-        </span>
+        {!hideStats && change !== undefined && (
+          <span className={cn(
+            "text-xs font-medium px-2 py-0.5 rounded-full", 
+            isNegative ? "bg-red-50 text-buzzaroo-red" : "bg-green-50 text-buzzaroo-green"
+          )}>
+            {changeText}
+          </span>
+        )}
+        {showIcon && (
+          <div className="text-gray-400">
+            {iconComponent || <User size={20} />}
+          </div>
+        )}
       </div>
       <div className="flex items-end justify-between">
         <span className="text-3xl font-bold text-gray-900">{value}</span>
-        {status && (
+        {!hideStats && status && (
           <div className="flex items-center gap-1 text-sm">
             {status === "on-track" ? (
               <>

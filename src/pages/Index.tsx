@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -7,8 +6,8 @@ import StatisticChart from '@/components/StatisticChart';
 import DataTable from '@/components/DataTable';
 import { getStats, getCustomerCount, getStatsHistory, Stats, StatsHistory, MAX_HISTORY_RECORDS } from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
+import { Users } from 'lucide-react';
 
-// Fallback function for generating chart data if no data is available
 const generateChartData = (length: number, isNegative = false) => {
   const startValue = isNegative ? 80 : 20;
   const endValue = isNegative ? 20 : 80;
@@ -21,7 +20,6 @@ const generateChartData = (length: number, isNegative = false) => {
   });
 };
 
-// Format history data for charts
 const formatHistoryData = (data: StatsHistory[], key: keyof Pick<StatsHistory, 'total' | 'total_15' | 'total_in_proces'>) => {
   return data.map(item => ({ value: Number(item[key]) || 0 }));
 };
@@ -33,13 +31,11 @@ const Index: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Default chart data (used as fallback)
   const defaultClientsChartData = generateChartData(MAX_HISTORY_RECORDS);
   const defaultDocumentsChartData = generateChartData(MAX_HISTORY_RECORDS, true);
   const defaultTopChartData = generateChartData(MAX_HISTORY_RECORDS);
   const defaultFacturesChartData = generateChartData(MAX_HISTORY_RECORDS);
 
-  // Prepare chart data from history or use defaults
   const documentsChartData = statsHistory.length > 0 
     ? formatHistoryData(statsHistory, 'total')
     : defaultDocumentsChartData;
@@ -94,12 +90,12 @@ const Index: React.FC = () => {
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <MetricCard 
             title="Aantal Klanten" 
-            value={loading ? "..." : customerCount.toString()} 
-            change={24.45} 
-            status="on-track"
-          >
-            <StatisticChart data={defaultClientsChartData} color="#4CAF50" />
-          </MetricCard>
+            value={loading ? "..." : customerCount.toString()}
+            hideStats={true}
+            showIcon={true}
+            iconComponent={<Users size={20} />}
+            className="h-[102px]"
+          />
           
           <MetricCard 
             title="Totaal Documenten" 
