@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -9,7 +8,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getCustomers, Customer } from '@/lib/supabase';
+import { getCustomers, Customer, supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import CustomerDocumentsModal from '@/components/CustomerDocumentsModal';
@@ -23,26 +22,46 @@ const DataTable: React.FC = () => {
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true);
-        const data = await getCustomers();
-        setCustomers(data);
-        setFilteredCustomers(data);
-      } catch (error) {
-        console.error('Failed to fetch customers:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load customer data. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const data = await getCustomers();
+      setCustomers(data);
+      setFilteredCustomers(data);
+    } catch (error) {
+      console.error('Failed to fetch customers:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load customer data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCustomers();
+    
+    const customersChannel = supabase
+      .channel('datatable-customers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'customers'
+        },
+        (payload) => {
+          console.log('Customer data changed:', payload);
+          fetchCustomers();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(customersChannel);
+    };
   }, [toast]);
 
   useEffect(() => {
@@ -188,7 +207,6 @@ const DataTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Customer Documents Modal */}
       <CustomerDocumentsModal
         isOpen={documentsModalOpen}
         onClose={() => setDocumentsModalOpen(false)}

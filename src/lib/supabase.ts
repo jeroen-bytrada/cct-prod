@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -40,6 +39,19 @@ export const supabase = supabaseClient;
 
 export const MAX_HISTORY_RECORDS = 10;
 export const DOCUMENTS_PER_PAGE = 25;
+
+// Enable real-time for the tables we need
+async function enableRealtimeForTables() {
+  try {
+    await supabase.channel('any').subscribe();
+    console.log('Real-time subscriptions enabled');
+  } catch (error) {
+    console.error('Failed to enable real-time:', error);
+  }
+}
+
+// Initialize real-time
+enableRealtimeForTables();
 
 export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
