@@ -76,7 +76,7 @@ const DataTable: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-100 shadow-sm animate-slide-up" 
+    <div className="bg-white rounded-lg border border-gray-100 shadow-sm animate-slide-up flex flex-col h-full" 
          style={{ animationDelay: '0.3s' }}>
       <div className="p-4 border-b border-gray-100 w-full">
         <div className="relative w-full">
@@ -91,13 +91,13 @@ const DataTable: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-auto flex-grow">
         {loading ? (
           <div className="p-8 text-center text-gray-500">Loading customer data...</div>
         ) : (
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
+            <thead className="sticky top-0 bg-gray-50/95 z-10">
+              <tr className="border-b border-gray-100">
                 <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Klantnr
                 </th>
@@ -166,7 +166,7 @@ const DataTable: React.FC = () => {
         )}
       </div>
 
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 mt-auto">
         <div className="text-sm text-gray-500">
           Getoond {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
         </div>

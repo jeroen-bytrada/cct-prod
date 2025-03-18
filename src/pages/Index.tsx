@@ -80,7 +80,7 @@ const Index: React.FC = () => {
   return (
     <div className="min-h-screen flex">
       <Sidebar />
-      <div className="flex-1 ml-[190px] p-8">
+      <div className="flex-1 ml-[190px] p-8 flex flex-col">
         <SearchBar />
         
         <div className="mt-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -128,7 +128,7 @@ const Index: React.FC = () => {
           </MetricCard>
         </div>
         
-        <div className="mt-8">
+        <div className="mt-8 flex-grow flex flex-col">
           <DataTable />
         </div>
       </div>
