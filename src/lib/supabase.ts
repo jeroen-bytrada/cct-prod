@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -35,6 +36,21 @@ export type StatsHistory = {
   created_at: string
 }
 
+export type UserProfile = {
+  id: string
+  email: string
+  full_name: string
+  created_at: string
+  updated_at: string
+}
+
+export type UserRole = {
+  id: string
+  user_id: string
+  role: 'admin' | 'user'
+  created_at: string
+}
+
 export const supabase = supabaseClient;
 
 export const MAX_HISTORY_RECORDS = 10;
@@ -53,6 +69,7 @@ async function enableRealtimeForTables() {
 // Initialize real-time
 enableRealtimeForTables();
 
+// Customer-related queries
 export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
     .from('cct_customers')
@@ -64,55 +81,6 @@ export async function getCustomers(): Promise<Customer[]> {
   }
   
   return data || []
-}
-
-export async function getStats(): Promise<Stats | null> {
-  const { data, error } = await supabase
-    .from('cct_stats_hist')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching stats:', error)
-    return null
-  }
-  
-  return {
-    id: data.id,
-    total: data.total,
-    total_15: data.total_15,
-    total_in_proces: data.total_in_proces
-  }
-}
-
-export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Promise<StatsHistory[]> {
-  const { data, error } = await supabase
-    .from('cct_stats_hist')
-    .select('id, total, total_15, total_in_proces, created_at')
-    .order('created_at', { ascending: false })
-    .limit(limit)
-  
-  if (error) {
-    console.error('Error fetching stats history:', error)
-    return []
-  }
-  
-  return (data || []).reverse()
-}
-
-export async function getCustomerCount(): Promise<number> {
-  const { count, error } = await supabase
-    .from('cct_customers')
-    .select('*', { count: 'exact', head: true })
-  
-  if (error) {
-    console.error('Error fetching customer count:', error)
-    return 0
-  }
-  
-  return count || 0
 }
 
 export async function getCustomerById(customerId: string): Promise<Customer | null> {
@@ -128,6 +96,19 @@ export async function getCustomerById(customerId: string): Promise<Customer | nu
   }
   
   return data;
+}
+
+export async function getCustomerCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from('cct_customers')
+    .select('*', { count: 'exact', head: true })
+  
+  if (error) {
+    console.error('Error fetching customer count:', error)
+    return 0
+  }
+  
+  return count || 0
 }
 
 export async function getCustomerDocuments(
@@ -181,4 +162,85 @@ export async function getCustomerDocuments(
     })),
     total
   };
+}
+
+// Stats-related queries
+export async function getStats(): Promise<Stats | null> {
+  const { data, error } = await supabase
+    .from('cct_stats_hist')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+  
+  if (error) {
+    console.error('Error fetching stats:', error)
+    return null
+  }
+  
+  return {
+    id: data.id,
+    total: data.total,
+    total_15: data.total_15,
+    total_in_proces: data.total_in_proces
+  }
+}
+
+export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Promise<StatsHistory[]> {
+  const { data, error } = await supabase
+    .from('cct_stats_hist')
+    .select('id, total, total_15, total_in_proces, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  
+  if (error) {
+    console.error('Error fetching stats history:', error)
+    return []
+  }
+  
+  return (data || []).reverse()
+}
+
+// User profile-related queries
+export async function getUserProfile(): Promise<UserProfile | null> {
+  const { data: session } = await supabase.auth.getSession();
+  
+  if (!session.session?.user) {
+    return null;
+  }
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', session.session.user.id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+  
+  return data;
+}
+
+export async function checkUserRole(role: 'admin' | 'user'): Promise<boolean> {
+  const { data: session } = await supabase.auth.getSession();
+  
+  if (!session.session?.user) {
+    return false;
+  }
+  
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('*')
+    .eq('user_id', session.session.user.id)
+    .eq('role', role)
+    .single();
+  
+  if (error) {
+    // Error here often means no matching record was found
+    return false;
+  }
+  
+  return !!data;
 }
