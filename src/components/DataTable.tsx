@@ -81,7 +81,7 @@ const DataTable: React.FC = () => {
         'getTime' in aValue && 'getTime' in bValue
       ) {
         // Check if objects have getTime method (Date objects)
-        comparison = aValue.getTime() - bValue.getTime();
+        comparison = (aValue as Date).getTime() - (bValue as Date).getTime();
       } else {
         // Convert to string as fallback
         comparison = String(aValue).localeCompare(String(bValue));

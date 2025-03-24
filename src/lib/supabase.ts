@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -79,6 +80,7 @@ export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
     .from('cct_customers')
     .select('*')
+    .eq('is_active', true)  // Only get active customers
   
   if (error) {
     console.error('Error fetching customers:', error)
@@ -99,6 +101,7 @@ export async function getCustomerById(customerId: string): Promise<Customer | nu
     .from('cct_customers')
     .select('*')
     .eq('id', customerId)
+    .eq('is_active', true)  // Only get active customers
     .single();
   
   if (error) {
@@ -119,6 +122,7 @@ export async function getCustomerCount(): Promise<number> {
   const { count, error } = await supabase
     .from('cct_customers')
     .select('*', { count: 'exact', head: true })
+    .eq('is_active', true)  // Only count active customers
   
   if (error) {
     console.error('Error fetching customer count:', error)
