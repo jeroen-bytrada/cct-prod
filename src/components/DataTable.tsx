@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -75,7 +74,9 @@ const DataTable: React.FC = () => {
         comparison = aValue.localeCompare(bValue);
       } else if (typeof aValue === 'number' && typeof bValue === 'number') {
         comparison = aValue - bValue;
-      } else if (aValue instanceof Date && bValue instanceof Date) {
+      } else if (typeof aValue === 'object' && aValue !== null && 'getTime' in aValue && 
+                 typeof bValue === 'object' && bValue !== null && 'getTime' in bValue) {
+        // Check if objects have getTime method (Date objects)
         comparison = aValue.getTime() - bValue.getTime();
       } else {
         // Convert to string as fallback

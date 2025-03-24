@@ -168,14 +168,12 @@ export type Database = {
           created_at: string | null
           cs_documents_in_process: number | null
           cs_documents_other: number | null
-          cs_documents_total: number | null
           cs_last_update: string | null
           customer_name: string | null
           id: string | null
           is_active: boolean | null
           source: string | null
           source_root: string | null
-          str_cs_documents_total: string | null
         }
         Insert: {
           administration_mail?: string | null
@@ -183,14 +181,12 @@ export type Database = {
           created_at?: string | null
           cs_documents_in_process?: number | null
           cs_documents_other?: number | null
-          cs_documents_total?: never
           cs_last_update?: string | null
           customer_name?: string | null
           id?: string | null
           is_active?: boolean | null
           source?: string | null
           source_root?: string | null
-          str_cs_documents_total?: never
         }
         Update: {
           administration_mail?: string | null
@@ -198,14 +194,12 @@ export type Database = {
           created_at?: string | null
           cs_documents_in_process?: number | null
           cs_documents_other?: number | null
-          cs_documents_total?: never
           cs_last_update?: string | null
           customer_name?: string | null
           id?: string | null
           is_active?: boolean | null
           source?: string | null
           source_root?: string | null
-          str_cs_documents_total?: never
         }
         Relationships: []
       }
