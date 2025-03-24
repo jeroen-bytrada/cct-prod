@@ -1,14 +1,19 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
 export type Customer = {
   id: string
   customer_name: string
-  cs_documents_total: number
+  cs_documents_total?: number // Make it optional
   cs_documents_in_process: number
   cs_documents_other: number
   cs_last_update: string
+  administration_name?: string | null
+  administration_mail?: string | null
+  source?: string | null
+  source_root?: string | null
+  is_active?: boolean | null
+  created_at?: string | null
 }
 
 export type CustomerDocument = {
@@ -80,7 +85,13 @@ export async function getCustomers(): Promise<Customer[]> {
     return []
   }
   
-  return data || []
+  // Map the data to include cs_documents_total
+  return (data || []).map(customer => ({
+    ...customer,
+    cs_documents_total: 
+      (customer.cs_documents_in_process || 0) + 
+      (customer.cs_documents_other || 0)
+  }))
 }
 
 export async function getCustomerById(customerId: string): Promise<Customer | null> {
@@ -95,7 +106,13 @@ export async function getCustomerById(customerId: string): Promise<Customer | nu
     return null;
   }
   
-  return data;
+  // Add cs_documents_total to the customer data
+  return data ? {
+    ...data,
+    cs_documents_total: 
+      (data.cs_documents_in_process || 0) + 
+      (data.cs_documents_other || 0)
+  } : null;
 }
 
 export async function getCustomerCount(): Promise<number> {
