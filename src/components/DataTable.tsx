@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -29,9 +30,10 @@ const DataTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  // Set initial sort to customer id (Klantnr)
   const [sortConfig, setSortConfig] = useState<SortConfig>({ 
-    key: 'cs_documents_total', 
-    direction: 'desc' 
+    key: 'id', 
+    direction: 'asc' 
   });
   const { toast } = useToast();
 
@@ -70,22 +72,26 @@ const DataTable: React.FC = () => {
       if (bValue === null || bValue === undefined) return config.direction === 'asc' ? -1 : 1;
       
       // Both values exist at this point, so we can safely compare them
+      // TypeScript still flags possible null values, so we need additional type assertions
+      const safeAValue = aValue as NonNullable<typeof aValue>;
+      const safeBValue = bValue as NonNullable<typeof bValue>;
+      
       // Compare based on type
       let comparison = 0;
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        comparison = aValue.localeCompare(bValue);
-      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-        comparison = aValue - bValue;
+      if (typeof safeAValue === 'string' && typeof safeBValue === 'string') {
+        comparison = safeAValue.localeCompare(safeBValue);
+      } else if (typeof safeAValue === 'number' && typeof safeBValue === 'number') {
+        comparison = safeAValue - safeBValue;
       } else if (
-        typeof aValue === 'object' && aValue !== null && 
-        typeof bValue === 'object' && bValue !== null && 
-        'getTime' in aValue && 'getTime' in bValue
+        typeof safeAValue === 'object' && safeAValue !== null && 
+        typeof safeBValue === 'object' && safeBValue !== null && 
+        'getTime' in safeAValue && 'getTime' in safeBValue
       ) {
         // Check if objects have getTime method (Date objects)
-        comparison = (aValue as Date).getTime() - (bValue as Date).getTime();
+        comparison = (safeAValue as Date).getTime() - (safeBValue as Date).getTime();
       } else {
         // Convert to string as fallback
-        comparison = String(aValue).localeCompare(String(bValue));
+        comparison = String(safeAValue).localeCompare(String(safeBValue));
       }
 
       // Apply direction
@@ -100,6 +106,26 @@ const DataTable: React.FC = () => {
     if (sortConfig.key === key) {
       direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
     } else {
+      direction = 'asc';
+    }
+    
+    const newConfig: SortConfig = { key, direction };
+    setSortConfig(newConfig);
+    
+    // Apply sorting to filtered data
+    const sortedData = sortData(filteredCustomers, newConfig);
+    setFilteredCustomers(sortedData);
+  };
+
+  // Double click handler for column headers
+  const handleDoubleClick = (key: keyof Customer) => {
+    let direction: SortDirection = 'asc';
+    
+    if (sortConfig.key === key) {
+      // Toggle direction on double click for the same column
+      direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column should start with ascending
       direction = 'asc';
     }
     
@@ -209,36 +235,42 @@ const DataTable: React.FC = () => {
                 <th 
                   className={columnHeaderStyle}
                   onClick={() => handleSort('id')}
+                  onDoubleClick={() => handleDoubleClick('id')}
                 >
                   Klantnr {getSortIcon('id')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
                   onClick={() => handleSort('customer_name')}
+                  onDoubleClick={() => handleDoubleClick('customer_name')}
                 >
                   Klantnaam {getSortIcon('customer_name')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
                   onClick={() => handleSort('cs_documents_total')}
+                  onDoubleClick={() => handleDoubleClick('cs_documents_total')}
                 >
                   Totaal {getSortIcon('cs_documents_total')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
                   onClick={() => handleSort('cs_documents_in_process')}
+                  onDoubleClick={() => handleDoubleClick('cs_documents_in_process')}
                 >
                   Snelstart {getSortIcon('cs_documents_in_process')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
                   onClick={() => handleSort('cs_documents_other')}
+                  onDoubleClick={() => handleDoubleClick('cs_documents_other')}
                 >
                   Overzicht {getSortIcon('cs_documents_other')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
                   onClick={() => handleSort('cs_last_update')}
+                  onDoubleClick={() => handleDoubleClick('cs_last_update')}
                 >
                   Bijgewerkt {getSortIcon('cs_last_update')}
                 </th>
