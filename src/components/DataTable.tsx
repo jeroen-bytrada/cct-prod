@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -30,7 +29,6 @@ const DataTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
-  // Set initial sort to customer id (Klantnr)
   const [sortConfig, setSortConfig] = useState<SortConfig>({ 
     key: 'id', 
     direction: 'asc' 
@@ -43,7 +41,6 @@ const DataTable: React.FC = () => {
       const data = await getCustomers();
       setCustomers(data);
       
-      // Apply initial sorting
       const sortedData = sortData(data, sortConfig);
       setFilteredCustomers(sortedData);
     } catch (error) {
@@ -58,48 +55,42 @@ const DataTable: React.FC = () => {
     }
   };
 
-  // Sort function
   const sortData = (data: Customer[], config: SortConfig): Customer[] => {
     if (!config.key) return data;
     
     return [...data].sort((a, b) => {
-      // Type guard for string values
       const aValue = a[config.key as keyof Customer];
       const bValue = b[config.key as keyof Customer];
 
-      // Handle null or undefined values - null values should come last regardless of sort direction
       if (aValue === null || aValue === undefined) return config.direction === 'asc' ? 1 : -1;
       if (bValue === null || bValue === undefined) return config.direction === 'asc' ? -1 : 1;
       
-      // Both values exist at this point, so we can safely compare them
-      // TypeScript still flags possible null values, so we need additional type assertions
-      const safeAValue = aValue as NonNullable<typeof aValue>;
-      const safeBValue = bValue as NonNullable<typeof bValue>;
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return config.direction === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
+      } 
       
-      // Compare based on type
-      let comparison = 0;
-      if (typeof safeAValue === 'string' && typeof safeBValue === 'string') {
-        comparison = safeAValue.localeCompare(safeBValue);
-      } else if (typeof safeAValue === 'number' && typeof safeBValue === 'number') {
-        comparison = safeAValue - safeBValue;
-      } else if (
-        typeof safeAValue === 'object' && safeAValue !== null && 
-        typeof safeBValue === 'object' && safeBValue !== null && 
-        'getTime' in safeAValue && 'getTime' in safeBValue
-      ) {
-        // Check if objects have getTime method (Date objects)
-        comparison = (safeAValue as Date).getTime() - (safeBValue as Date).getTime();
-      } else {
-        // Convert to string as fallback
-        comparison = String(safeAValue).localeCompare(String(safeBValue));
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return config.direction === 'asc' 
+          ? aValue - bValue 
+          : bValue - aValue;
+      } 
+      
+      if (aValue instanceof Date && bValue instanceof Date) {
+        return config.direction === 'asc' 
+          ? aValue.getTime() - bValue.getTime() 
+          : bValue.getTime() - aValue.getTime();
       }
-
-      // Apply direction
-      return config.direction === 'asc' ? comparison : -comparison;
+      
+      const aString = String(aValue);
+      const bString = String(bValue);
+      return config.direction === 'asc' 
+        ? aString.localeCompare(bString) 
+        : bString.localeCompare(aString);
     });
   };
 
-  // Handle column header click
   const handleSort = (key: keyof Customer) => {
     let direction: SortDirection = 'asc';
     
@@ -112,32 +103,26 @@ const DataTable: React.FC = () => {
     const newConfig: SortConfig = { key, direction };
     setSortConfig(newConfig);
     
-    // Apply sorting to filtered data
     const sortedData = sortData(filteredCustomers, newConfig);
     setFilteredCustomers(sortedData);
   };
 
-  // Double click handler for column headers
   const handleDoubleClick = (key: keyof Customer) => {
     let direction: SortDirection = 'asc';
     
     if (sortConfig.key === key) {
-      // Toggle direction on double click for the same column
       direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
     } else {
-      // New column should start with ascending
       direction = 'asc';
     }
     
     const newConfig: SortConfig = { key, direction };
     setSortConfig(newConfig);
     
-    // Apply sorting to filtered data
     const sortedData = sortData(filteredCustomers, newConfig);
     setFilteredCustomers(sortedData);
   };
 
-  // Get the sort icon for a column
   const getSortIcon = (columnKey: keyof Customer) => {
     if (sortConfig.key !== columnKey) {
       return null;
@@ -174,7 +159,6 @@ const DataTable: React.FC = () => {
 
   useEffect(() => {
     if (searchText.trim() === '') {
-      // Apply sorting to all customers when search is cleared
       const sortedData = sortData(customers, sortConfig);
       setFilteredCustomers(sortedData);
       return;
@@ -187,7 +171,6 @@ const DataTable: React.FC = () => {
         customer.customer_name.toLowerCase().includes(searchLower)
     );
     
-    // Apply sorting to filtered results
     const sortedFiltered = sortData(filtered, sortConfig);
     setFilteredCustomers(sortedFiltered);
   }, [searchText, customers, sortConfig]);
@@ -206,7 +189,6 @@ const DataTable: React.FC = () => {
     setDocumentsModalOpen(true);
   };
 
-  // Create a style for sortable column headers
   const columnHeaderStyle = "py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none";
 
   return (

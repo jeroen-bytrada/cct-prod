@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -173,10 +172,13 @@ const Clients: React.FC = () => {
 
     try {
       if (isNewCustomer) {
+        const now = new Date().toISOString();
+        
         const { error } = await supabase
           .from('customers')
           .insert([{
             ...editingCustomer,
+            created_at: now,
             cs_documents_in_process: null,
             cs_documents_other: null,
             cs_last_update: null
@@ -189,8 +191,15 @@ const Clients: React.FC = () => {
           description: "New customer added successfully",
         });
       } else {
-        // If ID was changed, we need to delete the old record and create a new one
         if (originalId !== editingCustomer.id) {
+          const { data: originalCustomer, error: fetchError } = await supabase
+            .from('customers')
+            .select('created_at')
+            .eq('id', originalId)
+            .single();
+          
+          if (fetchError) throw fetchError;
+          
           const { error: deleteError } = await supabase
             .from('customers')
             .delete()
@@ -202,6 +211,7 @@ const Clients: React.FC = () => {
             .from('customers')
             .insert([{
               ...editingCustomer,
+              created_at: originalCustomer?.created_at,
               cs_documents_in_process: null,
               cs_documents_other: null,
               cs_last_update: null
@@ -209,7 +219,6 @@ const Clients: React.FC = () => {
           
           if (insertError) throw insertError;
         } else {
-          // Normal update if ID didn't change
           const { error } = await supabase
             .from('customers')
             .update({
