@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -20,7 +21,9 @@ import {
   ChevronLeft, 
   ChevronRight, 
   X, 
-  Check 
+  Check,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -40,6 +43,13 @@ type Customer = {
   source_root: string | null;
   is_active: boolean | null;
   created_at: string | null;
+};
+
+type SortDirection = 'asc' | 'desc';
+
+type SortConfig = {
+  key: keyof Customer | null;
+  direction: SortDirection;
 };
 
 const emptyCustomer: Customer = {
@@ -64,6 +74,10 @@ const Clients: React.FC = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   const [originalId, setOriginalId] = useState<string>('');
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ 
+    key: 'id', 
+    direction: 'asc' 
+  });
   
   const { toast } = useToast();
 
@@ -73,7 +87,8 @@ const Clients: React.FC = () => {
   
   useEffect(() => {
     if (searchText.trim() === '') {
-      setFilteredCustomers(customers);
+      const sortedCustomers = sortData(customers, sortConfig);
+      setFilteredCustomers(sortedCustomers);
       return;
     }
 
@@ -86,8 +101,76 @@ const Clients: React.FC = () => {
         (customer.administration_mail && customer.administration_mail.toLowerCase().includes(searchLower))
     );
     
-    setFilteredCustomers(filtered);
-  }, [searchText, customers]);
+    const sortedFiltered = sortData(filtered, sortConfig);
+    setFilteredCustomers(sortedFiltered);
+  }, [searchText, customers, sortConfig]);
+
+  const sortData = (data: Customer[], config: SortConfig): Customer[] => {
+    if (!config.key) return data;
+    
+    return [...data].sort((a, b) => {
+      const aValue = a[config.key as keyof Customer];
+      const bValue = b[config.key as keyof Customer];
+
+      if (aValue === null || aValue === undefined) return config.direction === 'asc' ? 1 : -1;
+      if (bValue === null || bValue === undefined) return config.direction === 'asc' ? -1 : 1;
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return config.direction === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
+      } 
+      
+      if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+        return config.direction === 'asc' 
+          ? (aValue === bValue ? 0 : aValue ? 1 : -1)
+          : (aValue === bValue ? 0 : aValue ? -1 : 1);
+      }
+      
+      // Check if values are date strings and can be converted to dates
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const aDate = new Date(aValue);
+        const bDate = new Date(bValue);
+        
+        // Check if both are valid dates
+        if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+          return config.direction === 'asc' 
+            ? aDate.getTime() - bDate.getTime() 
+            : bDate.getTime() - aDate.getTime();
+        }
+      }
+      
+      // Default to string comparison for all other types
+      const aString = String(aValue);
+      const bString = String(bValue);
+      return config.direction === 'asc' 
+        ? aString.localeCompare(bString) 
+        : bString.localeCompare(aString);
+    });
+  };
+
+  const handleSort = (key: keyof Customer) => {
+    let direction: SortDirection = 'asc';
+    
+    if (sortConfig.key === key) {
+      direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      direction = 'asc';
+    }
+    
+    const newConfig: SortConfig = { key, direction };
+    setSortConfig(newConfig);
+  };
+
+  const getSortIcon = (columnKey: keyof Customer) => {
+    if (sortConfig.key !== columnKey) {
+      return null;
+    }
+    
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUp size={14} className="ml-1 inline-block" /> 
+      : <ArrowDown size={14} className="ml-1 inline-block" />;
+  };
 
   const fetchCustomers = async () => {
     try {
@@ -99,7 +182,8 @@ const Clients: React.FC = () => {
       if (error) throw error;
       
       setCustomers(data || []);
-      setFilteredCustomers(data || []);
+      const sortedData = sortData(data || [], sortConfig);
+      setFilteredCustomers(sortedData);
     } catch (error) {
       console.error('Error fetching customers:', error);
       toast({
@@ -300,20 +384,35 @@ const Clients: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Klantnr
+                    <TableHead 
+                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('id')}
+                    >
+                      Klantnr {getSortIcon('id')}
                     </TableHead>
-                    <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Klantnaam
+                    <TableHead 
+                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('customer_name')}
+                    >
+                      Klantnaam {getSortIcon('customer_name')}
                     </TableHead>
-                    <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hoofdmap
+                    <TableHead 
+                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('source_root')}
+                    >
+                      Hoofdmap {getSortIcon('source_root')}
                     </TableHead>
-                    <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
+                    <TableHead 
+                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('administration_mail')}
+                    >
+                      Email {getSortIcon('administration_mail')}
                     </TableHead>
-                    <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actief
+                    <TableHead 
+                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('is_active')}
+                    >
+                      Actief {getSortIcon('is_active')}
                     </TableHead>
                     <TableHead className="py-3 px-4"></TableHead>
                   </TableRow>
