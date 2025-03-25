@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Layout } from "@/components/Layout";
 import Index from "./pages/Index";
 import Clients from "./pages/Clients";
 import Auth from "./pages/Auth";
@@ -25,14 +24,12 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Layout><Index /></Layout>} />
-              <Route path="/clients" element={<Layout><Clients /></Layout>} />
-              <Route path="/profile" element={<Layout><Profile /></Layout>} />
-              <Route path="/deals" element={<Layout><NotFound />}</Layout>} />
-              <Route path="/contacts" element={<Layout><NotFound />}</Layout>} />
+              <Route path="/" element={<Index />} />
+              <Route path="/clients" element={<Clients />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
             <Route element={<ProtectedRoute requireAdmin={true} />}>
-              <Route path="/settings" element={<Layout><Settings /></Layout>} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
