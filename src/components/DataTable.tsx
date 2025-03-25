@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -77,12 +78,21 @@ const DataTable: React.FC = () => {
           : bValue - aValue;
       } 
       
-      if (aValue instanceof Date && bValue instanceof Date) {
-        return config.direction === 'asc' 
-          ? aValue.getTime() - bValue.getTime() 
-          : bValue.getTime() - aValue.getTime();
+      // Fix for the instanceof Date error
+      // Check if values are date strings and can be converted to dates
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const aDate = new Date(aValue);
+        const bDate = new Date(bValue);
+        
+        // Check if both are valid dates
+        if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+          return config.direction === 'asc' 
+            ? aDate.getTime() - bDate.getTime() 
+            : bDate.getTime() - aDate.getTime();
+        }
       }
       
+      // Default to string comparison for all other types
       const aString = String(aValue);
       const bString = String(bValue);
       return config.direction === 'asc' 
