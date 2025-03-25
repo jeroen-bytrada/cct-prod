@@ -28,6 +28,8 @@ const App = () => (
               <Route path="/" element={<Layout><Index /></Layout>} />
               <Route path="/clients" element={<Layout><Clients /></Layout>} />
               <Route path="/profile" element={<Layout><Profile /></Layout>} />
+              <Route path="/deals" element={<Layout><NotFound />}</Layout>} />
+              <Route path="/contacts" element={<Layout><NotFound />}</Layout>} />
             </Route>
             <Route element={<ProtectedRoute requireAdmin={true} />}>
               <Route path="/settings" element={<Layout><Settings /></Layout>} />
