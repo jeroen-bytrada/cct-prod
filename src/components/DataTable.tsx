@@ -66,8 +66,9 @@ const DataTable: React.FC = () => {
       const aValue = a[config.key as keyof Customer];
       const bValue = b[config.key as keyof Customer];
 
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
+      // Handle null or undefined values
+      if (aValue === null || aValue === undefined) return config.direction === 'asc' ? -1 : 1;
+      if (bValue === null || bValue === undefined) return config.direction === 'asc' ? 1 : -1;
 
       // Compare based on type
       let comparison = 0;

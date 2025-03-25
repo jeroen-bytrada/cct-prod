@@ -81,7 +81,7 @@ const Clients: React.FC = () => {
       customer => 
         customer.id.toLowerCase().includes(searchLower) || 
         customer.customer_name.toLowerCase().includes(searchLower) ||
-        (customer.administration_name && customer.administration_name.toLowerCase().includes(searchLower)) ||
+        (customer.source_root && customer.source_root.toLowerCase().includes(searchLower)) ||
         (customer.administration_mail && customer.administration_mail.toLowerCase().includes(searchLower))
     );
     
@@ -271,7 +271,7 @@ const Clients: React.FC = () => {
                       Klantnaam
                     </TableHead>
                     <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Administratie
+                      Hoofdmap
                     </TableHead>
                     <TableHead className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
@@ -302,7 +302,7 @@ const Clients: React.FC = () => {
                           {customer.customer_name}
                         </TableCell>
                         <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                          {customer.administration_name || '-'}
+                          {customer.source_root || '-'}
                         </TableCell>
                         <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
                           {customer.administration_mail || '-'}
@@ -393,13 +393,13 @@ const Clients: React.FC = () => {
               />
             </div>
             <div className="grid grid-cols-6 items-center gap-4">
-              <label htmlFor="administration_name" className="text-right font-medium col-span-1">
-                Administratie
+              <label htmlFor="source_root" className="text-right font-medium col-span-1">
+                Hoofdmap
               </label>
               <Input
-                id="administration_name"
-                value={editingCustomer.administration_name || ''}
-                onChange={(e) => updateField('administration_name', e.target.value)}
+                id="source_root"
+                value={editingCustomer.source_root || ''}
+                onChange={(e) => updateField('source_root', e.target.value)}
                 className="col-span-5"
               />
             </div>
@@ -425,14 +425,14 @@ const Clients: React.FC = () => {
                 className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-6 items-center gap-4">
-              <label htmlFor="source_root" className="text-right font-medium col-span-1">
-                Bronpad
+            <div className="grid grid-cols-6 items-center gap-4 hidden">
+              <label htmlFor="administration_name" className="text-right font-medium col-span-1">
+                Administratie
               </label>
               <Input
-                id="source_root"
-                value={editingCustomer.source_root || ''}
-                onChange={(e) => updateField('source_root', e.target.value)}
+                id="administration_name"
+                value={editingCustomer.administration_name || ''}
+                onChange={(e) => updateField('administration_name', e.target.value)}
                 className="col-span-5"
               />
             </div>
