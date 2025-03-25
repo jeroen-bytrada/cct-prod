@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
-import Sidebar from '@/components/Sidebar';
+import { useSidebar } from '@/contexts/SidebarContext';
+import { cn } from "@/lib/utils";
 import SearchBar from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
 import { 
@@ -64,6 +64,7 @@ const emptyCustomer: Customer = {
 };
 
 const Clients: React.FC = () => {
+  const { collapsed } = useSidebar();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchText, setSearchText] = useState('');
@@ -345,8 +346,10 @@ const Clients: React.FC = () => {
 
   return (
     <div className="min-h-screen flex">
-      <Sidebar />
-      <div className="flex-1 ml-[190px] p-8">
+      <div className={cn(
+        "flex-1 p-8 transition-all duration-300",
+        collapsed ? "ml-[60px]" : "ml-[190px]"
+      )}>
         <SearchBar />
         
         <div className="mt-8 flex justify-between items-center animate-slide-up" style={{ animationDelay: '0.1s' }}>
