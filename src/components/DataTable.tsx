@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -66,10 +65,11 @@ const DataTable: React.FC = () => {
       const aValue = a[config.key as keyof Customer];
       const bValue = b[config.key as keyof Customer];
 
-      // Handle null or undefined values
-      if (aValue === null || aValue === undefined) return config.direction === 'asc' ? -1 : 1;
-      if (bValue === null || bValue === undefined) return config.direction === 'asc' ? 1 : -1;
-
+      // Handle null or undefined values - null values should come last regardless of sort direction
+      if (aValue === null || aValue === undefined) return config.direction === 'asc' ? 1 : -1;
+      if (bValue === null || bValue === undefined) return config.direction === 'asc' ? -1 : 1;
+      
+      // Both values exist at this point, so we can safely compare them
       // Compare based on type
       let comparison = 0;
       if (typeof aValue === 'string' && typeof bValue === 'string') {
