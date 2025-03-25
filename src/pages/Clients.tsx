@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -63,6 +64,7 @@ const Clients: React.FC = () => {
   const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
+  const [originalId, setOriginalId] = useState<string>('');
   
   const { toast } = useToast();
 
@@ -114,12 +116,14 @@ const Clients: React.FC = () => {
   const handleAddCustomer = () => {
     setEditingCustomer(emptyCustomer);
     setIsNewCustomer(true);
+    setOriginalId('');
     setIsDialogOpen(true);
   };
 
   const handleEditCustomer = (customer: Customer) => {
     setEditingCustomer(customer);
     setIsNewCustomer(false);
+    setOriginalId(customer.id);
     setIsDialogOpen(true);
   };
 
@@ -185,19 +189,42 @@ const Clients: React.FC = () => {
           description: "New customer added successfully",
         });
       } else {
-        const { error } = await supabase
-          .from('customers')
-          .update({
-            customer_name: editingCustomer.customer_name,
-            administration_name: editingCustomer.administration_name,
-            administration_mail: editingCustomer.administration_mail,
-            source: editingCustomer.source,
-            source_root: editingCustomer.source_root,
-            is_active: editingCustomer.is_active
-          })
-          .eq('id', editingCustomer.id);
-        
-        if (error) throw error;
+        // If ID was changed, we need to delete the old record and create a new one
+        if (originalId !== editingCustomer.id) {
+          const { error: deleteError } = await supabase
+            .from('customers')
+            .delete()
+            .eq('id', originalId);
+          
+          if (deleteError) throw deleteError;
+          
+          const { error: insertError } = await supabase
+            .from('customers')
+            .insert([{
+              ...editingCustomer,
+              cs_documents_in_process: null,
+              cs_documents_other: null,
+              cs_last_update: null
+            }]);
+          
+          if (insertError) throw insertError;
+        } else {
+          // Normal update if ID didn't change
+          const { error } = await supabase
+            .from('customers')
+            .update({
+              id: editingCustomer.id,
+              customer_name: editingCustomer.customer_name,
+              administration_name: editingCustomer.administration_name,
+              administration_mail: editingCustomer.administration_mail,
+              source: editingCustomer.source,
+              source_root: editingCustomer.source_root,
+              is_active: editingCustomer.is_active
+            })
+            .eq('id', originalId);
+          
+          if (error) throw error;
+        }
         
         toast({
           title: "Success",
@@ -377,7 +404,6 @@ const Clients: React.FC = () => {
                 id="id"
                 value={editingCustomer.id}
                 onChange={(e) => updateField('id', e.target.value)}
-                disabled={!isNewCustomer}
                 className="col-span-5"
               />
             </div>
