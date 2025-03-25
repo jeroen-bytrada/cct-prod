@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSidebar } from '@/contexts/SidebarContext';
-import { cn } from "@/lib/utils";
 import SearchBar from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
 import { 
@@ -64,7 +62,6 @@ const emptyCustomer: Customer = {
 };
 
 const Clients: React.FC = () => {
-  const { collapsed } = useSidebar();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [searchText, setSearchText] = useState('');
@@ -345,158 +342,153 @@ const Clients: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className={cn(
-        "flex-1 p-8 transition-all duration-300",
-        collapsed ? "ml-[60px]" : "ml-[190px]"
-      )}>
-        <SearchBar />
-        
-        <div className="mt-8 flex justify-between items-center animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Klanten</h1>
-            <p className="text-gray-600">Beheer en bekijk alle klanten</p>
-          </div>
-          <Button 
-            className="bg-buzzaroo-green hover:bg-buzzaroo-green/90 flex items-center gap-2"
-            onClick={handleAddCustomer}
-          >
-            <PlusCircle size={18} />
-            <span>Nieuwe Klant</span>
-          </Button>
+    <div className="min-h-screen">
+      <SearchBar />
+      
+      <div className="mt-8 flex justify-between items-center animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">Klanten</h1>
+          <p className="text-gray-600">Beheer en bekijk alle klanten</p>
         </div>
-        
-        <div className="mt-8 bg-white rounded-lg border border-gray-100 shadow-sm animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <div className="p-4 border-b border-gray-100 w-full">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <Input
-                type="text"
-                placeholder="Zoek op klantnummer of klantnaam"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-200 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-buzzaroo-blue/20"
-              />
-            </div>
+        <Button 
+          className="bg-buzzaroo-green hover:bg-buzzaroo-green/90 flex items-center gap-2"
+          onClick={handleAddCustomer}
+        >
+          <PlusCircle size={18} />
+          <span>Nieuwe Klant</span>
+        </Button>
+      </div>
+      
+      <div className="mt-8 bg-white rounded-lg border border-gray-100 shadow-sm animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <div className="p-4 border-b border-gray-100 w-full">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              type="text"
+              placeholder="Zoek op klantnummer of klantnaam"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full border border-gray-200 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-buzzaroo-blue/20"
+            />
           </div>
+        </div>
 
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="p-8 text-center text-gray-500">Loading customer data...</div>
-            ) : (
-              <Table>
-                <TableHeader>
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">Loading customer data...</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead 
+                    className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('id')}
+                  >
+                    Klantnr {getSortIcon('id')}
+                  </TableHead>
+                  <TableHead 
+                    className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('customer_name')}
+                  >
+                    Klantnaam {getSortIcon('customer_name')}
+                  </TableHead>
+                  <TableHead 
+                    className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('source_root')}
+                  >
+                    Hoofdmap {getSortIcon('source_root')}
+                  </TableHead>
+                  <TableHead 
+                    className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('administration_mail')}
+                  >
+                    Email {getSortIcon('administration_mail')}
+                  </TableHead>
+                  <TableHead 
+                    className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('is_active')}
+                  >
+                    Actief {getSortIcon('is_active')}
+                  </TableHead>
+                  <TableHead className="py-3 px-4"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-gray-100">
+                {filteredCustomers.length === 0 ? (
                   <TableRow>
-                    <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('id')}
-                    >
-                      Klantnr {getSortIcon('id')}
-                    </TableHead>
-                    <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('customer_name')}
-                    >
-                      Klantnaam {getSortIcon('customer_name')}
-                    </TableHead>
-                    <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('source_root')}
-                    >
-                      Hoofdmap {getSortIcon('source_root')}
-                    </TableHead>
-                    <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('administration_mail')}
-                    >
-                      Email {getSortIcon('administration_mail')}
-                    </TableHead>
-                    <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() => handleSort('is_active')}
-                    >
-                      Actief {getSortIcon('is_active')}
-                    </TableHead>
-                    <TableHead className="py-3 px-4"></TableHead>
+                    <TableCell colSpan={6} className="py-4 px-4 text-center text-gray-500">
+                      {customers.length === 0 ? "No customer data available" : "No matching customers found"}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-gray-100">
-                  {filteredCustomers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="py-4 px-4 text-center text-gray-500">
-                        {customers.length === 0 ? "No customer data available" : "No matching customers found"}
+                ) : (
+                  filteredCustomers.map((customer) => (
+                    <TableRow 
+                      key={customer.id} 
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <TableCell className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {customer.id}
+                      </TableCell>
+                      <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        {customer.customer_name}
+                      </TableCell>
+                      <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        {customer.source_root || '-'}
+                      </TableCell>
+                      <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        {customer.administration_mail || '-'}
+                      </TableCell>
+                      <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        {customer.is_active ? 
+                          <Check size={18} className="text-green-500" /> :
+                          <X size={18} className="text-red-500" />
+                        }
+                      </TableCell>
+                      <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-right flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          onClick={() => handleEditCustomer(customer)}
+                        >
+                          <Edit size={18} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-red-600 hover:text-red-800 transition-colors"
+                          onClick={() => handleDeleteClick(customer)}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    filteredCustomers.map((customer) => (
-                      <TableRow 
-                        key={customer.id} 
-                        className="hover:bg-gray-50 transition-colors duration-150"
-                      >
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {customer.id}
-                        </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                          {customer.customer_name}
-                        </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                          {customer.source_root || '-'}
-                        </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                          {customer.administration_mail || '-'}
-                        </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
-                          {customer.is_active ? 
-                            <Check size={18} className="text-green-500" /> :
-                            <X size={18} className="text-red-500" />
-                          }
-                        </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-right flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-blue-600 hover:text-blue-800 transition-colors"
-                            onClick={() => handleEditCustomer(customer)}
-                          >
-                            <Edit size={18} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-red-600 hover:text-red-800 transition-colors"
-                            onClick={() => handleDeleteClick(customer)}
-                          >
-                            <Trash2 size={18} />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </div>
 
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <div className="text-sm text-gray-500">
-              Showing {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8 bg-white border-gray-200"
-              >
-                <ChevronLeft size={16} className="text-gray-500" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8 bg-white border-gray-200"
-              >
-                <ChevronRight size={16} className="text-gray-500" />
-              </Button>
-            </div>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+          <div className="text-sm text-gray-500">
+            Showing {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 bg-white border-gray-200"
+            >
+              <ChevronLeft size={16} className="text-gray-500" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 bg-white border-gray-200"
+            >
+              <ChevronRight size={16} className="text-gray-500" />
+            </Button>
           </div>
         </div>
       </div>
