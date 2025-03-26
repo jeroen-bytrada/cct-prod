@@ -153,6 +153,30 @@ export type Database = {
         }
         Relationships: []
       }
+      settings: {
+        Row: {
+          id: number
+          last_update_run: string
+          target_all: number | null
+          target_invoice: number | null
+          target_top: number | null
+        }
+        Insert: {
+          id?: number
+          last_update_run?: string
+          target_all?: number | null
+          target_invoice?: number | null
+          target_top?: number | null
+        }
+        Update: {
+          id?: number
+          last_update_run?: string
+          target_all?: number | null
+          target_invoice?: number | null
+          target_top?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

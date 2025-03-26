@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -127,12 +126,10 @@ const Clients: React.FC = () => {
           : (aValue === bValue ? 0 : aValue ? -1 : 1);
       }
       
-      // Check if values are date strings and can be converted to dates
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const aDate = new Date(aValue);
         const bDate = new Date(bValue);
         
-        // Check if both are valid dates
         if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
           return config.direction === 'asc' 
             ? aDate.getTime() - bDate.getTime() 
@@ -140,7 +137,6 @@ const Clients: React.FC = () => {
         }
       }
       
-      // Default to string comparison for all other types
       const aString = String(aValue);
       const bString = String(bValue);
       return config.direction === 'asc' 
@@ -476,7 +472,7 @@ const Clients: React.FC = () => {
 
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
             <div className="text-sm text-gray-500">
-              Showing {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
+              Getoond {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
             </div>
             <div className="flex items-center space-x-2">
               <Button 
