@@ -9,12 +9,14 @@ interface MetricCardProps {
   change?: number;
   isPositive?: boolean;
   isNegative?: boolean;
-  status?: "on-track" | "off-track";
+  targetValue?: number | null; // Added target value
+  showStatus?: boolean; // Control whether to show status
   className?: string;
   children?: React.ReactNode;
   showIcon?: boolean;
   hideStats?: boolean;
   iconComponent?: React.ReactNode;
+  absoluteChange?: number; // Added absolute change
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ 
@@ -23,15 +25,19 @@ const MetricCard: React.FC<MetricCardProps> = ({
   change, 
   isPositive = true, 
   isNegative = false,
-  status,
+  targetValue,
+  showStatus = false,
   className,
   children,
   showIcon = false,
   hideStats = false,
-  iconComponent
+  iconComponent,
+  absoluteChange
 }) => {
   // Always show the percentage, even if it's 0%
   const changeText = change !== undefined ? `${change > 0 ? '+' : ''}${change}%` : '';
+  // Show absolute change
+  const absoluteChangeText = absoluteChange !== undefined ? `${absoluteChange > 0 ? '+' : ''}${absoluteChange}` : '';
   
   // Apply green color when percentage is exactly 0%, otherwise use the original logic
   const isZeroPercent = change === 0;
@@ -42,6 +48,11 @@ const MetricCard: React.FC<MetricCardProps> = ({
     ? "text-buzzaroo-green" 
     : "text-buzzaroo-red";
 
+  // Determine on-track status based on comparing the current value to target value
+  const isOnTrack = targetValue !== undefined && targetValue !== null 
+    ? Number(value) < targetValue
+    : undefined;
+
   return (
     <div 
       className={cn(
@@ -51,13 +62,25 @@ const MetricCard: React.FC<MetricCardProps> = ({
     >
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-sm text-gray-500 font-medium">{title}</h3>
-        {!hideStats && change !== undefined && (
-          <span className={cn(
-            "text-xs font-medium px-2 py-0.5 rounded-full", 
-            isZeroPercent || isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
-          )}>
-            {changeText}
-          </span>
+        {!hideStats && (
+          <div className="flex flex-col items-end gap-1">
+            {change !== undefined && (
+              <span className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded-full", 
+                isZeroPercent || isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
+              )}>
+                {changeText}
+              </span>
+            )}
+            {absoluteChange !== undefined && (
+              <span className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded-full", 
+                isZeroPercent || isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
+              )}>
+                {absoluteChangeText}
+              </span>
+            )}
+          </div>
         )}
         {showIcon && (
           <div className="text-gray-400">
@@ -67,9 +90,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </div>
       <div className="flex items-end justify-between">
         <span className="text-3xl font-bold text-gray-900">{value}</span>
-        {!hideStats && status && (
+        {!hideStats && showStatus && isOnTrack !== undefined && (
           <div className="flex items-center gap-1 text-sm">
-            {status === "on-track" || isZeroPercent ? (
+            {isOnTrack ? (
               <>
                 <CheckCircle size={16} className="text-buzzaroo-green" />
                 <span className="text-buzzaroo-green font-medium">On track</span>
