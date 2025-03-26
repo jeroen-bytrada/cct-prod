@@ -29,7 +29,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
 
-  // Debug logs to check values
+  // Debugging logs
   useEffect(() => {
     if (stats && settings) {
       console.log('Document stats:', stats.total);
