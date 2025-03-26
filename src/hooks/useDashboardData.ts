@@ -32,7 +32,19 @@ export function useDashboardData() {
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
-      setSettings(settingsData);
+      
+      // For debugging, let's log the settings
+      console.log('Fetched settings data:', settingsData);
+      
+      // If settings are null, let's create default settings for testing
+      const finalSettings = settingsData || {
+        target_all: 10, // Default target
+        target_invoice: 10, // Default target
+        target_top: 10 // Default target
+      };
+      
+      console.log('Using settings:', finalSettings);
+      setSettings(finalSettings);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
