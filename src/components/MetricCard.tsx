@@ -33,8 +33,12 @@ const MetricCard: React.FC<MetricCardProps> = ({
   // Always show the percentage, even if it's 0%
   const changeText = change !== undefined ? `${change > 0 ? '+' : ''}${change}%` : '';
   
+  // Apply green color when percentage is exactly 0%, otherwise use the original logic
+  const isZeroPercent = change === 0;
+  
   // We're reversing the logic here - negative changes use green color, positive use red
-  const changeClass = isPositive 
+  // But when change is exactly 0%, we always use green
+  const changeClass = isZeroPercent || isPositive 
     ? "text-buzzaroo-green" 
     : "text-buzzaroo-red";
 
@@ -50,7 +54,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         {!hideStats && change !== undefined && (
           <span className={cn(
             "text-xs font-medium px-2 py-0.5 rounded-full", 
-            isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
+            isZeroPercent || isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
           )}>
             {changeText}
           </span>
@@ -65,7 +69,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         <span className="text-3xl font-bold text-gray-900">{value}</span>
         {!hideStats && status && (
           <div className="flex items-center gap-1 text-sm">
-            {status === "on-track" ? (
+            {status === "on-track" || isZeroPercent ? (
               <>
                 <CheckCircle size={16} className="text-buzzaroo-green" />
                 <span className="text-buzzaroo-green font-medium">On track</span>
