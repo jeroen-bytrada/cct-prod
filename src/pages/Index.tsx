@@ -178,13 +178,13 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total || 0).toString()} 
             change={documentsPercentChange} 
             isNegative={documentsPercentChange < 0}
-            isPositive={isDocumentsOnTrack}
+            isPositive={documentsPercentChange >= 0}
             status={isDocumentsOnTrack ? "on-track" : "off-track"}
           >
             <StatisticChart 
               data={documentsChartData} 
-              color={isDocumentsOnTrack ? "#4CAF50" : "#FF5252"} 
-              isNegative={!isDocumentsOnTrack} 
+              color={documentsPercentChange < 0 ? "#FF5252" : "#4CAF50"} 
+              isNegative={documentsPercentChange < 0} 
             />
           </MetricCard>
           
@@ -193,13 +193,13 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total_15 || 0).toString()} 
             change={topPercentChange} 
             isNegative={topPercentChange < 0}
-            isPositive={isTopOnTrack}
+            isPositive={topPercentChange >= 0}
             status={isTopOnTrack ? "on-track" : "off-track"}
           >
             <StatisticChart 
               data={topChartData} 
-              color={isTopOnTrack ? "#4CAF50" : "#FF5252"} 
-              isNegative={!isTopOnTrack} 
+              color={topPercentChange < 0 ? "#FF5252" : "#4CAF50"} 
+              isNegative={topPercentChange < 0} 
             />
           </MetricCard>
           
@@ -208,13 +208,13 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
             change={facturesPercentChange} 
             isNegative={facturesPercentChange < 0}
-            isPositive={isFacturesOnTrack}
+            isPositive={facturesPercentChange >= 0}
             status={isFacturesOnTrack ? "on-track" : "off-track"}
           >
             <StatisticChart 
               data={facturesChartData} 
-              color={isFacturesOnTrack ? "#4CAF50" : "#FF5252"} 
-              isNegative={!isFacturesOnTrack} 
+              color={facturesPercentChange < 0 ? "#FF5252" : "#4CAF50"} 
+              isNegative={facturesPercentChange < 0} 
             />
           </MetricCard>
         </div>

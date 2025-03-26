@@ -36,8 +36,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   // Apply green color when percentage is exactly 0%, otherwise use the original logic
   const isZeroPercent = change === 0;
   
-  // Color logic based on isPositive prop (which now comes from the target comparison)
-  // But when change is exactly 0%, we always use green
+  // Color logic based on isPositive prop or zero percent
   const changeClass = isZeroPercent || isPositive 
     ? "text-buzzaroo-green" 
     : "text-buzzaroo-red";
@@ -69,7 +68,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         <span className="text-3xl font-bold text-gray-900">{value}</span>
         {!hideStats && status && (
           <div className="flex items-center gap-1 text-sm">
-            {status === "on-track" || isZeroPercent ? (
+            {status === "on-track" ? (
               <>
                 <CheckCircle size={16} className="text-buzzaroo-green" />
                 <span className="text-buzzaroo-green font-medium">On track</span>
