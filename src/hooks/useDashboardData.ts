@@ -4,7 +4,6 @@ import {
   getStats, 
   getCustomerCount, 
   getStatsHistory, 
-  getSettings,
   Stats, 
   StatsHistory,
   supabase 
@@ -16,35 +15,21 @@ export function useDashboardData() {
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<{ target_all: number | null, target_invoice: number | null, target_top: number | null } | null>(null);
   const { toast } = useToast();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData, settingsData] = await Promise.all([
+      const [statsData, countData, historyData] = await Promise.all([
         getStats(),
         getCustomerCount(),
-        getStatsHistory(),
-        getSettings()
+        getStatsHistory()
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
       
-      // For debugging, let's log the settings
-      console.log('Fetched settings data:', settingsData);
-      
-      // If settings are null, let's create default settings for testing
-      const finalSettings = settingsData || {
-        target_all: 10, // Default target
-        target_invoice: 10, // Default target
-        target_top: 10 // Default target
-      };
-      
-      console.log('Using settings:', finalSettings);
-      setSettings(finalSettings);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
@@ -107,7 +92,6 @@ export function useDashboardData() {
     statsHistory,
     customerCount,
     loading,
-    settings,
     fetchData
   };
 }

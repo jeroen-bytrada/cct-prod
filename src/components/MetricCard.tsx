@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CheckCircle, XCircle, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -9,7 +9,6 @@ interface MetricCardProps {
   change?: number;
   isPositive?: boolean;
   isNegative?: boolean;
-  status?: "on-track" | "off-track";
   className?: string;
   children?: React.ReactNode;
   showIcon?: boolean;
@@ -23,7 +22,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
   change, 
   isPositive = true, 
   isNegative = false,
-  status,
   className,
   children,
   showIcon = false,
@@ -35,9 +33,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
   
   // Apply green color when percentage is exactly 0%, otherwise use the original logic
   const isZeroPercent = change === 0;
-  
-  // Debug log to see status value
-  console.log(`MetricCard "${title}" - status:`, status);
   
   return (
     <div 
@@ -64,21 +59,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </div>
       <div className="flex items-end justify-between">
         <span className="text-3xl font-bold text-gray-900">{value}</span>
-        {status && (
-          <div className="flex items-center gap-1 text-sm">
-            {status === "on-track" ? (
-              <>
-                <CheckCircle size={16} className="text-buzzaroo-green" />
-                <span className="text-buzzaroo-green font-medium">On track</span>
-              </>
-            ) : (
-              <>
-                <XCircle size={16} className="text-buzzaroo-red" />
-                <span className="text-buzzaroo-red font-medium">Off track</span>
-              </>
-            )}
-          </div>
-        )}
       </div>
       {children}
     </div>
