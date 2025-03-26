@@ -43,7 +43,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     : "text-buzzaroo-red";
 
   // Debug log to see what status value is being received
-  console.log(`MetricCard '${title}' status: ${status}, value: ${value}, target comparison result`);
+  console.log(`MetricCard '${title}' status: ${status}, value: ${value}`);
 
   return (
     <div 
