@@ -36,15 +36,6 @@ const calculatePercentageChange = (data: StatsHistory[], key: keyof Pick<StatsHi
   return Number(change.toFixed(2));
 };
 
-const calculateAbsoluteChange = (data: StatsHistory[], key: keyof Pick<StatsHistory, 'total' | 'total_15' | 'total_in_proces'>) => {
-  if (data.length < 2) return 0;
-  
-  const current = Number(data[data.length - 1][key]) || 0;
-  const previous = Number(data[data.length - 2][key]) || 0;
-  
-  return current - previous;
-};
-
 const Index: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
@@ -72,10 +63,6 @@ const Index: React.FC = () => {
   const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
   const topPercentChange = calculatePercentageChange(statsHistory, 'total_15');
   const facturesPercentChange = calculatePercentageChange(statsHistory, 'total_in_proces');
-
-  const documentsAbsoluteChange = calculateAbsoluteChange(statsHistory, 'total');
-  const topAbsoluteChange = calculateAbsoluteChange(statsHistory, 'total_15');
-  const facturesAbsoluteChange = calculateAbsoluteChange(statsHistory, 'total_in_proces');
 
   const fetchData = async () => {
     try {
@@ -168,7 +155,6 @@ const Index: React.FC = () => {
             title="Totaal Documenten" 
             value={loading ? "..." : (stats?.total || 0).toString()} 
             change={documentsPercentChange} 
-            absoluteChange={documentsAbsoluteChange}
             isNegative={documentsPercentChange < 0}
             isPositive={documentsPercentChange < 0}
           >
@@ -183,7 +169,6 @@ const Index: React.FC = () => {
             title="Totaal top 1" 
             value={loading ? "..." : (stats?.total_15 || 0).toString()} 
             change={topPercentChange} 
-            absoluteChange={topAbsoluteChange}
             isNegative={topPercentChange < 0}
             isPositive={topPercentChange < 0}
           >
@@ -198,7 +183,6 @@ const Index: React.FC = () => {
             title="Totaal Snelstart Facturen" 
             value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
             change={facturesPercentChange} 
-            absoluteChange={facturesAbsoluteChange}
             isNegative={facturesPercentChange < 0}
             isPositive={facturesPercentChange < 0}
           >
