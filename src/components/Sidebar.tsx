@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Users, Settings, LogOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Logo from './Logo';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 const Sidebar: React.FC = () => {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -63,18 +64,18 @@ const Sidebar: React.FC = () => {
       <div className="mt-auto p-4 border-t border-gray-200">
         <div className="flex flex-col gap-3">
           {/* Settings link (subtle styling) */}
-          <button
-            onClick={() => navigate('/settings')}
-            className={cn(
-              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group text-sm w-full text-left",
-              location.pathname === '/settings'
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group text-sm",
+              isActive 
                 ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
                 : "text-gray-500 hover:bg-gray-50"
             )}
           >
             <Settings size={18} className="transition-transform duration-200 group-hover:scale-110" />
             <span>Instellingen</span>
-          </button>
+          </NavLink>
           
           {user ? (
             <>
