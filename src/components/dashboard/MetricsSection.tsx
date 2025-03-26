@@ -50,7 +50,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isPositive={documentsPercentChange < 0}
         status={
           settings && settings.target_all !== null && stats?.total !== undefined 
-            ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
+            ? stats.total >= (settings.target_all || 0) ? "off-track" : "on-track"
             : documentsPercentChange < 0 ? "on-track" : "off-track"
         }
       >
@@ -70,7 +70,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isPositive={topPercentChange < 0}
         status={
           settings && settings.target_top !== null && stats?.total_15 !== undefined 
-            ? stats.total_15 < (settings.target_top || 0) ? "on-track" : "off-track"
+            ? stats.total_15 >= (settings.target_top || 0) ? "off-track" : "on-track"
             : topPercentChange < 0 ? "on-track" : "off-track"
         }
       >
@@ -90,7 +90,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isPositive={facturesPercentChange < 0}
         status={
           settings && settings.target_invoice !== null && stats?.total_in_proces !== undefined 
-            ? stats.total_in_proces < (settings.target_invoice || 0) ? "on-track" : "off-track"
+            ? stats.total_in_proces >= (settings.target_invoice || 0) ? "off-track" : "on-track"
             : facturesPercentChange < 0 ? "on-track" : "off-track"
         }
       >
