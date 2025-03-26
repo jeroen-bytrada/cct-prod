@@ -30,7 +30,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
   hideStats = false,
   iconComponent
 }) => {
-  const changeText = change ? `${change > 0 ? '+' : ''}${change}%` : '';
+  // Always show the percentage, even if it's 0%
+  const changeText = change !== undefined ? `${change > 0 ? '+' : ''}${change}%` : '';
   
   // We're reversing the logic here - negative changes use green color, positive use red
   const changeClass = isPositive 
