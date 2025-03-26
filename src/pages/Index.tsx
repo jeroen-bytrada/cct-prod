@@ -5,7 +5,17 @@ import SearchBar from '@/components/SearchBar';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import DataTable from '@/components/DataTable';
-import { getStats, getCustomerCount, getStatsHistory, Stats, StatsHistory, MAX_HISTORY_RECORDS, supabase } from '@/lib/supabase';
+import { 
+  getStats, 
+  getCustomerCount, 
+  getStatsHistory, 
+  getSettings,
+  Stats, 
+  StatsHistory, 
+  Settings,
+  MAX_HISTORY_RECORDS, 
+  supabase 
+} from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
 import { Users } from 'lucide-react';
 
@@ -43,6 +53,7 @@ const Index: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -71,15 +82,17 @@ const Index: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData] = await Promise.all([
+      const [statsData, countData, historyData, settingsData] = await Promise.all([
         getStats(),
         getCustomerCount(),
-        getStatsHistory(MAX_HISTORY_RECORDS)
+        getStatsHistory(MAX_HISTORY_RECORDS),
+        getSettings()
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
+      setSettings(settingsData);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
@@ -166,7 +179,8 @@ const Index: React.FC = () => {
             isNegative={documentsPercentChange < 0}
             // Here we reverse the logic - negative is good, positive is bad
             isPositive={documentsPercentChange < 0}
-            status={documentsPercentChange < 0 ? "on-track" : "off-track"}
+            targetValue={settings?.target_all || null}
+            showStatus={true}
           >
             <StatisticChart 
               data={documentsChartData} 
@@ -182,7 +196,8 @@ const Index: React.FC = () => {
             isNegative={topPercentChange < 0}
             // Here we reverse the logic - negative is good, positive is bad
             isPositive={topPercentChange < 0}
-            status={topPercentChange < 0 ? "on-track" : "off-track"}
+            targetValue={settings?.target_top || null}
+            showStatus={false}
           >
             <StatisticChart 
               data={topChartData} 
@@ -198,7 +213,8 @@ const Index: React.FC = () => {
             isNegative={facturesPercentChange < 0}
             // Here we reverse the logic - negative is good, positive is bad
             isPositive={facturesPercentChange < 0}
-            status={facturesPercentChange < 0 ? "on-track" : "off-track"}
+            targetValue={settings?.target_invoice || null}
+            showStatus={false}
           >
             <StatisticChart 
               data={facturesChartData} 
