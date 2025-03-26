@@ -42,6 +42,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
     ? "text-buzzaroo-green" 
     : "text-buzzaroo-red";
 
+  // Debug log
+  console.log('MetricCard rendering:', { title, value, status, hideStats });
+
   return (
     <div 
       className={cn(
@@ -67,9 +70,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </div>
       <div className="flex items-end justify-between">
         <span className="text-3xl font-bold text-gray-900">{value}</span>
-        {!hideStats && status && (
+        {status && !hideStats && (
           <div className="flex items-center gap-1 text-sm">
-            {status === "on-track" || isZeroPercent ? (
+            {status === "on-track" ? (
               <>
                 <CheckCircle size={16} className="text-buzzaroo-green" />
                 <span className="text-buzzaroo-green font-medium">On track</span>

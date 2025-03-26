@@ -29,6 +29,13 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
 
+  // Debug log to check values
+  console.log('MetricsSection values:', { 
+    statsTotal: stats?.total, 
+    targetAll: settings?.target_all,
+    documentsPercentChange
+  });
+
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <MetricCard 
@@ -51,6 +58,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         status={stats?.total !== undefined && settings?.target_all !== null 
           ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
           : undefined}
+        hideStats={false}
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -66,7 +74,11 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
-        status={topPercentChange < 0 ? "on-track" : "off-track"}
+        status={settings?.target_top !== null 
+          ? stats?.total_15 !== undefined && stats.total_15 < (settings.target_top || 0) 
+            ? "on-track" 
+            : "off-track"
+          : undefined}
       >
         <StatisticChart 
           data={topChartData} 
@@ -82,7 +94,11 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
-        status={facturesPercentChange < 0 ? "on-track" : "off-track"}
+        status={settings?.target_invoice !== null
+          ? stats?.total_in_proces !== undefined && stats.total_in_proces < (settings.target_invoice || 0)
+            ? "on-track"
+            : "off-track"
+          : undefined}
       >
         <StatisticChart 
           data={facturesChartData} 
