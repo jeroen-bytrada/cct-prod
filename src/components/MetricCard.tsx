@@ -15,8 +15,6 @@ interface MetricCardProps {
   showIcon?: boolean;
   hideStats?: boolean;
   iconComponent?: React.ReactNode;
-  targetValue?: number | null;
-  showStatus?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ 
@@ -30,9 +28,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   children,
   showIcon = false,
   hideStats = false,
-  iconComponent,
-  targetValue = null,
-  showStatus = true
+  iconComponent
 }) => {
   // Always show the percentage, even if it's 0%
   const changeText = change !== undefined ? `${change > 0 ? '+' : ''}${change}%` : '';
@@ -45,12 +41,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const changeClass = isZeroPercent || isPositive 
     ? "text-buzzaroo-green" 
     : "text-buzzaroo-red";
-
-  // Determine status based on targetValue if provided
-  let calculatedStatus = status;
-  if (targetValue !== null && typeof value !== 'string') {
-    calculatedStatus = Number(value) < targetValue ? "on-track" : "off-track";
-  }
 
   return (
     <div 
@@ -77,9 +67,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </div>
       <div className="flex items-end justify-between">
         <span className="text-3xl font-bold text-gray-900">{value}</span>
-        {!hideStats && showStatus && calculatedStatus && (
+        {!hideStats && status && (
           <div className="flex items-center gap-1 text-sm">
-            {calculatedStatus === "on-track" ? (
+            {status === "on-track" || isZeroPercent ? (
               <>
                 <CheckCircle size={16} className="text-buzzaroo-green" />
                 <span className="text-buzzaroo-green font-medium">On track</span>
