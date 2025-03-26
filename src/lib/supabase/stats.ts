@@ -41,16 +41,22 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
 }
 
 export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null } | null> {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('target_all, target_invoice, target_top')
-    .limit(1)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching settings:', error)
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('target_all, target_invoice, target_top')
+      .limit(1)
+      .maybeSingle()
+    
+    if (error) {
+      console.error('Error fetching settings:', error)
+      return null
+    }
+    
+    // Return the data if found, or a default object with null values if no settings exist
+    return data || { target_all: null, target_invoice: null, target_top: null }
+  } catch (error) {
+    console.error('Error in getSettings:', error)
     return null
   }
-  
-  return data
 }

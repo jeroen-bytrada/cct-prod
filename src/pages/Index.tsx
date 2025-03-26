@@ -179,7 +179,7 @@ const Index: React.FC = () => {
             // Here we reverse the logic - negative is good, positive is bad
             isPositive={documentsPercentChange < 0}
             status={
-              settings?.target_all !== null && stats?.total !== undefined 
+              settings && settings.target_all !== null && stats?.total !== undefined 
                 ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
                 : documentsPercentChange < 0 ? "on-track" : "off-track"
             }
