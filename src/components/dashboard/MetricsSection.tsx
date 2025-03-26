@@ -34,14 +34,18 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
     if (stats && settings) {
       console.log('Document stats:', stats.total);
       console.log('Settings target_all:', settings.target_all);
-      console.log('Is on track?', stats.total < (settings.target_all || Infinity));
       
-      // Add more detailed logging to help troubleshoot
-      console.log('Documents status calculation:', 
-        settings.target_all !== null && stats.total !== undefined 
-        ? `${stats.total} < ${settings.target_all} = ${stats.total < settings.target_all} => ${stats.total < settings.target_all ? "on-track" : "off-track"}`
-        : "Using percentage change fallback"
-      );
+      // This is the correct logic - if current value is LESS than target, we're on track
+      const isOnTrack = stats.total < (settings.target_all || Infinity);
+      console.log('Is on track?', isOnTrack);
+      
+      // More detailed logging to help troubleshoot
+      const target = settings.target_all;
+      const current = stats.total;
+      if (target !== null && current !== undefined) {
+        console.log(`DETAILED STATUS: ${current} < ${target} = ${current < target}`);
+        console.log(`Status should be: ${current < target ? "on-track" : "off-track"}`);
+      }
     }
   }, [stats, settings]);
 
