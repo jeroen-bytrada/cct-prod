@@ -48,11 +48,11 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={documentsPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
-        status={
-          settings && settings.target_all !== null && stats?.total !== undefined 
-            ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
-            : documentsPercentChange < 0 ? "on-track" : "off-track"
-        }
+        status={settings && settings.target_all !== null && stats?.total !== undefined
+          ? stats.total < (settings.target_all || 0)
+            ? "on-track"
+            : "off-track"
+          : undefined} // Use undefined instead of a fallback status
       >
         <StatisticChart 
           data={documentsChartData} 
