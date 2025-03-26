@@ -32,9 +32,6 @@ export function useDashboardData() {
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
-      
-      // Debug log to check what settings are coming from the database
-      console.log('Settings from database:', settingsData);
       setSettings(settingsData);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -85,29 +82,11 @@ export function useDashboardData() {
         }
       )
       .subscribe();
-      
-    // Set up real-time subscription for settings table to get updated targets
-    const settingsChannel = supabase
-      .channel('settings-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'settings'
-        },
-        (payload) => {
-          console.log('Settings updated:', payload);
-          fetchData(); // Refresh all data when settings are updated
-        }
-      )
-      .subscribe();
     
     // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
-      supabase.removeChannel(settingsChannel);
     };
   }, [toast]);
 

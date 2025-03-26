@@ -42,9 +42,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
     ? "text-buzzaroo-green" 
     : "text-buzzaroo-red";
 
-  // Debug log to help troubleshoot status issues
-  console.log(`MetricCard '${title}' status: ${status}, value: ${value}, isPositive: ${isPositive}`);
-
   return (
     <div 
       className={cn(
@@ -72,7 +69,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         <span className="text-3xl font-bold text-gray-900">{value}</span>
         {!hideStats && status && (
           <div className="flex items-center gap-1 text-sm">
-            {status === "on-track" ? (
+            {status === "on-track" || isZeroPercent ? (
               <>
                 <CheckCircle size={16} className="text-buzzaroo-green" />
                 <span className="text-buzzaroo-green font-medium">On track</span>
