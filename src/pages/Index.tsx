@@ -1,11 +1,10 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import DataTable from '@/components/DataTable';
-import { getStats, getCustomerCount, getStatsHistory, Stats, StatsHistory, MAX_HISTORY_RECORDS, supabase } from '@/lib/supabase';
+import { getStats, getCustomerCount, getStatsHistory, getSettings, Stats, StatsHistory, MAX_HISTORY_RECORDS, supabase } from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
 import { Users } from 'lucide-react';
 
@@ -25,18 +24,16 @@ const formatHistoryData = (data: StatsHistory[], key: keyof Pick<StatsHistory, '
   return data.map(item => ({ value: Number(item[key]) || 0 }));
 };
 
-// Calculate percentage change between the last two values
 const calculatePercentageChange = (data: StatsHistory[], key: keyof Pick<StatsHistory, 'total' | 'total_15' | 'total_in_proces'>) => {
   if (data.length < 2) return 0;
   
   const current = Number(data[data.length - 1][key]) || 0;
   const previous = Number(data[data.length - 2][key]) || 0;
   
-  // Avoid division by zero
   if (previous === 0) return current > 0 ? 100 : 0;
   
   const change = ((current - previous) / previous) * 100;
-  return Number(change.toFixed(2)); // Round to 2 decimal places
+  return Number(change.toFixed(2));
 };
 
 const Index: React.FC = () => {
@@ -44,6 +41,11 @@ const Index: React.FC = () => {
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<{
+    target_all: number | null;
+    target_invoice: number | null;
+    target_top: number | null;
+  } | null>(null);
   const { toast } = useToast();
 
   const defaultClientsChartData = generateChartData(MAX_HISTORY_RECORDS);
@@ -63,7 +65,6 @@ const Index: React.FC = () => {
     ? formatHistoryData(statsHistory, 'total_in_proces')
     : defaultFacturesChartData;
 
-  // Calculate percentage changes
   const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
   const topPercentChange = calculatePercentageChange(statsHistory, 'total_15');
   const facturesPercentChange = calculatePercentageChange(statsHistory, 'total_in_proces');
@@ -71,15 +72,17 @@ const Index: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData] = await Promise.all([
+      const [statsData, countData, historyData, settingsData] = await Promise.all([
         getStats(),
         getCustomerCount(),
-        getStatsHistory(MAX_HISTORY_RECORDS)
+        getStatsHistory(MAX_HISTORY_RECORDS),
+        getSettings()
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
+      setSettings(settingsData);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
@@ -93,10 +96,8 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    // Initial data fetch
     fetchData();
     
-    // Set up real-time subscription for customers table
     const customersChannel = supabase
       .channel('customers-changes')
       .on(
@@ -108,12 +109,11 @@ const Index: React.FC = () => {
         },
         (payload) => {
           console.log('Customer table changed:', payload);
-          fetchData(); // Refresh all data when customers table changes
+          fetchData();
         }
       )
       .subscribe();
       
-    // Set up real-time subscription for cct_stats_hist table
     const statsHistChannel = supabase
       .channel('stats-hist-changes')
       .on(
@@ -125,17 +125,31 @@ const Index: React.FC = () => {
         },
         (payload) => {
           console.log('Stats history updated:', payload);
-          fetchData(); // Refresh all data when new stats history is added
+          fetchData();
         }
       )
       .subscribe();
     
-    // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
     };
   }, [toast]);
+
+  const isDocumentsOnTrack = React.useMemo(() => {
+    if (!stats || !settings || settings.target_all === null) return false;
+    return stats.total <= settings.target_all;
+  }, [stats, settings]);
+
+  const isTopOnTrack = React.useMemo(() => {
+    if (!stats || !settings || settings.target_top === null) return false;
+    return stats.total_15 <= settings.target_top;
+  }, [stats, settings]);
+
+  const isFacturesOnTrack = React.useMemo(() => {
+    if (!stats || !settings || settings.target_invoice === null) return false;
+    return stats.total_in_proces <= settings.target_invoice;
+  }, [stats, settings]);
 
   return (
     <div className="min-h-screen flex">
@@ -156,7 +170,7 @@ const Index: React.FC = () => {
             showIcon={true}
             iconComponent={<Users size={20} />}
           >
-            <div className="h-[45px]"></div> {/* Empty div to match chart height */}
+            <div className="h-[45px]"></div>
           </MetricCard>
           
           <MetricCard 
@@ -164,14 +178,13 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total || 0).toString()} 
             change={documentsPercentChange} 
             isNegative={documentsPercentChange < 0}
-            // Here we reverse the logic - negative is good, positive is bad
-            isPositive={documentsPercentChange < 0}
-            status={documentsPercentChange < 0 ? "on-track" : "off-track"}
+            isPositive={isDocumentsOnTrack}
+            status={isDocumentsOnTrack ? "on-track" : "off-track"}
           >
             <StatisticChart 
               data={documentsChartData} 
-              color={documentsPercentChange < 0 ? "#4CAF50" : "#FF5252"} 
-              isNegative={documentsPercentChange >= 0} 
+              color={isDocumentsOnTrack ? "#4CAF50" : "#FF5252"} 
+              isNegative={!isDocumentsOnTrack} 
             />
           </MetricCard>
           
@@ -180,14 +193,13 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total_15 || 0).toString()} 
             change={topPercentChange} 
             isNegative={topPercentChange < 0}
-            // Here we reverse the logic - negative is good, positive is bad
-            isPositive={topPercentChange < 0}
-            status={topPercentChange < 0 ? "on-track" : "off-track"}
+            isPositive={isTopOnTrack}
+            status={isTopOnTrack ? "on-track" : "off-track"}
           >
             <StatisticChart 
               data={topChartData} 
-              color={topPercentChange < 0 ? "#4CAF50" : "#FF5252"} 
-              isNegative={topPercentChange >= 0} 
+              color={isTopOnTrack ? "#4CAF50" : "#FF5252"} 
+              isNegative={!isTopOnTrack} 
             />
           </MetricCard>
           
@@ -196,14 +208,13 @@ const Index: React.FC = () => {
             value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
             change={facturesPercentChange} 
             isNegative={facturesPercentChange < 0}
-            // Here we reverse the logic - negative is good, positive is bad
-            isPositive={facturesPercentChange < 0}
-            status={facturesPercentChange < 0 ? "on-track" : "off-track"}
+            isPositive={isFacturesOnTrack}
+            status={isFacturesOnTrack ? "on-track" : "off-track"}
           >
             <StatisticChart 
               data={facturesChartData} 
-              color={facturesPercentChange < 0 ? "#4CAF50" : "#FF5252"} 
-              isNegative={facturesPercentChange >= 0} 
+              color={isFacturesOnTrack ? "#4CAF50" : "#FF5252"} 
+              isNegative={!isFacturesOnTrack} 
             />
           </MetricCard>
         </div>

@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -220,6 +219,26 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
   }
   
   return (data || []).reverse()
+}
+
+// Settings-related queries
+export async function getSettings(): Promise<{
+  target_all: number | null;
+  target_invoice: number | null;
+  target_top: number | null;
+} | null> {
+  const { data, error } = await supabase
+    .from('settings')
+    .select('target_all, target_invoice, target_top')
+    .limit(1)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching settings:', error);
+    return null;
+  }
+  
+  return data;
 }
 
 // User profile-related queries
