@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import { Users } from 'lucide-react';
@@ -28,6 +28,15 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
+
+  // Debug logs to check values
+  useEffect(() => {
+    if (stats && settings) {
+      console.log('Document stats:', stats.total);
+      console.log('Settings target_all:', settings.target_all);
+      console.log('Is off track?', stats.total >= (settings.target_all || 0));
+    }
+  }, [stats, settings]);
 
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
