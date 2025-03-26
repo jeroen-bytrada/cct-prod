@@ -29,6 +29,20 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
 
+  // Determine document status based on comparison with target
+  const documentStatus = 
+    stats && settings && settings.target_all !== null 
+      ? stats.total < settings.target_all 
+        ? "on-track" 
+        : "off-track"
+      : documentsPercentChange < 0 
+        ? "on-track" 
+        : "off-track";
+
+  console.log('[MetricsSection] Stats Total:', stats?.total);
+  console.log('[MetricsSection] Target All:', settings?.target_all);
+  console.log('[MetricsSection] Status:', documentStatus);
+
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <MetricCard 
@@ -48,11 +62,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={documentsPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
-        status={
-          settings && settings.target_all !== null && stats?.total !== undefined 
-            ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
-            : documentsPercentChange < 0 ? "on-track" : "off-track"
-        }
+        status={documentStatus}
       >
         <StatisticChart 
           data={documentsChartData} 
