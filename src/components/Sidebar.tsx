@@ -59,23 +59,22 @@ const Sidebar: React.FC = () => {
         </nav>
       </div>
       
-      {/* Profile and Settings at the bottom */}
+      {/* Settings and Profile at the bottom */}
       <div className="mt-auto p-4 border-t border-gray-200">
         <div className="flex flex-col gap-3">
-          {isAdmin && (
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
-                isActive 
-                  ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
-                  : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
-              <span>Instellingen</span>
-            </NavLink>
-          )}
+          {/* Settings link (subtle styling) */}
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group text-sm",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-500 hover:bg-gray-50"
+            )}
+          >
+            <Settings size={18} className="transition-transform duration-200 group-hover:scale-110" />
+            <span>Instellingen</span>
+          </NavLink>
           
           {user ? (
             <>
