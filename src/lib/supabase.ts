@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 import { supabase as supabaseClient } from '@/integrations/supabase/client'
 
@@ -54,14 +55,6 @@ export type UserRole = {
   user_id: string
   role: 'admin' | 'user'
   created_at: string
-}
-
-export type Settings = {
-  id: number
-  target_all: number | null
-  target_invoice: number | null
-  target_top: number | null
-  last_update_run: string
 }
 
 export const supabase = supabaseClient;
@@ -271,20 +264,4 @@ export async function checkUserRole(role: 'admin' | 'user'): Promise<boolean> {
   }
   
   return !!data;
-}
-
-export async function getSettings(): Promise<Settings | null> {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('*')
-    .order('id', { ascending: false })
-    .limit(1)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching settings:', error);
-    return null;
-  }
-  
-  return data;
 }
