@@ -56,9 +56,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
         status={stats?.total !== undefined && settings?.target_all !== null 
-          ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
+          ? stats.total < settings.target_all ? "on-track" : "off-track"
           : undefined}
-        hideStats={false}
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -74,10 +73,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
-        status={settings?.target_top !== null 
-          ? stats?.total_15 !== undefined && stats.total_15 < (settings.target_top || 0) 
-            ? "on-track" 
-            : "off-track"
+        status={stats?.total_15 !== undefined && settings?.target_top !== null 
+          ? stats.total_15 < settings.target_top ? "on-track" : "off-track"
           : undefined}
       >
         <StatisticChart 
@@ -94,10 +91,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
-        status={settings?.target_invoice !== null
-          ? stats?.total_in_proces !== undefined && stats.total_in_proces < (settings.target_invoice || 0)
-            ? "on-track"
-            : "off-track"
+        status={stats?.total_in_proces !== undefined && settings?.target_invoice !== null
+          ? stats.total_in_proces < settings.target_invoice ? "on-track" : "off-track"
           : undefined}
       >
         <StatisticChart 

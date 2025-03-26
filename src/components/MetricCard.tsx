@@ -70,7 +70,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </div>
       <div className="flex items-end justify-between">
         <span className="text-3xl font-bold text-gray-900">{value}</span>
-        {status && !hideStats && (
+        {status && (
           <div className="flex items-center gap-1 text-sm">
             {status === "on-track" ? (
               <>
