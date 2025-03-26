@@ -34,7 +34,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
     if (stats && settings) {
       console.log('Document stats:', stats.total);
       console.log('Settings target_all:', settings.target_all);
-      console.log('Is on track?', stats.total < (settings.target_all || 0));
+      console.log('Is on track?', stats.total < (settings.target_all || Infinity));
     }
   }, [stats, settings]);
 
@@ -58,8 +58,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
         status={
-          settings && settings.target_all !== null && stats?.total !== undefined 
-            ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
+          settings && settings.target_all !== null && stats?.total !== undefined
+            ? (stats.total < settings.target_all) ? "on-track" : "off-track"
             : documentsPercentChange < 0 ? "on-track" : "off-track"
         }
       >
@@ -78,8 +78,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
         status={
-          settings && settings.target_top !== null && stats?.total_15 !== undefined 
-            ? stats.total_15 < (settings.target_top || 0) ? "on-track" : "off-track"
+          settings && settings.target_top !== null && stats?.total_15 !== undefined
+            ? (stats.total_15 < settings.target_top) ? "on-track" : "off-track"
             : topPercentChange < 0 ? "on-track" : "off-track"
         }
       >
@@ -98,8 +98,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
         status={
-          settings && settings.target_invoice !== null && stats?.total_in_proces !== undefined 
-            ? stats.total_in_proces < (settings.target_invoice || 0) ? "on-track" : "off-track"
+          settings && settings.target_invoice !== null && stats?.total_in_proces !== undefined
+            ? (stats.total_in_proces < settings.target_invoice) ? "on-track" : "off-track"
             : facturesPercentChange < 0 ? "on-track" : "off-track"
         }
       >
