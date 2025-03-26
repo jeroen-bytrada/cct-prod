@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { 
   getStats, 
   getCustomerCount, 
-  getStatsHistory, 
+  getStatsHistory,
+  getSettings,
   Stats, 
   StatsHistory,
   supabase 
@@ -15,20 +16,27 @@ export function useDashboardData() {
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<{
+    target_all: number | null;
+    target_invoice: number | null;
+    target_top: number | null;
+  } | null>(null);
   const { toast } = useToast();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData] = await Promise.all([
+      const [statsData, countData, historyData, settingsData] = await Promise.all([
         getStats(),
         getCustomerCount(),
-        getStatsHistory()
+        getStatsHistory(),
+        getSettings()
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
+      setSettings(settingsData);
       
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -80,10 +88,28 @@ export function useDashboardData() {
       )
       .subscribe();
     
+    // Add real-time subscription for settings table
+    const settingsChannel = supabase
+      .channel('settings-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'settings'
+        },
+        (payload) => {
+          console.log('Settings updated:', payload);
+          fetchData(); // Refresh all data when settings are updated
+        }
+      )
+      .subscribe();
+    
     // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
+      supabase.removeChannel(settingsChannel);
     };
   }, [toast]);
 
@@ -91,6 +117,7 @@ export function useDashboardData() {
     stats,
     statsHistory,
     customerCount,
+    settings,
     loading,
     fetchData
   };
