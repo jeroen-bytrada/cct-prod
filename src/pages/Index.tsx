@@ -5,7 +5,16 @@ import SearchBar from '@/components/SearchBar';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import DataTable from '@/components/DataTable';
-import { getStats, getCustomerCount, getStatsHistory, Stats, StatsHistory, MAX_HISTORY_RECORDS, supabase } from '@/lib/supabase';
+import { 
+  getStats, 
+  getCustomerCount, 
+  getStatsHistory, 
+  getSettings,
+  Stats, 
+  StatsHistory, 
+  MAX_HISTORY_RECORDS, 
+  supabase 
+} from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
 import { Users } from 'lucide-react';
 
@@ -44,6 +53,7 @@ const Index: React.FC = () => {
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<{ target_all: number | null, target_invoice: number | null, target_top: number | null } | null>(null);
   const { toast } = useToast();
 
   const defaultClientsChartData = generateChartData(MAX_HISTORY_RECORDS);
@@ -71,15 +81,17 @@ const Index: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData] = await Promise.all([
+      const [statsData, countData, historyData, settingsData] = await Promise.all([
         getStats(),
         getCustomerCount(),
-        getStatsHistory(MAX_HISTORY_RECORDS)
+        getStatsHistory(MAX_HISTORY_RECORDS),
+        getSettings()
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
+      setSettings(settingsData);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
@@ -166,7 +178,11 @@ const Index: React.FC = () => {
             isNegative={documentsPercentChange < 0}
             // Here we reverse the logic - negative is good, positive is bad
             isPositive={documentsPercentChange < 0}
-            status={documentsPercentChange < 0 ? "on-track" : "off-track"}
+            status={
+              settings?.target_all !== null && stats?.total !== undefined 
+                ? stats.total < (settings.target_all || 0) ? "on-track" : "off-track"
+                : documentsPercentChange < 0 ? "on-track" : "off-track"
+            }
           >
             <StatisticChart 
               data={documentsChartData} 
