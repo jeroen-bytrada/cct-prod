@@ -2,7 +2,7 @@
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
-import DataTable from '@/components/DataTable';
+import DataTable from '@/components/data-table/DataTable';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import MetricsSection from '@/components/dashboard/MetricsSection';
 import { useDashboardData } from '@/hooks/useDashboardData';
