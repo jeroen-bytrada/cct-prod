@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -22,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { setUserRole, removeUserRole } from '@/lib/supabase';
 
 type UserWithRole = {
   id: string;
@@ -46,7 +46,6 @@ const Settings = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
 
-  // Form setup
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
     defaultValues: {
@@ -65,7 +64,6 @@ const Settings = () => {
     try {
       setLoading(true);
       
-      // Only fetch users if the current user is an admin
       if (!isAdmin) {
         setLoading(false);
         return;
@@ -87,7 +85,6 @@ const Settings = () => {
         throw rolesError;
       }
       
-      // Combine profiles with roles
       const usersWithRoles = profiles.map(profile => {
         const userRole = userRoles.find(role => role.user_id === profile.id);
         return {
@@ -114,7 +111,6 @@ const Settings = () => {
       setSettingsLoading(true);
       setSettingsError(null);
       
-      // Explicitly fetch the settings with ID 1 using single() to indicate we expect exactly one record
       const { data, error } = await supabase
         .from('settings')
         .select('*')
@@ -123,7 +119,6 @@ const Settings = () => {
         
       if (error) {
         if (error.code === 'PGRST116') {
-          // This is the error code when no rows are returned by .single()
           console.error('CRITICAL ERROR: No settings record found with ID 1');
           setSettingsError('Settings record with ID 1 not found. The application cannot function properly.');
           toast.error('Critical error: Required settings record not found');
@@ -138,14 +133,12 @@ const Settings = () => {
       if (data) {
         console.log('Successfully loaded settings:', data);
         
-        // Set the form values with the retrieved data
         form.reset({
           target_all: data.target_all,
           target_invoice: data.target_invoice,
           target_top: data.target_top,
         });
       } else {
-        // This should never happen with .single() but handle it just in case
         console.error('No settings data returned but no error was thrown');
         setSettingsError('Required settings not found');
         toast.error('Failed to load required settings');
@@ -162,35 +155,25 @@ const Settings = () => {
   const toggleUserRole = async (userId: string, currentRole: string) => {
     try {
       const newRole = currentRole === 'admin' ? 'user' : 'admin';
+      let success = false;
       
       if (currentRole === 'admin') {
-        // Demote from admin to user
-        const { error } = await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-          .eq('role', 'admin');
-          
-        if (error) throw error;
+        success = await removeUserRole(userId, 'admin');
         
-        // Ensure they have the user role
-        const { error: insertError } = await supabase
-          .from('user_roles')
-          .upsert({ user_id: userId, role: 'user' });
-          
-        if (insertError) throw insertError;
+        if (success) {
+          success = await setUserRole(userId, 'user');
+        }
       } else {
-        // Promote to admin
-        const { error } = await supabase
-          .from('user_roles')
-          .upsert({ user_id: userId, role: 'admin' });
-          
-        if (error) throw error;
+        success = await setUserRole(userId, 'admin');
+      }
+      
+      if (!success) {
+        toast.error('Gebruikersrol wijzigen mislukt');
+        return;
       }
       
       toast.success(`Gebruikersrol gewijzigd naar ${newRole}`);
       
-      // Update local state
       setUsers(users.map(user => 
         user.id === userId 
           ? { ...user, role: newRole } 
@@ -206,7 +189,6 @@ const Settings = () => {
     if (!isAdmin) return;
     
     try {
-      // Always update the settings with ID 1
       const { error } = await supabase
         .from('settings')
         .update({
@@ -224,7 +206,6 @@ const Settings = () => {
       
       toast.success('Instellingen succesvol bijgewerkt');
       
-      // Reload settings to ensure the UI shows the current values
       fetchSettings();
     } catch (error) {
       console.error('Error in onSubmitSettings:', error);
