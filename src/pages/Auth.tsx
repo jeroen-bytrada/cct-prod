@@ -34,12 +34,12 @@ const Auth = () => {
     
     // Basic validation
     if (!loginEmail.trim()) {
-      setError('Email is required');
+      setError('E-mailadres is verplicht');
       return;
     }
     
     if (!loginPassword) {
-      setError('Password is required');
+      setError('Wachtwoord is verplicht');
       return;
     }
     
@@ -49,7 +49,7 @@ const Auth = () => {
       navigate('/');
     } catch (err: any) {
       console.error('Error signing in:', err);
-      setError(err?.message || 'Failed to sign in. Please check your credentials.');
+      setError(err?.message || 'Inloggen mislukt. Controleer uw gegevens.');
     }
   };
 
@@ -58,39 +58,39 @@ const Auth = () => {
     
     // Basic validation
     if (!fullName.trim() || fullName.trim().length < 2) {
-      setError('Full name must be at least 2 characters');
+      setError('Naam moet minimaal 2 tekens bevatten');
       return;
     }
     
     if (!registerEmail.trim() || !registerEmail.includes('@')) {
-      setError('Please enter a valid email address');
+      setError('Voer een geldig e-mailadres in');
       return;
     }
     
     if (!registerPassword || registerPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Wachtwoord moet minimaal 6 tekens bevatten');
       return;
     }
     
     if (registerPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('Wachtwoorden komen niet overeen');
       return;
     }
     
     try {
       setError(null);
       await signUp(registerEmail, registerPassword, fullName);
-      toast.success('Registration successful! Please check your email for confirmation.');
+      toast.success('Registratie succesvol! Controleer uw e-mail voor bevestiging.');
       setIsLogin(true);
     } catch (err: any) {
       console.error('Error signing up:', err);
       // Get more specific error message from Supabase if available
       if (err?.message === 'Signups not allowed for this instance') {
-        setError('Signups are currently disabled. Please contact the administrator.');
+        setError('Registratie is momenteel uitgeschakeld. Neem contact op met de beheerder.');
       } else if (err?.code === 'invalid_credentials') {
-        setError('Invalid login credentials. Please try again.');
+        setError('Ongeldige inloggegevens. Probeer het opnieuw.');
       } else {
-        setError(err?.message || 'Failed to register. The email might already be in use.');
+        setError(err?.message || 'Registratie mislukt. Het e-mailadres is mogelijk al in gebruik.');
       }
     }
   };
@@ -120,7 +120,7 @@ const Auth = () => {
         </div>
         
         <h1 className="text-2xl font-bold text-center mb-6">
-          {isLogin ? 'Sign in to your account' : 'Create a new account'}
+          {isLogin ? 'Log in op uw account' : 'Maak een nieuw account'}
         </h1>
         
         {error && (
@@ -133,20 +133,20 @@ const Auth = () => {
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="login-email" className="text-sm font-medium">
-                Email
+                E-mailadres
               </label>
               <Input 
                 id="login-email"
                 type="email" 
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
-                placeholder="your.email@example.com"
+                placeholder="uw.email@voorbeeld.nl"
               />
             </div>
             
             <div className="space-y-2">
               <label htmlFor="login-password" className="text-sm font-medium">
-                Password
+                Wachtwoord
               </label>
               <Input 
                 id="login-password"
@@ -158,40 +158,40 @@ const Auth = () => {
             </div>
             
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Bezig met inloggen...' : 'Inloggen'}
             </Button>
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="full-name" className="text-sm font-medium">
-                Full Name
+                Volledige naam
               </label>
               <Input 
                 id="full-name"
                 type="text" 
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="John Doe"
+                placeholder="Jan Jansen"
               />
             </div>
             
             <div className="space-y-2">
               <label htmlFor="register-email" className="text-sm font-medium">
-                Email
+                E-mailadres
               </label>
               <Input 
                 id="register-email"
                 type="email" 
                 value={registerEmail}
                 onChange={(e) => setRegisterEmail(e.target.value)}
-                placeholder="your.email@example.com"
+                placeholder="uw.email@voorbeeld.nl"
               />
             </div>
             
             <div className="space-y-2">
               <label htmlFor="register-password" className="text-sm font-medium">
-                Password
+                Wachtwoord
               </label>
               <Input 
                 id="register-password"
@@ -204,7 +204,7 @@ const Auth = () => {
             
             <div className="space-y-2">
               <label htmlFor="confirm-password" className="text-sm font-medium">
-                Confirm Password
+                Bevestig wachtwoord
               </label>
               <Input 
                 id="confirm-password"
@@ -216,7 +216,7 @@ const Auth = () => {
             </div>
             
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? 'Account aanmaken...' : 'Account aanmaken'}
             </Button>
           </form>
         )}
@@ -228,8 +228,8 @@ const Auth = () => {
             className="text-sm text-blue-600 hover:underline"
           >
             {isLogin
-              ? "Don't have an account? Sign up"
-              : 'Already have an account? Sign in'}
+              ? "Nog geen account? Registreer nu"
+              : 'Heeft u al een account? Log in'}
           </button>
         </div>
       </div>

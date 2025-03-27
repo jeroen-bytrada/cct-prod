@@ -98,7 +98,7 @@ const Sidebar: React.FC = () => {
                 onClick={handleSignOut}
               >
                 <LogOut size={16} />
-                <span>Sign Out</span>
+                <span>Uitloggen</span>
               </Button>
             </>
           ) : (
@@ -108,7 +108,7 @@ const Sidebar: React.FC = () => {
               className="w-full" 
               onClick={() => navigate('/auth')}
             >
-              Sign In
+              Inloggen
             </Button>
           )}
         </div>
