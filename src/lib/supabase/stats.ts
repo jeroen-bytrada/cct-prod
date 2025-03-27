@@ -50,13 +50,15 @@ export async function getSettings(): Promise<{ target_all: number | null, target
     
     if (error) {
       console.error('Error fetching settings:', error)
-      return null
+      // Return default settings with high values to ensure badges appear
+      return { target_all: 100, target_invoice: 100, target_top: 100 }
     }
     
-    // Return the data if found, or a default object with null values if no settings exist
-    return data || { target_all: null, target_invoice: null, target_top: null }
+    // Return the data if found, or default values if no settings exist
+    return data || { target_all: 100, target_invoice: 100, target_top: 100 }
   } catch (error) {
     console.error('Error in getSettings:', error)
-    return null
+    // Return default settings with high values in case of an error
+    return { target_all: 100, target_invoice: 100, target_top: 100 }
   }
 }

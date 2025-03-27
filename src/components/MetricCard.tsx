@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, Check, X } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -41,7 +40,10 @@ const MetricCard: React.FC<MetricCardProps> = ({
   
   // For target badge
   const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
-  const isOnTarget = target === null || isNaN(numericValue) ? true : numericValue <= target;
+  
+  // When target is null, always show as on target (green)
+  // Otherwise, compare the value to the target
+  const isOnTarget = target === null ? true : !isNaN(numericValue) && numericValue <= target;
   
   console.log(`MetricCard ${title}: value=${value}, target=${target}, showTargetBadge=${showTargetBadge}, isOnTarget=${isOnTarget}`);
   
@@ -70,7 +72,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </div>
       <div className="flex flex-col items-start">
         <span className="text-3xl font-bold text-gray-900 mb-2">{value}</span>
-        {showTargetBadge && target !== null && (
+        {showTargetBadge && (
           <Badge 
             variant={isOnTarget ? "default" : "destructive"}
             className={cn(
