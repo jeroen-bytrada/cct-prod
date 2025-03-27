@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -50,6 +49,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [settingsId, setSettingsId] = useState<number | null>(null);
 
   // Form setup
   const form = useForm<SettingsFormValues>({
@@ -129,6 +129,7 @@ const Settings = () => {
       }
       
       if (data) {
+        setSettingsId(data.id);
         form.reset({
           target_all: data.target_all,
           target_invoice: data.target_invoice,
@@ -190,48 +191,24 @@ const Settings = () => {
     if (!isAdmin) return;
     
     try {
-      // Get the first settings record
-      const { data: existingSettings, error: fetchError } = await supabase
-        .from('settings')
-        .select('id')
-        .limit(1);
-        
-      if (fetchError) {
-        console.error('Error fetching settings:', fetchError);
-        toast.error('Failed to update settings');
+      if (!settingsId) {
+        console.error('No settings ID found. Cannot update settings.');
+        toast.error('Failed to update settings: No settings record found');
         return;
       }
       
-      let updateError;
-      
-      if (existingSettings && existingSettings.length > 0) {
-        // Update existing settings
-        const { error } = await supabase
-          .from('settings')
-          .update({
-            target_all: values.target_all,
-            target_invoice: values.target_invoice,
-            target_top: values.target_top,
-          })
-          .eq('id', existingSettings[0].id);
-          
-        updateError = error;
-      } else {
-        // Insert new settings
-        const { error } = await supabase
-          .from('settings')
-          .insert({
-            target_all: values.target_all,
-            target_invoice: values.target_invoice,
-            target_top: values.target_top,
-            last_update_run: new Date().toISOString(),
-          });
-          
-        updateError = error;
-      }
-      
-      if (updateError) {
-        console.error('Error updating settings:', updateError);
+      // Only update the existing settings record
+      const { error } = await supabase
+        .from('settings')
+        .update({
+          target_all: values.target_all,
+          target_invoice: values.target_invoice,
+          target_top: values.target_top,
+        })
+        .eq('id', settingsId);
+        
+      if (error) {
+        console.error('Error updating settings:', error);
         toast.error('Failed to update settings');
         return;
       }
