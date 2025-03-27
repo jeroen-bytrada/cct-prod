@@ -10,19 +10,19 @@ export async function getStats(): Promise<Stats | null> {
     .select('*')
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
   
   if (error) {
     console.error('Error fetching stats:', error)
     return null
   }
   
-  return {
+  return data ? {
     id: data.id,
     total: data.total,
     total_15: data.total_15,
     total_in_proces: data.total_in_proces
-  }
+  } : null
 }
 
 export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Promise<StatsHistory[]> {
@@ -50,17 +50,17 @@ export async function getSettings(): Promise<{ target_all: number | null, target
     
     if (error) {
       console.error('Error fetching settings:', error)
-      // Return default settings with high values to ensure badges appear
-      return { target_all: 100, target_invoice: 100, target_top: 100 }
+      // Return default settings with low values for testing to ensure badges can show "Off Track"
+      return { target_all: 10, target_invoice: 10, target_top: 10 }
     }
     
     console.log('Settings data from database:', data)
     
     // Return the data if found, or default values if no settings exist
-    return data || { target_all: 100, target_invoice: 100, target_top: 100 }
+    return data || { target_all: 10, target_invoice: 10, target_top: 10 }
   } catch (error) {
     console.error('Error in getSettings:', error)
-    // Return default settings with high values in case of an error
-    return { target_all: 100, target_invoice: 100, target_top: 100 }
+    // Return default settings with low values for testing
+    return { target_all: 10, target_invoice: 10, target_top: 10 }
   }
 }
