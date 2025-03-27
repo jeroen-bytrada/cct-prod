@@ -20,20 +20,14 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 type UserWithRole = {
   id: string;
   email: string;
   fullName: string | null;
   role: string;
-};
-
-type AppSettings = {
-  id: number;
-  target_all: number | null;
-  target_invoice: number | null;
-  target_top: number | null;
 };
 
 const settingsFormSchema = z.object({
@@ -50,7 +44,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [settingsId, setSettingsId] = useState<number>(1); // Always use ID 1
+  const [settingsError, setSettingsError] = useState<string | null>(null);
 
   // Form setup
   const form = useForm<SettingsFormValues>({
@@ -118,17 +112,26 @@ const Settings = () => {
     
     try {
       setSettingsLoading(true);
+      setSettingsError(null);
       
-      // Explicitly fetch the settings with ID 1
+      // Explicitly fetch the settings with ID 1 using single() to indicate we expect exactly one record
       const { data, error } = await supabase
         .from('settings')
         .select('*')
         .eq('id', 1)
-        .maybeSingle();
+        .single();
         
       if (error) {
-        console.error('Error fetching settings:', error);
-        toast.error('Failed to load application settings');
+        if (error.code === 'PGRST116') {
+          // This is the error code when no rows are returned by .single()
+          console.error('CRITICAL ERROR: No settings record found with ID 1');
+          setSettingsError('Settings record with ID 1 not found. The application cannot function properly.');
+          toast.error('Critical error: Required settings record not found');
+        } else {
+          console.error('Error fetching settings:', error);
+          setSettingsError(`Failed to load settings: ${error.message}`);
+          toast.error('Failed to load application settings');
+        }
         return;
       }
       
@@ -142,11 +145,14 @@ const Settings = () => {
           target_top: data.target_top,
         });
       } else {
-        console.warn('No settings record found with ID 1');
-        toast.warning('Settings record not found - default values will be used');
+        // This should never happen with .single() but handle it just in case
+        console.error('No settings data returned but no error was thrown');
+        setSettingsError('Required settings not found');
+        toast.error('Failed to load required settings');
       }
     } catch (error) {
       console.error('Error in fetchSettings:', error);
+      setSettingsError('An unexpected error occurred while loading settings');
       toast.error('Failed to load application settings');
     } finally {
       setSettingsLoading(false);
@@ -248,6 +254,15 @@ const Settings = () => {
             <TabsContent value="app-settings" className="mt-4">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h2 className="text-lg font-medium mb-4">Application Configuration</h2>
+                
+                {settingsError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {settingsError}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 
                 {settingsLoading ? (
                   <div className="py-4 flex justify-center">

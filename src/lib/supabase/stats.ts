@@ -42,21 +42,24 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
 
 export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, id: number } | null> {
   try {
-    // Always fetch the settings record with ID 1
+    // Explicitly fetch the single settings record with ID 1
     const { data, error } = await supabase
       .from('settings')
       .select('id, target_all, target_invoice, target_top')
       .eq('id', 1)
-      .maybeSingle()
+      .single() // Use single() as we expect exactly one record
     
     if (error) {
-      console.error('Error fetching settings:', error)
-      return null
+      // Log the specific error to help with debugging
+      console.error('Error fetching settings:', error.message, error.details, error.hint)
+      
+      // This is a critical error since we need settings for the application to function properly
+      throw new Error(`Failed to fetch required settings: ${error.message}`)
     }
     
     if (!data) {
-      console.warn('No settings found with ID 1')
-      return null
+      console.error('No settings found with ID 1 - application cannot function properly')
+      throw new Error('Required settings record not found')
     }
     
     console.log('Settings data from database:', data)
@@ -68,7 +71,7 @@ export async function getSettings(): Promise<{ target_all: number | null, target
       target_top: data.target_top
     }
   } catch (error) {
-    console.error('Error in getSettings:', error)
-    return null
+    console.error('Critical error in getSettings:', error)
+    throw error // Re-throw to ensure calling code handles this error as critical
   }
 }

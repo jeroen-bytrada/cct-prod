@@ -57,30 +57,29 @@ export function useDashboardData() {
   const fetchSettings = useCallback(async () => {
     try {
       const settingsData = await getSettings();
+      
       if (settingsData) {
         // We don't need the ID in the settings state
         const { id, ...settingsWithoutId } = settingsData;
         setSettings(settingsWithoutId);
         console.log('Settings loaded successfully:', settingsWithoutId);
       } else {
-        console.warn('No settings found in the database');
-        // If no settings are found, provide default values to prevent UI issues
-        setSettings({
-          target_all: null,
-          target_invoice: null,
-          target_top: null
+        console.error('Settings data is null - this should never happen');
+        toast({
+          title: "Critical Error",
+          description: "Required application settings could not be loaded. Please contact support.",
+          variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
-      // Set default values for settings on error
-      setSettings({
-        target_all: null,
-        target_invoice: null,
-        target_top: null
+      toast({
+        title: "Critical Error",
+        description: "Failed to load application settings. The application may not function properly.",
+        variant: "destructive",
       });
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     // Initial data fetch
@@ -137,17 +136,13 @@ export function useDashboardData() {
       )
       .subscribe();
     
-    // Refresh settings every 5 seconds to ensure they're up to date
-    const settingsRefreshInterval = setInterval(() => {
-      fetchSettings();
-    }, 5000); // 5000 ms = 5 seconds
+    // No need for settings refresh interval since we have real-time updates
     
     // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
       supabase.removeChannel(settingsChannel);
-      clearInterval(settingsRefreshInterval);
     };
   }, [fetchData, fetchSettings, toast]);
 

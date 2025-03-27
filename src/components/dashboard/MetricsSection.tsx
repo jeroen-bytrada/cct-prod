@@ -35,12 +35,13 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
 
-  // Fetch settings when stats are updated
+  // Fetch settings when stats are updated (ensure we have settings)
   useEffect(() => {
-    if (stats && fetchSettings) {
+    if (stats && fetchSettings && !settings) {
+      console.log("Stats loaded but settings missing - fetching settings");
       fetchSettings();
     }
-  }, [stats, fetchSettings]);
+  }, [stats, fetchSettings, settings]);
 
   // Log the actual settings values to verify they're being passed correctly
   console.log('Metrics Settings:', {
