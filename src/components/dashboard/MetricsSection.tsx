@@ -11,19 +11,13 @@ interface MetricsSectionProps {
   stats: Stats | null;
   statsHistory: StatsHistory[];
   customerCount: number;
-  settings: {
-    target_all: number | null;
-    target_invoice: number | null;
-    target_top: number | null;
-  } | null;
 }
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({
   loading,
   stats,
   statsHistory,
-  customerCount,
-  settings
+  customerCount
 }) => {
   // Calculate percentage changes
   const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
@@ -32,18 +26,6 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
-
-  // Determine track status based on settings and current values
-  const getTrackStatus = (currentValue: number | undefined, targetValue: number | null): 'on-track' | 'off-track' | undefined => {
-    if (currentValue === undefined || targetValue === null) {
-      return undefined;
-    }
-    return currentValue <= targetValue ? 'on-track' : 'off-track';
-  };
-
-  const documentsStatus = getTrackStatus(stats?.total, settings?.target_all);
-  const topStatus = getTrackStatus(stats?.total_15, settings?.target_top);
-  const facturesStatus = getTrackStatus(stats?.total_in_proces, settings?.target_invoice);
 
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -64,7 +46,6 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={documentsPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
-        status={documentsStatus}
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -80,7 +61,6 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
-        status={topStatus}
       >
         <StatisticChart 
           data={topChartData} 
@@ -96,7 +76,6 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
-        status={facturesStatus}
       >
         <StatisticChart 
           data={facturesChartData} 
