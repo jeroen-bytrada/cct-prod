@@ -1,11 +1,11 @@
 
 import React from 'react';
-import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/data-table/DataTable';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import MetricsSection from '@/components/dashboard/MetricsSection';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { Layout } from '@/components/Layout';
 
 const Index: React.FC = () => {
   const {
@@ -19,9 +19,8 @@ const Index: React.FC = () => {
   } = useDashboardData();
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
-      <div className="flex-1 ml-[190px] p-8 flex flex-col">
+    <Layout>
+      <div className="p-4 flex flex-col">
         <DashboardHeader />
         
         <MetricsSection 
@@ -38,7 +37,7 @@ const Index: React.FC = () => {
           <DataTable />
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
