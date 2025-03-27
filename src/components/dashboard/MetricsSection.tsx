@@ -42,6 +42,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
     }
   }, [stats, fetchSettings]);
 
+  // Log the actual settings values to verify they're being passed correctly
   console.log('Metrics Settings:', {
     target_all: settings?.target_all,
     target_top: settings?.target_top,
