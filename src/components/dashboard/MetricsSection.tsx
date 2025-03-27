@@ -75,7 +75,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
-        target={settings?.target_top || null}  // Using target_top for this metric
+        target={settings?.target_top || null}
         showTargetBadge={true}
       >
         <StatisticChart 
@@ -92,7 +92,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
-        target={settings?.target_invoice || null}  // Using target_invoice for this metric
+        target={settings?.target_invoice || null}
         showTargetBadge={true}
       >
         <StatisticChart 

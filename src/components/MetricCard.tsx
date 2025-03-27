@@ -42,7 +42,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   // For target badge
   const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
   
-  // For all metrics, "On Track" when value is below target
+  // For all metrics, "On Track" when value is below or equal to target
   // When target is null, always show as on target (green)
   const isOnTarget = target === null ? true : !isNaN(numericValue) && numericValue <= target;
   
