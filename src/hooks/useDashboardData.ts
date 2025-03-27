@@ -5,6 +5,7 @@ import {
   getCustomerCount, 
   getStatsHistory,
   getSettings,
+  getDocumentCount,
   Stats, 
   StatsHistory,
   supabase 
@@ -15,6 +16,7 @@ export function useDashboardData() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsHistory, setStatsHistory] = useState<StatsHistory[]>([]);
   const [customerCount, setCustomerCount] = useState<number>(0);
+  const [documentCount, setDocumentCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<{ 
     target_all: number | null, 
@@ -26,17 +28,19 @@ export function useDashboardData() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData] = await Promise.all([
+      const [statsData, countData, historyData, docCountData] = await Promise.all([
         getStats(),
         getCustomerCount(),
         getStatsHistory(),
+        getDocumentCount(),
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
+      setDocumentCount(docCountData);
       
-      console.log('Dashboard data loaded:', { statsData });
+      console.log('Dashboard data loaded:', { statsData, docCountData });
       
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -136,6 +140,23 @@ export function useDashboardData() {
       )
       .subscribe();
     
+    // Set up real-time subscription for customer_documents table
+    const documentsChannel = supabase
+      .channel('documents-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'customer_documents'
+        },
+        (payload) => {
+          console.log('Documents table changed:', payload);
+          fetchData(); // Refresh data when documents change
+        }
+      )
+      .subscribe();
+    
     // No need for settings refresh interval since we have real-time updates
     
     // Cleanup subscription on component unmount
@@ -143,6 +164,7 @@ export function useDashboardData() {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
       supabase.removeChannel(settingsChannel);
+      supabase.removeChannel(documentsChannel);
     };
   }, [fetchData, fetchSettings, toast]);
 
@@ -150,6 +172,7 @@ export function useDashboardData() {
     stats,
     statsHistory,
     customerCount,
+    documentCount,
     loading,
     settings,
     fetchData,

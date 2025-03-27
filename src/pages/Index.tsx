@@ -12,6 +12,7 @@ const Index: React.FC = () => {
     stats,
     statsHistory,
     customerCount,
+    documentCount,
     loading,
     settings,
     fetchSettings
@@ -30,6 +31,7 @@ const Index: React.FC = () => {
           stats={stats}
           statsHistory={statsHistory}
           customerCount={customerCount}
+          documentCount={documentCount}
           settings={settings}
           fetchSettings={fetchSettings}
         />

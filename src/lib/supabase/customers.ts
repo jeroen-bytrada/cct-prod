@@ -1,4 +1,3 @@
-
 import { supabase } from './client'
 import { Customer, CustomerDocument } from './types'
 import { DOCUMENTS_PER_PAGE } from './client'
@@ -54,6 +53,19 @@ export async function getCustomerCount(): Promise<number> {
   
   if (error) {
     console.error('Error fetching customer count:', error)
+    return 0
+  }
+  
+  return count || 0
+}
+
+export async function getDocumentCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from('customer_documents')
+    .select('*', { count: 'exact', head: true })
+  
+  if (error) {
+    console.error('Error fetching document count:', error)
     return 0
   }
   

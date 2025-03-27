@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
-import { Users } from 'lucide-react';
+import { Users, FileText } from 'lucide-react';
 import { Stats, StatsHistory } from '@/lib/supabase';
 import { calculatePercentageChange, prepareChartData } from '@/utils/chartUtils';
 
@@ -11,6 +11,7 @@ interface MetricsSectionProps {
   stats: Stats | null;
   statsHistory: StatsHistory[];
   customerCount: number;
+  documentCount: number; // Added new prop for document count
   settings: { 
     target_all: number | null, 
     target_invoice: number | null, 
@@ -24,6 +25,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   stats,
   statsHistory,
   customerCount,
+  documentCount, // Added new prop
   settings,
   fetchSettings
 }) => {
@@ -52,15 +54,30 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <MetricCard 
-        title="Aantal Klanten" 
-        value={loading ? "..." : customerCount.toString()}
-        hideStats={true}
-        showIcon={true}
-        iconComponent={<Users size={20} />}
-      >
-        <div className="h-[45px]"></div> {/* Empty div to match chart height */}
-      </MetricCard>
+      {/* Modified to add half-height classes */}
+      <div className="flex flex-col gap-6">
+        <MetricCard 
+          title="Aantal Klanten" 
+          value={loading ? "..." : customerCount.toString()}
+          hideStats={true}
+          showIcon={true}
+          iconComponent={<Users size={20} />}
+          className="h-[calc(50%-0.75rem)]" // Half height minus half the gap
+        >
+          <div className="h-[30px]"></div> {/* Reduced empty div height */}
+        </MetricCard>
+        
+        <MetricCard 
+          title="Totaal verwerkte documenten" 
+          value={loading ? "..." : documentCount.toString()}
+          hideStats={true}
+          showIcon={true}
+          iconComponent={<FileText size={20} />}
+          className="h-[calc(50%-0.75rem)]" // Half height minus half the gap
+        >
+          <div className="h-[30px]"></div> {/* Reduced empty div height */}
+        </MetricCard>
+      </div>
       
       <MetricCard 
         title="Target Totaal Documenten" 
