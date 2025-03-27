@@ -50,17 +50,17 @@ export async function getSettings(): Promise<{ target_all: number | null, target
     
     if (error) {
       console.error('Error fetching settings:', error)
-      // Return default settings with low values for testing to ensure badges can show "Off Track"
-      return { target_all: 10, target_invoice: 10, target_top: 10 }
+      // Return default settings
+      return { target_all: 1000, target_invoice: 1000, target_top: 1000 }
     }
     
     console.log('Settings data from database:', data)
     
     // Return the data if found, or default values if no settings exist
-    return data || { target_all: 10, target_invoice: 10, target_top: 10 }
+    return data || { target_all: 1000, target_invoice: 1000, target_top: 1000 }
   } catch (error) {
     console.error('Error in getSettings:', error)
-    // Return default settings with low values for testing
-    return { target_all: 10, target_invoice: 10, target_top: 10 }
+    // Return default settings in case of an error
+    return { target_all: 1000, target_invoice: 1000, target_top: 1000 }
   }
 }

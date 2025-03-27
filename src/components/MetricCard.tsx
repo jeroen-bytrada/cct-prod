@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, Check, X } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -45,7 +44,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   // For these metrics, we want ON TRACK when the value is LESS than the target
   // When target is null, always show as on target (green)
   // Otherwise, compare the value to the target
-  const isOnTarget = target === null ? true : !isNaN(numericValue) && numericValue <= target;
+  const isOnTarget = target === null ? true : !isNaN(numericValue) && numericValue < target;
   
   console.log(`MetricCard ${title}: value=${value}, target=${target}, showTargetBadge=${showTargetBadge}, isOnTarget=${isOnTarget}`);
   
