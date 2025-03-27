@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import { Users } from 'lucide-react';
-import { Stats, StatsHistory } from '@/lib/supabase';
+import { Stats, StatsHistory, getSettings } from '@/lib/supabase';
 import { calculatePercentageChange, prepareChartData } from '@/utils/chartUtils';
 
 interface MetricsSectionProps {
@@ -19,6 +19,12 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   statsHistory,
   customerCount
 }) => {
+  const [targets, setTargets] = useState<{
+    target_all: number | null;
+    target_invoice: number | null;
+    target_top: number | null;
+  }>({ target_all: null, target_invoice: null, target_top: null });
+
   // Calculate percentage changes
   const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
   const topPercentChange = calculatePercentageChange(statsHistory, 'total_15');
@@ -26,6 +32,22 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
+
+  // Fetch target values from settings
+  useEffect(() => {
+    const fetchTargets = async () => {
+      try {
+        const settingsData = await getSettings();
+        if (settingsData) {
+          setTargets(settingsData);
+        }
+      } catch (error) {
+        console.error('Error fetching targets:', error);
+      }
+    };
+
+    fetchTargets();
+  }, []);
 
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -46,6 +68,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={documentsPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
+        target={targets.target_all}
+        showTarget={!loading && stats?.total !== undefined}
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -61,6 +85,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
+        target={targets.target_top}
+        showTarget={!loading && stats?.total_15 !== undefined}
       >
         <StatisticChart 
           data={topChartData} 
@@ -76,6 +102,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
+        target={targets.target_invoice}
+        showTarget={!loading && stats?.total_in_proces !== undefined}
       >
         <StatisticChart 
           data={facturesChartData} 
