@@ -188,7 +188,7 @@ const Settings = () => {
         if (error) throw error;
       }
       
-      toast.success(`User role updated to ${newRole}`);
+      toast.success(`Gebruikersrol gewijzigd naar ${newRole}`);
       
       // Update local state
       setUsers(users.map(user => 
@@ -198,7 +198,7 @@ const Settings = () => {
       ));
     } catch (error) {
       console.error('Error updating user role:', error);
-      toast.error('Failed to update user role');
+      toast.error('Gebruikersrol wijzigen mislukt');
     }
   };
 
@@ -218,42 +218,42 @@ const Settings = () => {
         
       if (error) {
         console.error('Error updating settings:', error);
-        toast.error('Failed to update settings');
+        toast.error('Instellingen bijwerken mislukt');
         return;
       }
       
-      toast.success('Settings updated successfully');
+      toast.success('Instellingen succesvol bijgewerkt');
       
       // Reload settings to ensure the UI shows the current values
       fetchSettings();
     } catch (error) {
       console.error('Error in onSubmitSettings:', error);
-      toast.error('Failed to update settings');
+      toast.error('Instellingen bijwerken mislukt');
     }
   };
 
   return (
     <Layout>
       <div className="flex-1 p-8 flex flex-col">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Instellingen</h1>
         
         {!isAdmin ? (
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <h2 className="text-lg font-medium mb-2">User Settings</h2>
+            <h2 className="text-lg font-medium mb-2">Gebruikersinstellingen</h2>
             <p className="text-gray-600">
-              Your user account does not have administrative privileges.
+              Je gebruikersaccount heeft geen administratieve rechten.
             </p>
           </div>
         ) : (
           <Tabs defaultValue="app-settings" className="w-full">
             <TabsList>
-              <TabsTrigger value="app-settings">Application Settings</TabsTrigger>
-              <TabsTrigger value="user-management">User Management</TabsTrigger>
+              <TabsTrigger value="app-settings">Applicatie-instellingen</TabsTrigger>
+              <TabsTrigger value="user-management">Gebruikersbeheer</TabsTrigger>
             </TabsList>
             
             <TabsContent value="app-settings" className="mt-4">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h2 className="text-lg font-medium mb-4">Application Configuration</h2>
+                <h2 className="text-lg font-medium mb-4">Applicatieconfiguratie</h2>
                 
                 {settingsError && (
                   <Alert variant="destructive" className="mb-4">
@@ -273,11 +273,11 @@ const Settings = () => {
                     <form onSubmit={form.handleSubmit(onSubmitSettings)} className="space-y-6">
                       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md p-4">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-md font-medium">Target Settings</h3>
+                          <h3 className="text-md font-medium">Doelinstellingen</h3>
                           <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                              <span className="sr-only">Toggle</span>
+                              <span className="sr-only">Schakelen</span>
                             </Button>
                           </CollapsibleTrigger>
                         </div>
@@ -288,7 +288,7 @@ const Settings = () => {
                             name="target_all"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Target All</FormLabel>
+                                <FormLabel>Doel Totaal</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="number" 
@@ -298,7 +298,7 @@ const Settings = () => {
                                   />
                                 </FormControl>
                                 <FormDescription>
-                                  Target value for all documents
+                                  Doelwaarde voor alle documenten
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -310,7 +310,7 @@ const Settings = () => {
                             name="target_invoice"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Target Invoice</FormLabel>
+                                <FormLabel>Doel Facturen</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="number" 
@@ -320,7 +320,7 @@ const Settings = () => {
                                   />
                                 </FormControl>
                                 <FormDescription>
-                                  Target value for invoice documents
+                                  Doelwaarde voor facturen
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -332,7 +332,7 @@ const Settings = () => {
                             name="target_top"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Target Top</FormLabel>
+                                <FormLabel>Doel Top</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="number" 
@@ -342,7 +342,7 @@ const Settings = () => {
                                   />
                                 </FormControl>
                                 <FormDescription>
-                                  Target value for top documents
+                                  Doelwaarde voor top documenten
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -352,7 +352,7 @@ const Settings = () => {
                       </Collapsible>
                       
                       <Button type="submit" className="mt-4">
-                        Save Settings
+                        Instellingen Opslaan
                       </Button>
                     </form>
                   </Form>
@@ -362,7 +362,7 @@ const Settings = () => {
             
             <TabsContent value="user-management" className="mt-4">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h2 className="text-lg font-medium mb-4">User Management</h2>
+                <h2 className="text-lg font-medium mb-4">Gebruikersbeheer</h2>
                 
                 {loading ? (
                   <div className="py-8 flex justify-center">
@@ -373,10 +373,10 @@ const Settings = () => {
                     <table className="w-full">
                       <thead>
                         <tr className="text-left border-b">
-                          <th className="pb-2 font-medium text-gray-600">Email</th>
-                          <th className="pb-2 font-medium text-gray-600">Name</th>
-                          <th className="pb-2 font-medium text-gray-600">Role</th>
-                          <th className="pb-2 font-medium text-gray-600">Actions</th>
+                          <th className="pb-2 font-medium text-gray-600">E-mail</th>
+                          <th className="pb-2 font-medium text-gray-600">Naam</th>
+                          <th className="pb-2 font-medium text-gray-600">Rol</th>
+                          <th className="pb-2 font-medium text-gray-600">Acties</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -399,7 +399,7 @@ const Settings = () => {
                                 size="sm"
                                 onClick={() => toggleUserRole(user.id, user.role)}
                               >
-                                {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                                {user.role === 'admin' ? 'Admin Rechten Intrekken' : 'Admin Maken'}
                               </Button>
                             </td>
                           </tr>

@@ -80,7 +80,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
       </MetricCard>
       
       <MetricCard 
-        title="Totaal top 1" 
+        title="Totaal Top 1" 
         value={loading ? "..." : (stats?.total_15 || 0).toString()} 
         change={topPercentChange} 
         isNegative={topPercentChange < 0}
