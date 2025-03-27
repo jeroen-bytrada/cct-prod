@@ -63,7 +63,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
       </MetricCard>
       
       <MetricCard 
-        title="Totaal Documenten" 
+        title="Target Totaal Documenten" 
         value={loading ? "..." : (stats?.total || 0).toString()} 
         change={documentsPercentChange} 
         isNegative={documentsPercentChange < 0}
@@ -80,7 +80,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
       </MetricCard>
       
       <MetricCard 
-        title="Totaal Top 1" 
+        title="Target Totaal Top 1" 
         value={loading ? "..." : (stats?.total_15 || 0).toString()} 
         change={topPercentChange} 
         isNegative={topPercentChange < 0}
@@ -97,7 +97,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
       </MetricCard>
       
       <MetricCard 
-        title="Totaal Snelstart Facturen" 
+        title="Target Totaal Snelstart Facturen" 
         value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
         change={facturesPercentChange} 
         isNegative={facturesPercentChange < 0}

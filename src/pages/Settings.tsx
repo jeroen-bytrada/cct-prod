@@ -273,7 +273,7 @@ const Settings = () => {
                     <form onSubmit={form.handleSubmit(onSubmitSettings)} className="space-y-6">
                       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md p-4">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-md font-medium">Doelinstellingen</h3>
+                          <h3 className="text-md font-medium">Target instellingen</h3>
                           <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -288,7 +288,7 @@ const Settings = () => {
                             name="target_all"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Doel Totaal</FormLabel>
+                                <FormLabel>Target Totaal Documenten</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="number" 
@@ -307,32 +307,10 @@ const Settings = () => {
                           
                           <FormField
                             control={form.control}
-                            name="target_invoice"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Doel Facturen</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field} 
-                                    value={field.value === null ? '' : field.value}
-                                    onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Doelwaarde voor facturen
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
                             name="target_top"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Doel Top</FormLabel>
+                                <FormLabel>Target Totaal Top 1</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="number" 
@@ -343,6 +321,28 @@ const Settings = () => {
                                 </FormControl>
                                 <FormDescription>
                                   Doelwaarde voor top documenten
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="target_invoice"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Target Totaal Snelstart Facturen</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    {...field} 
+                                    value={field.value === null ? '' : field.value}
+                                    onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Doelwaarde voor facturen
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
