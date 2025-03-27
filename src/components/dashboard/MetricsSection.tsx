@@ -11,13 +11,19 @@ interface MetricsSectionProps {
   stats: Stats | null;
   statsHistory: StatsHistory[];
   customerCount: number;
+  settings: { 
+    target_all: number | null, 
+    target_invoice: number | null, 
+    target_top: number | null 
+  } | null;
 }
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({
   loading,
   stats,
   statsHistory,
-  customerCount
+  customerCount,
+  settings
 }) => {
   // Calculate percentage changes
   const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
@@ -46,6 +52,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={documentsPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
+        target={settings?.target_all || null}
+        showTargetBadge={true}
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -61,6 +69,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
+        target={settings?.target_top || null}
+        showTargetBadge={false}
       >
         <StatisticChart 
           data={topChartData} 
@@ -76,6 +86,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
+        target={settings?.target_invoice || null}
+        showTargetBadge={false}
       >
         <StatisticChart 
           data={facturesChartData} 

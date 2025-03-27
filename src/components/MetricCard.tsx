@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { User } from 'lucide-react';
+import { User, Check, X } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface MetricCardProps {
   title: string;
@@ -14,6 +15,8 @@ interface MetricCardProps {
   showIcon?: boolean;
   hideStats?: boolean;
   iconComponent?: React.ReactNode;
+  target?: number | null;
+  showTargetBadge?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ 
@@ -26,13 +29,19 @@ const MetricCard: React.FC<MetricCardProps> = ({
   children,
   showIcon = false,
   hideStats = false,
-  iconComponent
+  iconComponent,
+  target = null,
+  showTargetBadge = false
 }) => {
   // Always show the percentage, even if it's 0%
   const changeText = change !== undefined ? `${change > 0 ? '+' : ''}${change}%` : '';
   
   // Apply green color when percentage is exactly 0%, otherwise use the original logic
   const isZeroPercent = change === 0;
+  
+  // For target badge
+  const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
+  const isOnTarget = target === null || isNaN(numericValue) ? true : numericValue <= target;
   
   return (
     <div 
@@ -57,8 +66,23 @@ const MetricCard: React.FC<MetricCardProps> = ({
           </div>
         )}
       </div>
-      <div className="flex items-end justify-between">
-        <span className="text-3xl font-bold text-gray-900">{value}</span>
+      <div className="flex flex-col items-start">
+        <span className="text-3xl font-bold text-gray-900 mb-2">{value}</span>
+        {showTargetBadge && target !== null && (
+          <Badge 
+            variant={isOnTarget ? "default" : "destructive"}
+            className={cn(
+              "flex items-center gap-1",
+              isOnTarget ? "bg-green-100 hover:bg-green-200 text-green-800" : "bg-red-100 hover:bg-red-200 text-red-800"
+            )}
+          >
+            {isOnTarget ? (
+              <><Check size={12} /> On Track</>
+            ) : (
+              <><X size={12} /> Off Track</>
+            )}
+          </Badge>
+        )}
       </div>
       {children}
     </div>
