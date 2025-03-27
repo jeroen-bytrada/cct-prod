@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
 import { Users } from 'lucide-react';
@@ -16,6 +16,7 @@ interface MetricsSectionProps {
     target_invoice: number | null, 
     target_top: number | null 
   } | null;
+  fetchSettings?: () => Promise<void>; // Optional function to refresh settings
 }
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({
@@ -23,7 +24,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   stats,
   statsHistory,
   customerCount,
-  settings
+  settings,
+  fetchSettings
 }) => {
   // Calculate percentage changes
   const documentsPercentChange = calculatePercentageChange(statsHistory, 'total');
@@ -32,6 +34,13 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
+
+  // Fetch settings when stats are updated
+  useEffect(() => {
+    if (stats && fetchSettings) {
+      fetchSettings();
+    }
+  }, [stats, fetchSettings]);
 
   console.log('Metrics Settings:', {
     target_all: settings?.target_all,

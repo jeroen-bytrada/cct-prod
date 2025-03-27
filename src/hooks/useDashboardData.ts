@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   getStats, 
   getCustomerCount, 
@@ -23,7 +23,7 @@ export function useDashboardData() {
   } | null>(null);
   const { toast } = useToast();
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [statsData, countData, historyData, settingsData] = await Promise.all([
@@ -50,7 +50,18 @@ export function useDashboardData() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  // Function specifically for fetching settings
+  const fetchSettings = useCallback(async () => {
+    try {
+      const settingsData = await getSettings();
+      setSettings(settingsData);
+      console.log('Settings refreshed:', settingsData);
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  }, []);
 
   useEffect(() => {
     // Initial data fetch
@@ -102,18 +113,24 @@ export function useDashboardData() {
         },
         (payload) => {
           console.log('Settings updated:', payload);
-          fetchData(); // Refresh all data when settings are updated
+          fetchSettings(); // Only refresh settings when they change
         }
       )
       .subscribe();
+    
+    // Refresh settings specifically every minute to ensure they're up to date
+    const settingsRefreshInterval = setInterval(() => {
+      fetchSettings();
+    }, 60000); // 60000 ms = 1 minute
     
     // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
       supabase.removeChannel(settingsChannel);
+      clearInterval(settingsRefreshInterval);
     };
-  }, [toast]);
+  }, [fetchData, fetchSettings, toast]);
 
   return {
     stats,
@@ -121,6 +138,7 @@ export function useDashboardData() {
     customerCount,
     loading,
     settings,
-    fetchData
+    fetchData,
+    fetchSettings // Expose the fetch settings function
   };
 }

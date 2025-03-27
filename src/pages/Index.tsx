@@ -13,7 +13,8 @@ const Index: React.FC = () => {
     statsHistory,
     customerCount,
     loading,
-    settings
+    settings,
+    fetchSettings
   } = useDashboardData();
 
   return (
@@ -30,6 +31,7 @@ const Index: React.FC = () => {
           statsHistory={statsHistory}
           customerCount={customerCount}
           settings={settings}
+          fetchSettings={fetchSettings}
         />
         
         <div className="mt-8 flex-grow flex flex-col">
