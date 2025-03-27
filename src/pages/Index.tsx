@@ -22,9 +22,10 @@ const Index: React.FC = () => {
     <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 ml-[190px] p-8 flex flex-col">
-        <SearchBar />
-        
-        <DashboardHeader />
+        <div className="flex justify-between items-center">
+          <SearchBar />
+          <DashboardHeader />
+        </div>
         
         <MetricsSection 
           loading={loading}
@@ -36,7 +37,7 @@ const Index: React.FC = () => {
           fetchSettings={fetchSettings}
         />
         
-        <div className="mt-8 flex-grow flex flex-col">
+        <div className="mt-6 flex-grow flex flex-col">
           <DataTable />
         </div>
       </div>

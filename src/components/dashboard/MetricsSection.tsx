@@ -11,13 +11,13 @@ interface MetricsSectionProps {
   stats: Stats | null;
   statsHistory: StatsHistory[];
   customerCount: number;
-  documentCount: number; // Added new prop for document count
+  documentCount: number;
   settings: { 
     target_all: number | null, 
     target_invoice: number | null, 
     target_top: number | null 
   } | null;
-  fetchSettings?: () => Promise<void>; // Optional function to refresh settings
+  fetchSettings?: () => Promise<void>;
 }
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({
@@ -25,7 +25,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   stats,
   statsHistory,
   customerCount,
-  documentCount, // Added new prop
+  documentCount,
   settings,
   fetchSettings
 }) => {
@@ -53,41 +53,38 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   });
 
   return (
-    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Modified to add half-height classes */}
-      <div className="flex flex-col gap-6">
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Info cards column - more compact design */}
+      <div className="flex flex-col gap-4">
         <MetricCard 
           title="Aantal Klanten" 
           value={loading ? "..." : customerCount.toString()}
           hideStats={true}
           showIcon={true}
-          iconComponent={<Users size={20} />}
-          className="h-[calc(50%-0.75rem)]" // Half height minus half the gap
-        >
-          <div className="h-[30px]"></div> {/* Reduced empty div height */}
-        </MetricCard>
+          iconComponent={<Users size={16} />}
+          className="h-[100px]" // Fixed smaller height
+        />
         
         <MetricCard 
           title="Totaal verwerkte documenten" 
           value={loading ? "..." : documentCount.toString()}
           hideStats={true}
           showIcon={true}
-          iconComponent={<FileText size={20} />}
-          className="h-[calc(50%-0.75rem)]" // Half height minus half the gap
-        >
-          <div className="h-[30px]"></div> {/* Reduced empty div height */}
-        </MetricCard>
+          iconComponent={<FileText size={16} />}
+          className="h-[100px]" // Fixed smaller height
+        />
       </div>
       
+      {/* The three metric cards with charts - heights matching the combined two cards */}
       <MetricCard 
         title="Target Totaal Documenten" 
         value={loading ? "..." : (stats?.total || 0).toString()} 
         change={documentsPercentChange} 
         isNegative={documentsPercentChange < 0}
-        // Here we reverse the logic - negative is good, positive is bad
         isPositive={documentsPercentChange < 0}
         target={settings?.target_all || null}
         showTargetBadge={true}
+        className="h-[208px]" // Matched to combined height of the two cards plus gap
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -101,10 +98,10 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         value={loading ? "..." : (stats?.total_15 || 0).toString()} 
         change={topPercentChange} 
         isNegative={topPercentChange < 0}
-        // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
         target={settings?.target_top || null}
         showTargetBadge={true}
+        className="h-[208px]" // Matched to combined height of the two cards plus gap
       >
         <StatisticChart 
           data={topChartData} 
@@ -118,10 +115,10 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
         change={facturesPercentChange} 
         isNegative={facturesPercentChange < 0}
-        // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
         target={settings?.target_invoice || null}
         showTargetBadge={true}
+        className="h-[208px]" // Matched to combined height of the two cards plus gap
       >
         <StatisticChart 
           data={facturesChartData} 

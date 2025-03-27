@@ -46,20 +46,18 @@ const MetricCard: React.FC<MetricCardProps> = ({
   // When target is null, always show as on target (green)
   const isOnTarget = target === null ? true : !isNaN(numericValue) && numericValue <= target;
   
-  console.log(`MetricCard ${title}: value=${value}, target=${target}, showTargetBadge=${showTargetBadge}, isOnTarget=${isOnTarget}`);
-  
   return (
     <div 
       className={cn(
-        "bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow duration-300 animate-scale-in", 
+        "bg-white rounded-lg border border-gray-100 p-3 shadow-sm hover:shadow-md transition-shadow duration-300 animate-scale-in flex flex-col", 
         className
       )}
     >
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-sm text-gray-500 font-medium">{title}</h3>
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="text-xs text-gray-500 font-medium">{title}</h3>
         {!hideStats && change !== undefined && (
           <span className={cn(
-            "text-xs font-medium px-2 py-0.5 rounded-full", 
+            "text-xs font-medium px-1.5 py-0.5 rounded-full", 
             isZeroPercent || isPositive ? "bg-green-50 text-buzzaroo-green" : "bg-red-50 text-buzzaroo-red"
           )}>
             {changeText}
@@ -67,29 +65,29 @@ const MetricCard: React.FC<MetricCardProps> = ({
         )}
         {showIcon && (
           <div className="text-gray-400">
-            {iconComponent || <User size={20} />}
+            {iconComponent || <User size={16} />}
           </div>
         )}
       </div>
       <div className="flex flex-col items-start">
-        <span className="text-3xl font-bold text-gray-900 mb-2">{value}</span>
+        <span className="text-2xl font-bold text-gray-900 mb-1">{value}</span>
         {showTargetBadge && (
           <Badge 
             variant={isOnTarget ? "default" : "destructive"}
             className={cn(
-              "flex items-center gap-1",
+              "flex items-center gap-1 text-xs py-0.5",
               isOnTarget ? "bg-green-100 hover:bg-green-200 text-green-800" : "bg-red-100 hover:bg-red-200 text-red-800"
             )}
           >
             {isOnTarget ? (
-              <><Check size={12} /> On Track</>
+              <><Check size={10} /> On Track</>
             ) : (
-              <><X size={12} /> Off Track</>
+              <><X size={10} /> Off Track</>
             )}
           </Badge>
         )}
       </div>
-      {children}
+      {children && <div className="mt-1 flex-grow">{children}</div>}
     </div>
   );
 };
