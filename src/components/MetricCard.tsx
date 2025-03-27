@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { User, Check, X } from 'lucide-react';
+import { User } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { Badge } from '@/components/ui/badge';
 
 interface MetricCardProps {
   title: string;
@@ -15,8 +14,6 @@ interface MetricCardProps {
   showIcon?: boolean;
   hideStats?: boolean;
   iconComponent?: React.ReactNode;
-  target?: number | null;
-  showTarget?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ 
@@ -29,19 +26,13 @@ const MetricCard: React.FC<MetricCardProps> = ({
   children,
   showIcon = false,
   hideStats = false,
-  iconComponent,
-  target = null,
-  showTarget = false
+  iconComponent
 }) => {
   // Always show the percentage, even if it's 0%
   const changeText = change !== undefined ? `${change > 0 ? '+' : ''}${change}%` : '';
   
   // Apply green color when percentage is exactly 0%, otherwise use the original logic
   const isZeroPercent = change === 0;
-
-  // Compare value with target for showing badge
-  const valueAsNumber = typeof value === 'string' ? parseInt(value, 10) : value;
-  const isOnTrack = target === null || isNaN(valueAsNumber) ? null : valueAsNumber <= target;
   
   return (
     <div 
@@ -66,22 +57,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
           </div>
         )}
       </div>
-      <div className="flex flex-col">
-        <span className="text-3xl font-bold text-gray-900 mb-2">{value}</span>
-        {showTarget && isOnTrack !== null && (
-          <Badge 
-            className={cn(
-              "text-white w-fit flex items-center gap-1",
-              isOnTrack ? "bg-green-500" : "bg-red-500"
-            )}
-          >
-            {isOnTrack ? (
-              <><Check size={14} /> On track</>
-            ) : (
-              <><X size={14} /> Off Track</>
-            )}
-          </Badge>
-        )}
+      <div className="flex items-end justify-between">
+        <span className="text-3xl font-bold text-gray-900">{value}</span>
       </div>
       {children}
     </div>
