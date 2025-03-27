@@ -42,22 +42,25 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
 
 export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null } | null> {
   try {
+    // Fetch the single row in the settings table by selecting the first row
     const { data, error } = await supabase
       .from('settings')
       .select('target_all, target_invoice, target_top')
       .limit(1)
-      .maybeSingle()
+      .single() // Use single() instead of maybeSingle() as we expect exactly one row
     
     if (error) {
       console.error('Error fetching settings:', error)
-      // Don't use hardcoded values that might conflict with actual DB values
       return null
     }
     
     console.log('Settings data from database:', data)
     
-    // Return the data if found, or null if no settings exist
-    return data || null
+    return {
+      target_all: data.target_all,
+      target_invoice: data.target_invoice,
+      target_top: data.target_top
+    }
   } catch (error) {
     console.error('Error in getSettings:', error)
     return null

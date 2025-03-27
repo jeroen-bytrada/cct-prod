@@ -26,19 +26,17 @@ export function useDashboardData() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [statsData, countData, historyData, settingsData] = await Promise.all([
+      const [statsData, countData, historyData] = await Promise.all([
         getStats(),
         getCustomerCount(),
         getStatsHistory(),
-        getSettings()
       ]);
       
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
-      setSettings(settingsData);
       
-      console.log('Dashboard data loaded:', { statsData, settingsData });
+      console.log('Dashboard data loaded:', { statsData });
       
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -49,6 +47,9 @@ export function useDashboardData() {
       });
     } finally {
       setLoading(false);
+      
+      // Fetch settings immediately after loading initial data
+      fetchSettings();
     }
   }, [toast]);
 
@@ -56,8 +57,12 @@ export function useDashboardData() {
   const fetchSettings = useCallback(async () => {
     try {
       const settingsData = await getSettings();
-      setSettings(settingsData);
-      console.log('Settings refreshed:', settingsData);
+      if (settingsData) {
+        setSettings(settingsData);
+        console.log('Settings loaded successfully:', settingsData);
+      } else {
+        console.warn('No settings found in the database');
+      }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
     }
@@ -118,10 +123,10 @@ export function useDashboardData() {
       )
       .subscribe();
     
-    // Refresh settings specifically every minute to ensure they're up to date
+    // Refresh settings every 5 seconds to ensure they're up to date
     const settingsRefreshInterval = setInterval(() => {
       fetchSettings();
-    }, 60000); // 60000 ms = 1 minute
+    }, 5000); // 5000 ms = 5 seconds
     
     // Cleanup subscription on component unmount
     return () => {
