@@ -46,57 +46,64 @@ const Sidebar: React.FC = () => {
         </CollapsibleTrigger>
       </div>
 
-      <CollapsibleContent className="flex-1 flex flex-col" forceMount>
-        <div className={cn("p-6", isCollapsed ? "items-center" : "")}>
-          <Logo className={cn("mb-8 mt-2", isCollapsed ? "scale-75" : "")} />
-          <nav className="space-y-1">
-            <NavLink
-              to="/"
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
-                isActive 
-                  ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
-                  : "text-gray-700 hover:bg-gray-100",
-                isCollapsed ? "justify-center" : ""
-              )}
-            >
-              <Home size={20} className="transition-transform duration-200 group-hover:scale-110" />
-              {!isCollapsed && <span>Dashboard</span>}
-            </NavLink>
-            <NavLink
-              to="/clients"
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
-                isActive 
-                  ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
-                  : "text-gray-700 hover:bg-gray-100",
-                isCollapsed ? "justify-center" : ""
-              )}
-            >
-              <Users size={20} className="transition-transform duration-200 group-hover:scale-110" />
-              {!isCollapsed && <span>Klanten</span>}
-            </NavLink>
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
-                isActive 
-                  ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
-                  : "text-gray-700 hover:bg-gray-100",
-                isCollapsed ? "justify-center" : ""
-              )}
-            >
-              <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
-              {!isCollapsed && (
-                <>
-                  <span>Instellingen</span>
-                  {!isAdmin && <span className="ml-1 text-xs bg-gray-200 text-gray-700 px-1 rounded">Admin</span>}
-                </>
-              )}
-            </NavLink>
-          </nav>
+      <div className={cn(
+        "p-6 flex flex-col",
+        isCollapsed ? "items-center" : ""
+      )}>
+        <div className={cn(
+          "mb-8 mt-2 flex justify-center",
+          isCollapsed ? "w-full" : ""
+        )}>
+          <Logo collapsed={isCollapsed} />
         </div>
-      </CollapsibleContent>
+        
+        <nav className="space-y-1 w-full">
+          <NavLink
+            to="/"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100",
+              isCollapsed ? "justify-center px-2" : ""
+            )}
+          >
+            <Home size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            {!isCollapsed && <span>Dashboard</span>}
+          </NavLink>
+          <NavLink
+            to="/clients"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100",
+              isCollapsed ? "justify-center px-2" : ""
+            )}
+          >
+            <Users size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            {!isCollapsed && <span>Klanten</span>}
+          </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100",
+              isCollapsed ? "justify-center px-2" : ""
+            )}
+          >
+            <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            {!isCollapsed && (
+              <>
+                <span>Instellingen</span>
+                {!isAdmin && <span className="ml-1 text-xs bg-gray-200 text-gray-700 px-1 rounded">Admin</span>}
+              </>
+            )}
+          </NavLink>
+        </nav>
+      </div>
       
       {/* Profile and Settings at the bottom */}
       <div className={cn(
@@ -140,11 +147,11 @@ const Sidebar: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-4">
             {user ? (
               <>
                 <Avatar 
-                  className="h-7 w-7 cursor-pointer transition duration-300" 
+                  className="h-8 w-8 cursor-pointer transition duration-300 hover:ring-2 hover:ring-gray-200" 
                   onClick={() => navigate('/profile')}
                 >
                   <AvatarImage src={user.user_metadata.avatar_url} />
@@ -154,20 +161,20 @@ const Sidebar: React.FC = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-7 w-7" 
+                  className="h-8 w-8 hover:bg-gray-100" 
                   onClick={handleSignOut}
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
                 </Button>
               </>
             ) : (
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-7 w-7" 
+                className="h-8 w-8" 
                 onClick={() => navigate('/auth')}
               >
-                <LogOut size={16} />
+                <LogOut size={18} />
               </Button>
             )}
           </div>

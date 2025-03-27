@@ -20,7 +20,7 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <div className="p-4 flex flex-col">
+      <div className="flex flex-col">
         <DashboardHeader />
         
         <MetricsSection 

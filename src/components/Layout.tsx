@@ -16,7 +16,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        setSidebarWidth(entry.contentRect.width);
+        // Set a small delay to ensure smooth transition
+        setTimeout(() => {
+          setSidebarWidth(entry.contentRect.width);
+        }, 50);
       }
     });
 
@@ -28,7 +31,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex">
       <Sidebar />
       <main 
-        className="flex-1 p-4 transition-all duration-300"
+        className="flex-1 p-4 transition-all duration-300 ease-in-out"
         style={{ marginLeft: `${sidebarWidth}px` }}
       >
         {children}
