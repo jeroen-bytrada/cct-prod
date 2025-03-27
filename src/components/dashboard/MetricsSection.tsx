@@ -54,15 +54,15 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   return (
     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* Info cards column - more compact design */}
-      <div className="flex flex-col gap-4">
+      {/* Info cards column - more compact design with reduced gap */}
+      <div className="flex flex-col gap-2"> {/* Reduced gap from 4 to 2 */}
         <MetricCard 
           title="Aantal Klanten" 
           value={loading ? "..." : customerCount.toString()}
           hideStats={true}
           showIcon={true}
           iconComponent={<Users size={16} />}
-          className="h-[90px]" // Reduced height
+          className="h-[91px]" // Fine-tuned height
         />
         
         <MetricCard 
@@ -71,7 +71,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
           hideStats={true}
           showIcon={true}
           iconComponent={<FileText size={16} />}
-          className="h-[90px]" // Reduced height
+          className="h-[91px]" // Fine-tuned height
         />
       </div>
       
@@ -84,7 +84,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isPositive={documentsPercentChange < 0}
         target={settings?.target_all || null}
         showTargetBadge={true}
-        className="h-[188px]" // Adjusted to match combined height of the two cards plus gap
+        className="h-[188px]" // Kept as is
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -101,7 +101,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isPositive={topPercentChange < 0}
         target={settings?.target_top || null}
         showTargetBadge={true}
-        className="h-[188px]" // Adjusted to match combined height of the two cards plus gap
+        className="h-[188px]" // Kept as is
       >
         <StatisticChart 
           data={topChartData} 
@@ -118,7 +118,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isPositive={facturesPercentChange < 0}
         target={settings?.target_invoice || null}
         showTargetBadge={true}
-        className="h-[188px]" // Adjusted to match combined height of the two cards plus gap
+        className="h-[188px]" // Kept as is
       >
         <StatisticChart 
           data={facturesChartData} 
