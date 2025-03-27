@@ -16,8 +16,8 @@ export function useTableData() {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ 
-    key: 'id', 
-    direction: 'asc' 
+    key: 'cs_documents_total', 
+    direction: 'desc' 
   });
   const { toast } = useToast();
 
