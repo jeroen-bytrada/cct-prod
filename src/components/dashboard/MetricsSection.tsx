@@ -33,6 +33,12 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   // Prepare chart data
   const { documentsChartData, topChartData, facturesChartData } = prepareChartData(statsHistory);
 
+  console.log('Metrics Settings:', {
+    target_all: settings?.target_all,
+    target_top: settings?.target_top,
+    target_invoice: settings?.target_invoice
+  });
+
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <MetricCard 
@@ -69,7 +75,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={topPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={topPercentChange < 0}
-        target={settings?.target_top || null}
+        target={settings?.target_top || null}  // Using target_top for this metric
         showTargetBadge={true}
       >
         <StatisticChart 
@@ -86,7 +92,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         isNegative={facturesPercentChange < 0}
         // Here we reverse the logic - negative is good, positive is bad
         isPositive={facturesPercentChange < 0}
-        target={settings?.target_invoice || null}
+        target={settings?.target_invoice || null}  // Using target_invoice for this metric
         showTargetBadge={true}
       >
         <StatisticChart 

@@ -54,6 +54,8 @@ export async function getSettings(): Promise<{ target_all: number | null, target
       return { target_all: 100, target_invoice: 100, target_top: 100 }
     }
     
+    console.log('Settings data from database:', data)
+    
     // Return the data if found, or default values if no settings exist
     return data || { target_all: 100, target_invoice: 100, target_top: 100 }
   } catch (error) {
