@@ -62,7 +62,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
           hideStats={true}
           showIcon={true}
           iconComponent={<Users size={16} />}
-          className="h-[100px]" // Fixed smaller height
+          className="h-[90px]" // Reduced height
         />
         
         <MetricCard 
@@ -71,20 +71,20 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
           hideStats={true}
           showIcon={true}
           iconComponent={<FileText size={16} />}
-          className="h-[100px]" // Fixed smaller height
+          className="h-[90px]" // Reduced height
         />
       </div>
       
       {/* The three metric cards with charts - heights matching the combined two cards */}
       <MetricCard 
-        title="Target Totaal Documenten" 
+        title="Totaal Documenten" 
         value={loading ? "..." : (stats?.total || 0).toString()} 
         change={documentsPercentChange} 
         isNegative={documentsPercentChange < 0}
         isPositive={documentsPercentChange < 0}
         target={settings?.target_all || null}
         showTargetBadge={true}
-        className="h-[208px]" // Matched to combined height of the two cards plus gap
+        className="h-[188px]" // Adjusted to match combined height of the two cards plus gap
       >
         <StatisticChart 
           data={documentsChartData} 
@@ -94,14 +94,14 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
       </MetricCard>
       
       <MetricCard 
-        title="Target Totaal Top 1" 
+        title="Totaal Top 1" 
         value={loading ? "..." : (stats?.total_15 || 0).toString()} 
         change={topPercentChange} 
         isNegative={topPercentChange < 0}
         isPositive={topPercentChange < 0}
         target={settings?.target_top || null}
         showTargetBadge={true}
-        className="h-[208px]" // Matched to combined height of the two cards plus gap
+        className="h-[188px]" // Adjusted to match combined height of the two cards plus gap
       >
         <StatisticChart 
           data={topChartData} 
@@ -111,14 +111,14 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
       </MetricCard>
       
       <MetricCard 
-        title="Target Totaal Snelstart Facturen" 
+        title="Totaal Snelstart Facturen" 
         value={loading ? "..." : (stats?.total_in_proces || 0).toString()} 
         change={facturesPercentChange} 
         isNegative={facturesPercentChange < 0}
         isPositive={facturesPercentChange < 0}
         target={settings?.target_invoice || null}
         showTargetBadge={true}
-        className="h-[208px]" // Matched to combined height of the two cards plus gap
+        className="h-[188px]" // Adjusted to match combined height of the two cards plus gap
       >
         <StatisticChart 
           data={facturesChartData} 
