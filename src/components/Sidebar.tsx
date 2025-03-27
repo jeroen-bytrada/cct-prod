@@ -56,27 +56,24 @@ const Sidebar: React.FC = () => {
             <Users size={20} className="transition-transform duration-200 group-hover:scale-110" />
             <span>Klanten</span>
           </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100"
+            )}
+          >
+            <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            <span>Instellingen</span>
+          </NavLink>
         </nav>
       </div>
       
       {/* Profile and Settings at the bottom */}
       <div className="mt-auto p-4 border-t border-gray-200">
         <div className="flex flex-col gap-3">
-          {isAdmin && (
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
-                isActive 
-                  ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
-                  : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
-              <span>Instellingen</span>
-            </NavLink>
-          )}
-          
           {user ? (
             <>
               {/* Make the user profile section clickable to navigate to profile page */}
