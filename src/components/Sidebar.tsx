@@ -1,27 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Users, Settings, LogOut, BarChart2, Phone, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Users, Settings, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Logo from './Logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { 
-  Sidebar as ShadcnSidebar,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter
-} from '@/components/ui/sidebar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const Sidebar: React.FC = () => {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,68 +29,91 @@ const Sidebar: React.FC = () => {
       .substring(0, 2);
   };
 
-  const menuItems = [
-    { to: "/", icon: <Home />, text: "Dashboard" },
-    { to: "/clients", icon: <Users />, text: "Klanten" },
-    { to: "/deals", icon: <BarChart2 />, text: "Deals" },
-    { to: "/contacts", icon: <Phone />, text: "Contacts" },
-    { to: "/settings", icon: <Settings />, text: "Instellingen", adminBadge: !isAdmin }
-  ];
-
   return (
-    <SidebarProvider open={open} onOpenChange={setOpen}>
-      <ShadcnSidebar className="border-r border-gray-200 bg-white">
-        <div className="flex h-[60px] items-center justify-between px-4">
-          <Logo collapsed={!open} />
-          <SidebarTrigger className="ml-auto">
-            {open ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-          </SidebarTrigger>
+    <Collapsible
+      open={!isCollapsed}
+      onOpenChange={(open) => setIsCollapsed(!open)}
+      className={cn(
+        "h-screen bg-white border-r border-gray-200 fixed left-0 top-0 overflow-y-auto animate-slide-down flex flex-col transition-all duration-300",
+        isCollapsed ? "w-[60px]" : "w-[190px]"
+      )}
+    >
+      <div className="flex justify-end p-2">
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-7 w-7">
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+
+      <div className={cn(
+        "p-6 flex flex-col",
+        isCollapsed ? "items-center" : ""
+      )}>
+        <div className={cn(
+          "mb-8 mt-2 flex justify-center",
+          isCollapsed ? "w-full" : ""
+        )}>
+          <Logo collapsed={isCollapsed} />
         </div>
         
-        <SidebarContent className="px-3 py-2">
-          <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) => cn(
-                    "w-full",
-                    open ? "" : "flex justify-center"
-                  )}
-                >
-                  {({ isActive }) => (
-                    <SidebarMenuButton 
-                      className={cn(
-                        "w-full", 
-                        isActive 
-                          ? "bg-buzzaroo-lightgreen text-buzzaroo-green" 
-                          : "text-gray-700 hover:bg-gray-100"
-                      )}
-                      tooltip={open ? undefined : item.text}
-                    >
-                      <span className="transition-transform duration-200 group-hover:scale-110">
-                        {item.icon}
-                      </span>
-                      {open && (
-                        <>
-                          <span>{item.text}</span>
-                          {item.adminBadge && (
-                            <span className="ml-1 text-xs bg-gray-200 text-gray-700 px-1 rounded">Admin</span>
-                          )}
-                        </>
-                      )}
-                    </SidebarMenuButton>
-                  )}
-                </NavLink>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        
-        {user && (
-          <SidebarFooter className="border-t border-gray-200 p-4">
-            {open ? (
-              <div className="flex flex-col gap-3">
+        <nav className="space-y-1 w-full">
+          <NavLink
+            to="/"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100",
+              isCollapsed ? "justify-center px-2" : ""
+            )}
+          >
+            <Home size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            {!isCollapsed && <span>Dashboard</span>}
+          </NavLink>
+          <NavLink
+            to="/clients"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100",
+              isCollapsed ? "justify-center px-2" : ""
+            )}
+          >
+            <Users size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            {!isCollapsed && <span>Klanten</span>}
+          </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 rounded-md py-2 px-3 transition-all duration-200 group",
+              isActive 
+                ? "bg-buzzaroo-lightgreen text-buzzaroo-green font-medium" 
+                : "text-gray-700 hover:bg-gray-100",
+              isCollapsed ? "justify-center px-2" : ""
+            )}
+          >
+            <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
+            {!isCollapsed && (
+              <>
+                <span>Instellingen</span>
+                {!isAdmin && <span className="ml-1 text-xs bg-gray-200 text-gray-700 px-1 rounded">Admin</span>}
+              </>
+            )}
+          </NavLink>
+        </nav>
+      </div>
+      
+      {/* Profile and Settings at the bottom */}
+      <div className={cn(
+        "mt-auto p-4 border-t border-gray-200",
+        isCollapsed ? "flex justify-center" : ""
+      )}>
+        {!isCollapsed ? (
+          <div className="flex flex-col gap-3">
+            {user ? (
+              <>
                 <button
                   onClick={() => navigate('/profile')}
                   className="flex items-center gap-3 rounded-md py-2 px-3 text-gray-700 hover:bg-gray-100 transition-all duration-200 w-full text-left"
@@ -120,35 +134,53 @@ const Sidebar: React.FC = () => {
                   <LogOut size={16} />
                   <span>Uitloggen</span>
                 </Button>
-              </div>
+              </>
             ) : (
-              <div className="flex flex-col items-center gap-3">
-                <button
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full" 
+                onClick={() => navigate('/auth')}
+              >
+                Inloggen
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4">
+            {user ? (
+              <>
+                <Avatar 
+                  className="h-8 w-8 cursor-pointer transition duration-300 hover:ring-2 hover:ring-gray-200" 
                   onClick={() => navigate('/profile')}
-                  className="flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-all duration-200"
-                  title={user.user_metadata.full_name || user.email}
                 >
-                  <Avatar className="h-7 w-7 transition duration-300">
-                    <AvatarImage src={user.user_metadata.avatar_url} />
-                    <AvatarFallback>{getInitials(user.user_metadata.full_name || user.email)}</AvatarFallback>
-                  </Avatar>
-                </button>
+                  <AvatarImage src={user.user_metadata.avatar_url} />
+                  <AvatarFallback>{getInitials(user.user_metadata.full_name || user.email)}</AvatarFallback>
+                </Avatar>
                 
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   size="icon" 
-                  className="mt-2" 
+                  className="h-8 w-8 hover:bg-gray-100" 
                   onClick={handleSignOut}
-                  title="Uitloggen"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
                 </Button>
-              </div>
+              </>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={() => navigate('/auth')}
+              >
+                <LogOut size={18} />
+              </Button>
             )}
-          </SidebarFooter>
+          </div>
         )}
-      </ShadcnSidebar>
-    </SidebarProvider>
+      </div>
+    </Collapsible>
   );
 };
 
