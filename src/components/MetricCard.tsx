@@ -57,7 +57,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
           )}
           {status && (
             <Badge 
-              variant="outline" 
               className={cn(
                 "flex items-center gap-1",
                 status === 'on-track' 
