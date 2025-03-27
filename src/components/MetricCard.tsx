@@ -43,6 +43,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
   const isOnTarget = target === null || isNaN(numericValue) ? true : numericValue <= target;
   
+  console.log(`MetricCard ${title}: value=${value}, target=${target}, showTargetBadge=${showTargetBadge}, isOnTarget=${isOnTarget}`);
+  
   return (
     <div 
       className={cn(

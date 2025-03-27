@@ -38,6 +38,8 @@ export function useDashboardData() {
       setStatsHistory(historyData);
       setSettings(settingsData);
       
+      console.log('Dashboard data loaded:', { statsData, settingsData });
+      
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
