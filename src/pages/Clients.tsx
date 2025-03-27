@@ -381,42 +381,42 @@ const Clients: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('id')}
                     >
                       Klantnr {getSortIcon('id')}
                     </TableHead>
                     <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('customer_name')}
                     >
                       Klantnaam {getSortIcon('customer_name')}
                     </TableHead>
                     <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('source_root')}
                     >
                       Hoofdmap {getSortIcon('source_root')}
                     </TableHead>
                     <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('administration_mail')}
                     >
                       Email {getSortIcon('administration_mail')}
                     </TableHead>
                     <TableHead 
-                      className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => handleSort('is_active')}
                     >
                       Actief {getSortIcon('is_active')}
                     </TableHead>
-                    <TableHead className="py-3 px-4"></TableHead>
+                    <TableHead className="py-2 px-4"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-gray-100">
                   {filteredCustomers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-4 px-4 text-center text-gray-500">
+                      <TableCell colSpan={6} className="py-2 px-4 text-center text-gray-500">
                         {customers.length === 0 ? "No customer data available" : "No matching customers found"}
                       </TableCell>
                     </TableRow>
@@ -426,40 +426,40 @@ const Clients: React.FC = () => {
                         key={customer.id} 
                         className="hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {customer.id}
                         </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
                           {customer.customer_name}
                         </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
                           {customer.source_root || '-'}
                         </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
                           {customer.administration_mail || '-'}
                         </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
                           {customer.is_active ? 
-                            <Check size={18} className="text-green-500" /> :
-                            <X size={18} className="text-red-500" />
+                            <Check size={16} className="text-green-500" /> :
+                            <X size={16} className="text-red-500" />
                           }
                         </TableCell>
-                        <TableCell className="py-4 px-4 whitespace-nowrap text-sm text-right flex justify-end gap-2">
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-right flex justify-end gap-2">
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                            className="h-7 w-7 text-blue-600 hover:text-blue-800 transition-colors"
                             onClick={() => handleEditCustomer(customer)}
                           >
-                            <Edit size={18} />
+                            <Edit size={16} />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="text-red-600 hover:text-red-800 transition-colors"
+                            className="h-7 w-7 text-red-600 hover:text-red-800 transition-colors"
                             onClick={() => handleDeleteClick(customer)}
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                           </Button>
                         </TableCell>
                       </TableRow>

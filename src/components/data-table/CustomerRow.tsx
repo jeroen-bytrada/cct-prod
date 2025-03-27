@@ -24,30 +24,30 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
       key={customer.id} 
       className="hover:bg-gray-50 transition-colors duration-150"
     >
-      <td className="py-4 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm font-medium text-gray-900">
         {customer.id}
       </td>
-      <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
         {customer.customer_name}
       </td>
-      <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
         {customer.cs_documents_total}
       </td>
-      <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
         {customer.cs_documents_in_process}
       </td>
-      <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
         {customer.cs_documents_other}
       </td>
-      <td className="py-4 px-4 whitespace-nowrap text-sm text-gray-500">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
         {formatDate(customer.cs_last_update)}
       </td>
-      <td className="py-4 px-4 whitespace-nowrap text-sm text-right">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-right">
         <button 
           className="text-green-600 hover:text-green-800 transition-colors"
           onClick={() => onViewDocuments(customer.id)}
         >
-          <FileText size={18} />
+          <FileText size={16} />
         </button>
       </td>
     </tr>
