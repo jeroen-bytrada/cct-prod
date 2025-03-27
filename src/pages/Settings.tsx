@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -49,7 +50,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [settingsId, setSettingsId] = useState<number | null>(null);
+  const [settingsId, setSettingsId] = useState<number | null>(1); // Default to 1 as we know this is the ID
 
   // Form setup
   const form = useForm<SettingsFormValues>({
@@ -117,11 +118,13 @@ const Settings = () => {
     
     try {
       setSettingsLoading(true);
+      
+      // Use the direct approach to get the settings with ID 1
       const { data, error } = await supabase
         .from('settings')
         .select('*')
-        .limit(1)
-        .single();
+        .eq('id', 1)
+        .maybeSingle();
         
       if (error) {
         console.error('Error fetching settings:', error);
@@ -129,12 +132,16 @@ const Settings = () => {
       }
       
       if (data) {
+        console.log('Successfully loaded settings with ID:', data.id);
         setSettingsId(data.id);
         form.reset({
           target_all: data.target_all,
           target_invoice: data.target_invoice,
           target_top: data.target_top,
         });
+      } else {
+        console.error('No settings record found with ID 1');
+        toast.error('Settings record not found');
       }
     } catch (error) {
       console.error('Error in fetchSettings:', error);

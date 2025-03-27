@@ -58,7 +58,9 @@ export function useDashboardData() {
     try {
       const settingsData = await getSettings();
       if (settingsData) {
-        setSettings(settingsData);
+        // We don't need the ID in the settings state
+        const { id, ...settingsWithoutId } = settingsData;
+        setSettings(settingsWithoutId);
         console.log('Settings loaded successfully:', settingsData);
       } else {
         console.warn('No settings found in the database');

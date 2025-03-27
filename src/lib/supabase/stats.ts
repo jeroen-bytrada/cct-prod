@@ -40,23 +40,29 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
   return (data || []).reverse()
 }
 
-export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null } | null> {
+export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, id: number } | null> {
   try {
-    // Fetch the single row in the settings table by selecting the first row
+    // Fetch the settings record with ID 1, which is the only settings record as confirmed by the user
     const { data, error } = await supabase
       .from('settings')
-      .select('target_all, target_invoice, target_top')
-      .limit(1)
-      .single() // Use single() instead of maybeSingle() as we expect exactly one row
+      .select('id, target_all, target_invoice, target_top')
+      .eq('id', 1)
+      .maybeSingle()
     
     if (error) {
       console.error('Error fetching settings:', error)
       return null
     }
     
+    if (!data) {
+      console.warn('No settings found with ID 1')
+      return null
+    }
+    
     console.log('Settings data from database:', data)
     
     return {
+      id: data.id,
       target_all: data.target_all,
       target_invoice: data.target_invoice,
       target_top: data.target_top
