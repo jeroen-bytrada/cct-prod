@@ -50,7 +50,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [settingsId, setSettingsId] = useState<number | null>(1); // Default to 1 as we know this is the ID
+  const [settingsId, setSettingsId] = useState<number>(1); // Always use ID 1
 
   // Form setup
   const form = useForm<SettingsFormValues>({
@@ -119,7 +119,7 @@ const Settings = () => {
     try {
       setSettingsLoading(true);
       
-      // Use the direct approach to get the settings with ID 1
+      // Explicitly fetch the settings with ID 1
       const { data, error } = await supabase
         .from('settings')
         .select('*')
@@ -128,20 +128,22 @@ const Settings = () => {
         
       if (error) {
         console.error('Error fetching settings:', error);
+        toast.error('Failed to load application settings');
         return;
       }
       
       if (data) {
-        console.log('Successfully loaded settings with ID:', data.id);
-        setSettingsId(data.id);
+        console.log('Successfully loaded settings:', data);
+        
+        // Set the form values with the retrieved data
         form.reset({
           target_all: data.target_all,
           target_invoice: data.target_invoice,
           target_top: data.target_top,
         });
       } else {
-        console.error('No settings record found with ID 1');
-        toast.error('Settings record not found');
+        console.warn('No settings record found with ID 1');
+        toast.warning('Settings record not found - default values will be used');
       }
     } catch (error) {
       console.error('Error in fetchSettings:', error);
@@ -198,13 +200,7 @@ const Settings = () => {
     if (!isAdmin) return;
     
     try {
-      if (!settingsId) {
-        console.error('No settings ID found. Cannot update settings.');
-        toast.error('Failed to update settings: No settings record found');
-        return;
-      }
-      
-      // Only update the existing settings record
+      // Always update the settings with ID 1
       const { error } = await supabase
         .from('settings')
         .update({
@@ -212,7 +208,7 @@ const Settings = () => {
           target_invoice: values.target_invoice,
           target_top: values.target_top,
         })
-        .eq('id', settingsId);
+        .eq('id', 1);
         
       if (error) {
         console.error('Error updating settings:', error);
@@ -221,6 +217,9 @@ const Settings = () => {
       }
       
       toast.success('Settings updated successfully');
+      
+      // Reload settings to ensure the UI shows the current values
+      fetchSettings();
     } catch (error) {
       console.error('Error in onSubmitSettings:', error);
       toast.error('Failed to update settings');

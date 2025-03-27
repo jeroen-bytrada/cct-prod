@@ -64,9 +64,21 @@ export function useDashboardData() {
         console.log('Settings loaded successfully:', settingsWithoutId);
       } else {
         console.warn('No settings found in the database');
+        // If no settings are found, provide default values to prevent UI issues
+        setSettings({
+          target_all: null,
+          target_invoice: null,
+          target_top: null
+        });
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
+      // Set default values for settings on error
+      setSettings({
+        target_all: null,
+        target_invoice: null,
+        target_top: null
+      });
     }
   }, []);
 

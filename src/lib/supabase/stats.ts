@@ -42,7 +42,7 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
 
 export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, id: number } | null> {
   try {
-    // Fetch the settings record with ID 1, which is the only settings record as confirmed by the user
+    // Always fetch the settings record with ID 1
     const { data, error } = await supabase
       .from('settings')
       .select('id, target_all, target_invoice, target_top')
