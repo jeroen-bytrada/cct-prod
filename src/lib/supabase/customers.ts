@@ -124,3 +124,38 @@ export async function getCustomerDocuments(
     total
   };
 }
+
+// Add a new function to update a customer without affecting document fields
+export async function updateCustomer(
+  customerId: string,
+  customerData: {
+    customer_name: string,
+    administration_name?: string | null,
+    administration_mail?: string | null,
+    source?: string | null,
+    source_root?: string | null,
+    is_active?: boolean | null,
+    id?: string
+  }
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('cct_customers')
+      .update({
+        customer_name: customerData.customer_name,
+        administration_name: customerData.administration_name,
+        administration_mail: customerData.administration_mail,
+        source: customerData.source,
+        source_root: customerData.source_root,
+        is_active: customerData.is_active,
+        ...(customerData.id && customerData.id !== customerId ? { id: customerData.id } : {})
+      })
+      .eq('id', customerId);
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error updating customer:', error);
+    return false;
+  }
+}

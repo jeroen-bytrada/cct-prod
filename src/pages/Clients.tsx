@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -25,6 +26,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { updateCustomer } from '@/lib/supabase';
 import { 
   Dialog, 
   DialogContent, 
@@ -272,9 +274,10 @@ const Clients: React.FC = () => {
         });
       } else {
         if (originalId !== editingCustomer.id) {
+          // If ID changed, we need to delete old record and create new one
           const { data: originalCustomer, error: fetchError } = await supabase
             .from('customers')
-            .select('created_at')
+            .select('created_at, cs_documents_in_process, cs_documents_other, cs_last_update')
             .eq('id', originalId)
             .single();
           
@@ -292,27 +295,26 @@ const Clients: React.FC = () => {
             .insert([{
               ...editingCustomer,
               created_at: originalCustomer?.created_at,
-              cs_documents_in_process: null,
-              cs_documents_other: null,
-              cs_last_update: null
+              cs_documents_in_process: originalCustomer?.cs_documents_in_process,
+              cs_documents_other: originalCustomer?.cs_documents_other,
+              cs_last_update: originalCustomer?.cs_last_update
             }]);
           
           if (insertError) throw insertError;
         } else {
-          const { error } = await supabase
-            .from('customers')
-            .update({
-              id: editingCustomer.id,
-              customer_name: editingCustomer.customer_name,
-              administration_name: editingCustomer.administration_name,
-              administration_mail: editingCustomer.administration_mail,
-              source: editingCustomer.source,
-              source_root: editingCustomer.source_root,
-              is_active: editingCustomer.is_active
-            })
-            .eq('id', originalId);
+          // Use the new updateCustomer function when ID hasn't changed
+          const success = await updateCustomer(originalId, {
+            customer_name: editingCustomer.customer_name,
+            administration_name: editingCustomer.administration_name,
+            administration_mail: editingCustomer.administration_mail,
+            source: editingCustomer.source,
+            source_root: editingCustomer.source_root,
+            is_active: editingCustomer.is_active
+          });
           
-          if (error) throw error;
+          if (!success) {
+            throw new Error("Failed to update customer");
+          }
         }
         
         toast({
