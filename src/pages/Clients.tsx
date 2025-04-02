@@ -474,7 +474,7 @@ const Clients: React.FC = () => {
 
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
             <div className="text-sm text-gray-500">
-              Getoond {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} of ${filteredCustomers.length}` : '0 of 0'}
+              Getoond {filteredCustomers.length > 0 ? `1-${Math.min(filteredCustomers.length, 10)} van ${filteredCustomers.length}` : '0 van 0'}
             </div>
             <div className="flex items-center space-x-2">
               <Button 

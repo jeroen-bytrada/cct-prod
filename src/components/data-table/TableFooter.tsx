@@ -17,7 +17,7 @@ const TableFooter: React.FC<TableFooterProps> = ({
   return (
     <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 mt-auto">
       <div className="text-sm text-gray-500">
-        Getoond {visibleCount > 0 ? `1-${Math.min(visibleCount, pageSize)} of ${totalCount}` : '0 of 0'}
+        Getoond {visibleCount > 0 ? `1-${Math.min(visibleCount, pageSize)} van ${totalCount}` : '0 van 0'}
       </div>
       <div className="flex items-center space-x-2">
         <Button 
