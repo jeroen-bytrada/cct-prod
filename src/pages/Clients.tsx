@@ -258,7 +258,10 @@ const Clients: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editingCustomer),
+        body: JSON.stringify({
+          ...editingCustomer,
+          type: isNewCustomer ? "Create" : "Edit"
+        }),
       });
       
       if (webhookResponse.status !== 200) {
