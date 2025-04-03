@@ -8,6 +8,7 @@ import {
   getDocumentCount,
   Stats, 
   StatsHistory,
+  AppSettings,
   supabase 
 } from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +22,8 @@ export function useDashboardData() {
   const [settings, setSettings] = useState<{ 
     target_all: number | null, 
     target_invoice: number | null, 
-    target_top: number | null 
+    target_top: number | null,
+    topx: number | null
   } | null>(null);
   const { toast } = useToast();
   
