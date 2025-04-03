@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Customer, getCustomers, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,7 +20,7 @@ export function useTableData() {
   });
   const { toast } = useToast();
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getCustomers();
@@ -39,7 +38,7 @@ export function useTableData() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, sortConfig]);
 
   const sortData = (data: Customer[], config: SortConfig): Customer[] => {
     if (!config.key) return data;
@@ -120,7 +119,7 @@ export function useTableData() {
     return () => {
       supabase.removeChannel(customersChannel);
     };
-  }, [toast]);
+  }, [toast, fetchCustomers]);
 
   useEffect(() => {
     if (searchText.trim() === '') {
@@ -147,6 +146,7 @@ export function useTableData() {
     searchText,
     setSearchText,
     sortConfig,
-    handleSort
+    handleSort,
+    fetchCustomers
   };
 }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { 
   getStats, 
@@ -25,6 +24,12 @@ export function useDashboardData() {
   } | null>(null);
   const { toast } = useToast();
 
+  const notifyDataUpdated = useCallback(() => {
+    const event = new CustomEvent('stats_update');
+    window.dispatchEvent(event);
+    console.log('Dispatched stats_update event');
+  }, []);
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -42,6 +47,8 @@ export function useDashboardData() {
       
       console.log('Dashboard data loaded:', { statsData, docCountData });
       
+      notifyDataUpdated();
+      
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       toast({
@@ -52,18 +59,15 @@ export function useDashboardData() {
     } finally {
       setLoading(false);
       
-      // Fetch settings immediately after loading initial data
       fetchSettings();
     }
-  }, [toast]);
+  }, [toast, notifyDataUpdated]);
 
-  // Function specifically for fetching settings
   const fetchSettings = useCallback(async () => {
     try {
       const settingsData = await getSettings();
       
       if (settingsData) {
-        // We don't need the ID in the settings state
         const { id, ...settingsWithoutId } = settingsData;
         setSettings(settingsWithoutId);
         console.log('Settings loaded successfully:', settingsWithoutId);
@@ -86,10 +90,8 @@ export function useDashboardData() {
   }, [toast]);
 
   useEffect(() => {
-    // Initial data fetch
     fetchData();
     
-    // Set up real-time subscription for customers table
     const customersChannel = supabase
       .channel('customers-changes')
       .on(
@@ -101,12 +103,11 @@ export function useDashboardData() {
         },
         (payload) => {
           console.log('Customer table changed:', payload);
-          fetchData(); // Refresh all data when customers table changes
+          fetchData();
         }
       )
       .subscribe();
       
-    // Set up real-time subscription for cct_stats_hist table
     const statsHistChannel = supabase
       .channel('stats-hist-changes')
       .on(
@@ -118,12 +119,11 @@ export function useDashboardData() {
         },
         (payload) => {
           console.log('Stats history updated:', payload);
-          fetchData(); // Refresh all data when new stats history is added
+          fetchData();
         }
       )
       .subscribe();
       
-    // Set up real-time subscription for settings table
     const settingsChannel = supabase
       .channel('settings-changes')
       .on(
@@ -135,12 +135,11 @@ export function useDashboardData() {
         },
         (payload) => {
           console.log('Settings updated:', payload);
-          fetchSettings(); // Only refresh settings when they change
+          fetchSettings();
         }
       )
       .subscribe();
-    
-    // Set up real-time subscription for customer_documents table
+      
     const documentsChannel = supabase
       .channel('documents-changes')
       .on(
@@ -152,14 +151,11 @@ export function useDashboardData() {
         },
         (payload) => {
           console.log('Documents table changed:', payload);
-          fetchData(); // Refresh data when documents change
+          fetchData();
         }
       )
       .subscribe();
     
-    // No need for settings refresh interval since we have real-time updates
-    
-    // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(customersChannel);
       supabase.removeChannel(statsHistChannel);
@@ -176,6 +172,6 @@ export function useDashboardData() {
     loading,
     settings,
     fetchData,
-    fetchSettings // Expose the fetch settings function
+    fetchSettings
   };
 }

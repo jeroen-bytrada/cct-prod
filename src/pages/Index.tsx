@@ -15,7 +15,8 @@ const Index: React.FC = () => {
     documentCount,
     loading,
     settings,
-    fetchSettings
+    fetchSettings,
+    fetchData
   } = useDashboardData();
 
   return (
@@ -35,7 +36,7 @@ const Index: React.FC = () => {
         />
         
         <div className="mt-6 flex-grow flex flex-col">
-          <DataTable />
+          <DataTable refreshData={fetchData} />
         </div>
       </div>
     </div>
