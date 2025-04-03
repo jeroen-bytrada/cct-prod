@@ -62,12 +62,12 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
   return (data || []).reverse()
 }
 
-export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, history_limit: number | null, id: number } | null> {
+export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, history_limit: number | null, topx: number | null, id: number } | null> {
   try {
     // Explicitly fetch the single settings record with ID 1
     const { data, error } = await supabase
       .from('settings')
-      .select('id, target_all, target_invoice, target_top, history_limit')
+      .select('id, target_all, target_invoice, target_top, history_limit, topx')
       .eq('id', 1)
       .single() // Use single() as we expect exactly one record
     
@@ -91,7 +91,8 @@ export async function getSettings(): Promise<{ target_all: number | null, target
       target_all: data.target_all,
       target_invoice: data.target_invoice,
       target_top: data.target_top,
-      history_limit: data.history_limit || MAX_HISTORY_RECORDS // Default to MAX_HISTORY_RECORDS if not set
+      history_limit: data.history_limit || MAX_HISTORY_RECORDS, // Default to MAX_HISTORY_RECORDS if not set
+      topx: data.topx || 5 // Default to 5 if not set
     }
   } catch (error) {
     console.error('Critical error in getSettings:', error)

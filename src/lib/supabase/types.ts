@@ -60,5 +60,6 @@ export type AppSettings = {
   target_invoice: number | null
   target_top: number | null
   history_limit: number | null
+  topx: number | null
   last_update_run: string
 }

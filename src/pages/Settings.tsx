@@ -38,6 +38,8 @@ const settingsFormSchema = z.object({
   target_top: z.coerce.number().nullable().optional(),
   history_limit: z.coerce.number().min(5, "Minimaal 5 eenheden").max(50, "Maximaal 50 eenheden").nullable().optional()
     .transform(val => val === null ? MAX_HISTORY_RECORDS : val),
+  topx: z.coerce.number().min(1, "Minimaal 1").max(100, "Maximaal 100").nullable().optional()
+    .transform(val => val === null ? 5 : val),
 });
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
@@ -58,6 +60,7 @@ const Settings = () => {
       target_invoice: null,
       target_top: null,
       history_limit: MAX_HISTORY_RECORDS,
+      topx: 5,
     },
   });
 
@@ -144,6 +147,7 @@ const Settings = () => {
           target_invoice: data.target_invoice,
           target_top: data.target_top,
           history_limit: data.history_limit || MAX_HISTORY_RECORDS,
+          topx: data.topx || 5,
         });
       } else {
         console.error('No settings data returned but no error was thrown');
@@ -203,6 +207,7 @@ const Settings = () => {
           target_invoice: values.target_invoice,
           target_top: values.target_top,
           history_limit: values.history_limit,
+          topx: values.topx,
         })
         .eq('id', 1);
         
@@ -368,6 +373,28 @@ const Settings = () => {
                                 </FormControl>
                                 <FormDescription>
                                   Aantal historische meetpunten dat wordt weergegeven in de grafieken (tussen 5 en 50)
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="topx"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Top X</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    {...field} 
+                                    value={field.value === null ? 5 : field.value}
+                                    onChange={e => field.onChange(e.target.value === '' ? 5 : Number(e.target.value))} 
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Definieer hoeveel items in de Top X worden meegenomen (tussen 1 en 100)
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
