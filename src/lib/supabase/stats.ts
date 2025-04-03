@@ -1,6 +1,6 @@
 
 import { supabase } from './client'
-import { Stats, StatsHistory } from './types'
+import { Stats, StatsHistory, AppSettings } from './types'
 import { MAX_HISTORY_RECORDS } from './client'
 
 // Stats-related queries
@@ -62,14 +62,14 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
   return (data || []).reverse()
 }
 
-export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, history_limit: number | null, topx: number | null, id: number } | null> {
+export async function getSettings(): Promise<AppSettings | null> {
   try {
     // Explicitly fetch the single settings record with ID 1
     const { data, error } = await supabase
       .from('settings')
-      .select('id, target_all, target_invoice, target_top, history_limit, topx')
+      .select('id, target_all, target_invoice, target_top, history_limit, topx, last_update_run')
       .eq('id', 1)
-      .single() // Use single() as we expect exactly one record
+      .maybeSingle() // Use maybeSingle() to handle the case where no record is found
     
     if (error) {
       // Log the specific error to help with debugging
@@ -92,7 +92,8 @@ export async function getSettings(): Promise<{ target_all: number | null, target
       target_invoice: data.target_invoice,
       target_top: data.target_top,
       history_limit: data.history_limit || MAX_HISTORY_RECORDS, // Default to MAX_HISTORY_RECORDS if not set
-      topx: data.topx || 5 // Default to 5 if not set
+      topx: data.topx || 5, // Default to 5 if not set
+      last_update_run: data.last_update_run
     }
   } catch (error) {
     console.error('Critical error in getSettings:', error)
