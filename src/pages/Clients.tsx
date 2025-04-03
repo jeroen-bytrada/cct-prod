@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
@@ -252,27 +253,6 @@ const Clients: React.FC = () => {
     }
 
     try {
-      const webhookUrl = 'https://hook.eu1.make.com/o4bctoiqvjll2endxpt7q2rpfi6iyg2h';
-      const webhookResponse = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...editingCustomer,
-          type: isNewCustomer ? "Create" : "Edit"
-        }),
-      });
-      
-      if (webhookResponse.status !== 200) {
-        toast({
-          title: "Error",
-          description: "Klant gegevens incorrect",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       if (isNewCustomer) {
         const now = new Date().toISOString();
         
@@ -294,6 +274,7 @@ const Clients: React.FC = () => {
         });
       } else {
         if (originalId !== editingCustomer.id) {
+          // If ID changed, we need to delete old record and create new one
           const { data: originalCustomer, error: fetchError } = await supabase
             .from('customers')
             .select('created_at, cs_documents_in_process, cs_documents_other, cs_last_update')
@@ -321,6 +302,7 @@ const Clients: React.FC = () => {
           
           if (insertError) throw insertError;
         } else {
+          // Use the new updateCustomer function when ID hasn't changed
           const success = await updateCustomer(originalId, {
             customer_name: editingCustomer.customer_name,
             administration_name: editingCustomer.administration_name,
