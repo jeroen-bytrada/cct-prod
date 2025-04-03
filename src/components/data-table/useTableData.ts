@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Customer, getCustomers, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { isEqual } from 'lodash';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -19,15 +21,30 @@ export function useTableData() {
     direction: 'desc' 
   });
   const { toast } = useToast();
+  
+  // Reference to previous customer data to compare for changes
+  const prevCustomersRef = useRef<Customer[]>([]);
 
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getCustomers();
-      setCustomers(data);
       
-      const sortedData = sortData(data, sortConfig);
-      setFilteredCustomers(sortedData);
+      // Check if data has actually changed
+      const customersChanged = !isEqual(data, prevCustomersRef.current);
+      
+      if (customersChanged) {
+        console.log('Customer data changed, updating table');
+        setCustomers(data);
+        
+        const sortedData = sortData(data, sortConfig);
+        setFilteredCustomers(sortedData);
+        
+        // Update reference to current values
+        prevCustomersRef.current = data;
+      } else {
+        console.log('Customer data fetched, no changes detected');
+      }
     } catch (error) {
       console.error('Failed to fetch customers:', error);
       toast({

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TableHeader from './TableHeader';
 import TableColumns from './TableColumns';
 import TableBody from './TableBody';
@@ -24,22 +24,33 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const lastUpdateTimeRef = useRef<number>(Date.now());
+  const updateDebounceTimeMs = 1000; // Minimum time between updates in milliseconds
 
   const handleViewDocuments = (customerId: string) => {
     setSelectedCustomerId(customerId);
     setDocumentsModalOpen(true);
   };
 
-  // Listen for dashboard data updates and refresh table data
+  // Listen for dashboard data updates and refresh table data with debounce
   useEffect(() => {
     // Set up a listener for the stats_update event
     const handleStatsUpdate = () => {
-      console.log('Dashboard stats updated, refreshing table data');
-      fetchCustomers();
+      const currentTime = Date.now();
       
-      // If parent component provided a refresh function, call it too
-      if (refreshData) {
-        refreshData();
+      // Only update if sufficient time has passed since last update
+      if (currentTime - lastUpdateTimeRef.current > updateDebounceTimeMs) {
+        console.log('Dashboard stats updated, refreshing table data');
+        lastUpdateTimeRef.current = currentTime;
+        
+        fetchCustomers();
+        
+        // If parent component provided a refresh function, call it too
+        if (refreshData) {
+          refreshData();
+        }
+      } else {
+        console.log('Update debounced, skipping table refresh');
       }
     };
 

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   getStats, 
   getCustomerCount, 
@@ -23,6 +24,25 @@ export function useDashboardData() {
     target_top: number | null 
   } | null>(null);
   const { toast } = useToast();
+  
+  // References to previous values to compare for actual changes
+  const prevStatsRef = useRef<Stats | null>(null);
+  const prevDocCountRef = useRef<number>(0);
+  const prevCustomerCountRef = useRef<number>(0);
+
+  const hasStatsChanged = (newStats: Stats | null, newDocCount: number, newCustomerCount: number): boolean => {
+    // If no previous stats, consider it as changed
+    if (!prevStatsRef.current) return true;
+    
+    // Check if any of the values changed
+    return (
+      prevStatsRef.current.total !== newStats?.total ||
+      prevStatsRef.current.total_15 !== newStats?.total_15 ||
+      prevStatsRef.current.total_in_proces !== newStats?.total_in_proces ||
+      prevDocCountRef.current !== newDocCount ||
+      prevCustomerCountRef.current !== newCustomerCount
+    );
+  };
 
   const notifyDataUpdated = useCallback(() => {
     const event = new CustomEvent('stats_update');
@@ -40,14 +60,29 @@ export function useDashboardData() {
         getDocumentCount(),
       ]);
       
+      // Check if data has actually changed before updating state and notifying
+      const hasChanged = hasStatsChanged(statsData, docCountData, countData);
+      
+      // Update state regardless (to ensure loading state is consistent)
       setStats(statsData);
       setCustomerCount(countData);
       setStatsHistory(historyData);
       setDocumentCount(docCountData);
       
-      console.log('Dashboard data loaded:', { statsData, docCountData });
+      // Only notify of updates if values actually changed
+      if (hasChanged) {
+        console.log('Dashboard data changed, notifying subscribers');
+        notifyDataUpdated();
+        
+        // Update refs to current values
+        prevStatsRef.current = statsData;
+        prevDocCountRef.current = docCountData;
+        prevCustomerCountRef.current = countData;
+      } else {
+        console.log('Dashboard data fetched, no changes detected');
+      }
       
-      notifyDataUpdated();
+      console.log('Dashboard data loaded:', { statsData, docCountData });
       
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
