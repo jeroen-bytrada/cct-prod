@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/data-table/DataTable';
@@ -18,6 +18,12 @@ const Index: React.FC = () => {
     fetchSettings,
     fetchData
   } = useDashboardData();
+
+  // Fetch all dashboard data when the component mounts
+  useEffect(() => {
+    console.log('Dashboard mounted, refreshing all data');
+    fetchData();
+  }, [fetchData]);
 
   return (
     <div className="min-h-screen flex">

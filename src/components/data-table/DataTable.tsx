@@ -27,6 +27,12 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
   const lastUpdateTimeRef = useRef<number>(Date.now());
   const updateDebounceTimeMs = 1000; // Minimum time between updates in milliseconds
 
+  // On initial mount, refresh the customer data
+  useEffect(() => {
+    console.log('DataTable mounted, fetching customers');
+    fetchCustomers();
+  }, [fetchCustomers]);
+
   const handleViewDocuments = (customerId: string) => {
     setSelectedCustomerId(customerId);
     setDocumentsModalOpen(true);
