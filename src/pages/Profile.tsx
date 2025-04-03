@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { User, UserPen, Upload } from 'lucide-react';
+import { getUserProfile } from '@/lib/supabase/user';
+import { UserProfile } from '@/lib/supabase/types';
 
 const Profile = () => {
   const { user, loading } = useAuth();
@@ -22,6 +23,7 @@ const Profile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     // If user is loaded and not authenticated, redirect to login
@@ -29,11 +31,24 @@ const Profile = () => {
       navigate('/auth');
     }
     
-    // Set the initial values from the user metadata
-    if (user) {
-      setFullName(user.user_metadata.full_name || '');
-      setAvatarUrl(user.user_metadata.avatar_url || null);
-    }
+    // Fetch user profile from profiles table
+    const fetchProfile = async () => {
+      if (user) {
+        const profileData = await getUserProfile();
+        setProfile(profileData);
+        
+        // Set fullName from profile if available, otherwise from user metadata
+        if (profileData?.full_name) {
+          setFullName(profileData.full_name);
+        } else if (user.user_metadata.full_name) {
+          setFullName(user.user_metadata.full_name);
+        }
+        
+        setAvatarUrl(user.user_metadata.avatar_url || null);
+      }
+    };
+    
+    fetchProfile();
   }, [user, loading, navigate]);
 
   const handleUpdateProfile = async () => {
@@ -42,13 +57,22 @@ const Profile = () => {
     try {
       setIsSubmitting(true);
       
-      const { error } = await supabase.auth.updateUser({
+      // Update user metadata
+      const { error: authError } = await supabase.auth.updateUser({
         data: {
           full_name: fullName,
         }
       });
       
-      if (error) throw error;
+      if (authError) throw authError;
+      
+      // Also update the public profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName })
+        .eq('id', user.id);
+        
+      if (profileError) throw profileError;
       
       toast.success('Profiel succesvol bijgewerkt');
       setIsEditing(false);
@@ -228,8 +252,14 @@ const Profile = () => {
                 variant="outline"
                 onClick={() => {
                   setIsEditing(false);
-                  // Reset to original value
-                  setFullName(user?.user_metadata.full_name || '');
+                  // Reset to original value from profile or user metadata
+                  if (profile?.full_name) {
+                    setFullName(profile.full_name);
+                  } else if (user?.user_metadata.full_name) {
+                    setFullName(user.user_metadata.full_name);
+                  } else {
+                    setFullName('');
+                  }
                 }}
               >
                 Annuleren
