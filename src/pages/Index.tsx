@@ -21,8 +21,9 @@ const Index: React.FC = () => {
 
   // Fetch all dashboard data when the component mounts
   useEffect(() => {
-    console.log('Dashboard mounted, refreshing all data');
-    fetchData();
+    console.log('Dashboard mounted, refreshing all data from Supabase');
+    // Force refresh all data
+    fetchData(true);
   }, [fetchData]);
 
   return (

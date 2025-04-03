@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   getStats, 
@@ -52,9 +51,11 @@ export function useDashboardData() {
     console.log('Dispatched stats_update event');
   }, []);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
+      console.log('Fetching all dashboard data from Supabase...');
+      
       const [statsData, countData, historyData, docCountData] = await Promise.all([
         getStats(),
         getCustomerCount(),
@@ -63,7 +64,8 @@ export function useDashboardData() {
       ]);
       
       // Check if data has actually changed before updating state and notifying
-      const hasChanged = hasStatsChanged(statsData, docCountData, countData);
+      // If forceRefresh is true, we'll update regardless of changes
+      const hasChanged = forceRefresh || hasStatsChanged(statsData, docCountData, countData);
       
       // Update state regardless (to ensure loading state is consistent)
       setStats(statsData);
@@ -71,9 +73,9 @@ export function useDashboardData() {
       setStatsHistory(historyData);
       setDocumentCount(docCountData);
       
-      // Only notify of updates if values actually changed
+      // Only notify of updates if values actually changed or force refreshing
       if (hasChanged) {
-        console.log('Dashboard data changed, notifying subscribers');
+        console.log('Dashboard data changed or force refreshed, notifying subscribers');
         notifyDataUpdated();
         
         // Update refs to current values
@@ -127,7 +129,8 @@ export function useDashboardData() {
   }, [toast]);
 
   useEffect(() => {
-    fetchData();
+    // Force refresh on initial load
+    fetchData(true);
     
     const customersChannel = supabase
       .channel('customers-changes')

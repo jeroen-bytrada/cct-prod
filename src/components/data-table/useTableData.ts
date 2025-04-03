@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Customer, getCustomers, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -25,16 +24,18 @@ export function useTableData() {
   // Reference to previous customer data to compare for changes
   const prevCustomersRef = useRef<Customer[]>([]);
 
-  const fetchCustomers = useCallback(async () => {
+  const fetchCustomers = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
+      console.log('Fetching customers data from Supabase...');
+      
       const data = await getCustomers();
       
-      // Check if data has actually changed
-      const customersChanged = !isEqual(data, prevCustomersRef.current);
+      // Check if data has actually changed or if force refresh is requested
+      const customersChanged = forceRefresh || !isEqual(data, prevCustomersRef.current);
       
       if (customersChanged) {
-        console.log('Customer data changed, updating table');
+        console.log('Customer data changed or force refreshed, updating table');
         setCustomers(data);
         
         const sortedData = sortData(data, sortConfig);
@@ -115,7 +116,8 @@ export function useTableData() {
   };
 
   useEffect(() => {
-    fetchCustomers();
+    // Force refresh on initial load
+    fetchCustomers(true);
     
     const customersChannel = supabase
       .channel('datatable-customers-changes')
