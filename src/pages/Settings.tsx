@@ -31,7 +31,6 @@ type UserWithRole = {
   role: string;
 };
 
-// Update the type definition to include topx
 const settingsFormSchema = z.object({
   target_all: z.coerce.number().nullable().optional(),
   target_invoice: z.coerce.number().nullable().optional(),
@@ -113,7 +112,7 @@ const Settings = () => {
     }
   };
 
-const fetchSettings = async () => {
+  const fetchSettings = async () => {
     if (!isAdmin) return;
     
     try {
