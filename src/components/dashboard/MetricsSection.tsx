@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import MetricCard from '@/components/MetricCard';
 import StatisticChart from '@/components/StatisticChart';
@@ -14,6 +15,7 @@ interface MetricsSectionProps {
     target_all: number | null;
     target_invoice: number | null;
     target_top: number | null;
+    topx: number | null;
   } | null;
   fetchSettings?: () => Promise<void>;
 }
@@ -50,7 +52,8 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
   console.log('Metrics Settings:', {
     target_all: settings?.target_all,
     target_top: settings?.target_top,
-    target_invoice: settings?.target_invoice
+    target_invoice: settings?.target_invoice,
+    topx: settings?.topx
   });
   return <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Info cards column - more compact design with reduced gap */}
@@ -68,7 +71,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         <StatisticChart data={documentsChartData} color={documentsPercentChange < 0 ? "#4CAF50" : "#FF5252"} isNegative={documentsPercentChange >= 0} />
       </MetricCard>
       
-      <MetricCard title="Totaal Top 1" value={loading ? "..." : (stats?.total_15 || 0).toString()} change={topPercentChange} isNegative={topPercentChange < 0} isPositive={topPercentChange < 0} target={settings?.target_top || null} showTargetBadge={true} className="h-[188px]" // Kept as is
+      <MetricCard title={`Totaal Top ${settings?.topx || 5}`} value={loading ? "..." : (stats?.total_15 || 0).toString()} change={topPercentChange} isNegative={topPercentChange < 0} isPositive={topPercentChange < 0} target={settings?.target_top || null} showTargetBadge={true} className="h-[188px]" // Kept as is
     >
         <StatisticChart data={topChartData} color={topPercentChange < 0 ? "#4CAF50" : "#FF5252"} isNegative={topPercentChange >= 0} />
       </MetricCard>
