@@ -155,6 +155,7 @@ export type Database = {
       }
       settings: {
         Row: {
+          history_limit: number | null
           id: number
           last_update_run: string
           target_all: number | null
@@ -162,6 +163,7 @@ export type Database = {
           target_top: number | null
         }
         Insert: {
+          history_limit?: number | null
           id?: number
           last_update_run?: string
           target_all?: number | null
@@ -169,6 +171,7 @@ export type Database = {
           target_top?: number | null
         }
         Update: {
+          history_limit?: number | null
           id?: number
           last_update_run?: string
           target_all?: number | null
