@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -22,6 +23,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { setUserRole, removeUserRole } from '@/lib/supabase';
+import { MAX_HISTORY_RECORDS } from '@/lib/supabase/client';
 
 type UserWithRole = {
   id: string;
@@ -34,6 +36,8 @@ const settingsFormSchema = z.object({
   target_all: z.coerce.number().nullable().optional(),
   target_invoice: z.coerce.number().nullable().optional(),
   target_top: z.coerce.number().nullable().optional(),
+  history_limit: z.coerce.number().min(5, "Minimaal 5 eenheden").max(50, "Maximaal 50 eenheden").nullable().optional()
+    .transform(val => val === null ? MAX_HISTORY_RECORDS : val),
 });
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
@@ -44,6 +48,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [isChartOpen, setIsChartOpen] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
 
   const form = useForm<SettingsFormValues>({
@@ -52,6 +57,7 @@ const Settings = () => {
       target_all: null,
       target_invoice: null,
       target_top: null,
+      history_limit: MAX_HISTORY_RECORDS,
     },
   });
 
@@ -137,6 +143,7 @@ const Settings = () => {
           target_all: data.target_all,
           target_invoice: data.target_invoice,
           target_top: data.target_top,
+          history_limit: data.history_limit || MAX_HISTORY_RECORDS,
         });
       } else {
         console.error('No settings data returned but no error was thrown');
@@ -195,6 +202,7 @@ const Settings = () => {
           target_all: values.target_all,
           target_invoice: values.target_invoice,
           target_top: values.target_top,
+          history_limit: values.history_limit,
         })
         .eq('id', 1);
         
@@ -324,6 +332,42 @@ const Settings = () => {
                                 </FormControl>
                                 <FormDescription>
                                   Doelwaarde voor facturen
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                      
+                      <Collapsible open={isChartOpen} onOpenChange={setIsChartOpen} className="border rounded-md p-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-md font-medium">Grafiek instellingen</h3>
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <ChevronDown className={`h-4 w-4 transition-transform ${isChartOpen ? 'rotate-180' : ''}`} />
+                              <span className="sr-only">Schakelen</span>
+                            </Button>
+                          </CollapsibleTrigger>
+                        </div>
+                        
+                        <CollapsibleContent className="pt-4 space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="history_limit"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Aantal eenheden historie in grafieken</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    {...field} 
+                                    value={field.value === null ? MAX_HISTORY_RECORDS : field.value}
+                                    onChange={e => field.onChange(e.target.value === '' ? MAX_HISTORY_RECORDS : Number(e.target.value))} 
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Aantal historische meetpunten dat wordt weergegeven in de grafieken (tussen 5 en 50)
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>

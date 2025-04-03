@@ -26,11 +26,33 @@ export async function getStats(): Promise<Stats | null> {
 }
 
 export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Promise<StatsHistory[]> {
+  // Try to get the history_limit setting from the database
+  let historyLimit = limit;
+  
+  try {
+    const { data: settingsData, error: settingsError } = await supabase
+      .from('settings')
+      .select('history_limit')
+      .eq('id', 1)
+      .single();
+      
+    if (!settingsError && settingsData && settingsData.history_limit) {
+      // Use the setting from the database if available
+      historyLimit = settingsData.history_limit;
+      console.log(`Using history limit from settings: ${historyLimit}`);
+    } else {
+      console.log(`Using default history limit: ${historyLimit}`);
+    }
+  } catch (error) {
+    // If there's an error, fall back to the provided limit
+    console.error('Error fetching history limit setting:', error);
+  }
+  
   const { data, error } = await supabase
     .from('cct_stats_hist')
     .select('id, total, total_15, total_in_proces, created_at')
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .limit(historyLimit)
   
   if (error) {
     console.error('Error fetching stats history:', error)
@@ -40,12 +62,12 @@ export async function getStatsHistory(limit: number = MAX_HISTORY_RECORDS): Prom
   return (data || []).reverse()
 }
 
-export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, id: number } | null> {
+export async function getSettings(): Promise<{ target_all: number | null, target_invoice: number | null, target_top: number | null, history_limit: number | null, id: number } | null> {
   try {
     // Explicitly fetch the single settings record with ID 1
     const { data, error } = await supabase
       .from('settings')
-      .select('id, target_all, target_invoice, target_top')
+      .select('id, target_all, target_invoice, target_top, history_limit')
       .eq('id', 1)
       .single() // Use single() as we expect exactly one record
     
@@ -68,7 +90,8 @@ export async function getSettings(): Promise<{ target_all: number | null, target
       id: data.id,
       target_all: data.target_all,
       target_invoice: data.target_invoice,
-      target_top: data.target_top
+      target_top: data.target_top,
+      history_limit: data.history_limit || MAX_HISTORY_RECORDS // Default to MAX_HISTORY_RECORDS if not set
     }
   } catch (error) {
     console.error('Critical error in getSettings:', error)

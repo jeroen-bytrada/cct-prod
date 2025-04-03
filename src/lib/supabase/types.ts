@@ -53,3 +53,12 @@ export type UserRole = {
   role: 'admin' | 'user'
   created_at: string
 }
+
+export type AppSettings = {
+  id: number
+  target_all: number | null
+  target_invoice: number | null
+  target_top: number | null
+  history_limit: number | null
+  last_update_run: string
+}
