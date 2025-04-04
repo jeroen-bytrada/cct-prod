@@ -104,3 +104,72 @@ export async function removeUserRole(userId: string, role: 'admin' | 'user'): Pr
     return false;
   }
 }
+
+// New function to fetch all users with their roles
+export async function getAllUsers(): Promise<UserWithRole[]> {
+  try {
+    // First get all authenticated users from auth.users
+    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+    
+    if (authError) {
+      console.error('Error fetching auth users:', authError);
+      return [];
+    }
+    
+    // Get all profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*');
+      
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      return [];
+    }
+    
+    // Get all user roles
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('*');
+      
+    if (rolesError) {
+      console.error('Error fetching user roles:', rolesError);
+      return [];
+    }
+    
+    // Create a map of profile data for quick lookup
+    const profileMap = new Map();
+    profiles.forEach(profile => {
+      profileMap.set(profile.id, profile);
+    });
+    
+    // Create a map of user roles for quick lookup
+    const roleMap = new Map();
+    userRoles.forEach(role => {
+      roleMap.set(role.user_id, role.role);
+    });
+    
+    // Combine the data
+    const usersWithRoles = authUsers.users.map(user => {
+      const profile = profileMap.get(user.id);
+      return {
+        id: user.id,
+        email: user.email || '',
+        fullName: profile?.full_name || null,
+        role: roleMap.get(user.id) || 'user'
+      };
+    });
+    
+    return usersWithRoles;
+  } catch (error) {
+    console.error('Error in getAllUsers:', error);
+    return [];
+  }
+}
+
+// Type for user with role information
+export type UserWithRole = {
+  id: string;
+  email: string;
+  fullName: string | null;
+  role: string;
+};

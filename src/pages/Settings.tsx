@@ -19,17 +19,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, AlertCircle } from 'lucide-react';
+import { ChevronDown, AlertCircle, UserCog } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { setUserRole, removeUserRole } from '@/lib/supabase';
+import { setUserRole, removeUserRole, getAllUsers, UserWithRole } from '@/lib/supabase';
 import { MAX_HISTORY_RECORDS } from '@/lib/supabase/client';
-
-type UserWithRole = {
-  id: string;
-  email: string;
-  fullName: string | null;
-  role: string;
-};
 
 const settingsFormSchema = z.object({
   target_all: z.coerce.number().nullable().optional(),
@@ -77,32 +70,7 @@ const Settings = () => {
         return;
       }
       
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name');
-        
-      if (profilesError) {
-        throw profilesError;
-      }
-      
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-        
-      if (rolesError) {
-        throw rolesError;
-      }
-      
-      const usersWithRoles = profiles.map(profile => {
-        const userRole = userRoles.find(role => role.user_id === profile.id);
-        return {
-          id: profile.id,
-          email: profile.email,
-          fullName: profile.full_name,
-          role: userRole?.role || 'user'
-        };
-      });
-      
+      const usersWithRoles = await getAllUsers();
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -413,7 +381,10 @@ const Settings = () => {
             
             <TabsContent value="user-management" className="mt-4">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h2 className="text-lg font-medium mb-4">Gebruikersbeheer</h2>
+                <div className="flex items-center mb-4">
+                  <UserCog className="h-5 w-5 mr-2 text-gray-600" />
+                  <h2 className="text-lg font-medium">Gebruikersbeheer</h2>
+                </div>
                 
                 {loading ? (
                   <div className="py-8 flex justify-center">
@@ -431,30 +402,38 @@ const Settings = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {users.map(user => (
-                          <tr key={user.id} className="border-b last:border-0">
-                            <td className="py-3">{user.email}</td>
-                            <td className="py-3">{user.fullName || '-'}</td>
-                            <td className="py-3">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                user.role === 'admin' 
-                                  ? 'bg-purple-100 text-purple-800' 
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {user.role}
-                              </span>
-                            </td>
-                            <td className="py-3">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => toggleUserRole(user.id, user.role)}
-                              >
-                                {user.role === 'admin' ? 'Admin Rechten Intrekken' : 'Admin Maken'}
-                              </Button>
+                        {users.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="py-4 text-center text-gray-500">
+                              Geen gebruikers gevonden
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          users.map(user => (
+                            <tr key={user.id} className="border-b last:border-0">
+                              <td className="py-3">{user.email}</td>
+                              <td className="py-3">{user.fullName || '-'}</td>
+                              <td className="py-3">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  user.role === 'admin' 
+                                    ? 'bg-purple-100 text-purple-800' 
+                                    : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                  {user.role}
+                                </span>
+                              </td>
+                              <td className="py-3">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => toggleUserRole(user.id, user.role)}
+                                >
+                                  {user.role === 'admin' ? 'Admin Rechten Intrekken' : 'Admin Maken'}
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
