@@ -252,7 +252,7 @@ const DataTable: React.FC = () => {
                   onClick={() => handleSort('cs_documents_other')}
                   onDoubleClick={() => handleDoubleClick('cs_documents_other')}
                 >
-                  Inbox {getSortIcon('cs_documents_other')}
+                  Overig {getSortIcon('cs_documents_other')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
