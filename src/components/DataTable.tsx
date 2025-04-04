@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft,
@@ -253,7 +252,7 @@ const DataTable: React.FC = () => {
                   onClick={() => handleSort('cs_documents_other')}
                   onDoubleClick={() => handleDoubleClick('cs_documents_other')}
                 >
-                  Overzicht {getSortIcon('cs_documents_other')}
+                  Inbox {getSortIcon('cs_documents_other')}
                 </th>
                 <th 
                   className={columnHeaderStyle}
