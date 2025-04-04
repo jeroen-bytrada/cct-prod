@@ -10,9 +10,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { User, UserPen, Upload } from 'lucide-react';
+import { User, UserPen, Upload, Lock } from 'lucide-react';
 import { getUserProfile } from '@/lib/supabase/user';
 import { UserProfile } from '@/lib/supabase/types';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const Profile = () => {
   const { user, loading } = useAuth();
@@ -24,6 +28,27 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [passwordUpdating, setPasswordUpdating] = useState(false);
+
+  // Password validation schema
+  const passwordSchema = z.object({
+    currentPassword: z.string().min(6, 'Huidig wachtwoord moet minimaal 6 tekens bevatten'),
+    newPassword: z.string().min(6, 'Nieuw wachtwoord moet minimaal 6 tekens bevatten'),
+    confirmPassword: z.string().min(6, 'Bevestiging moet minimaal 6 tekens bevatten'),
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Wachtwoorden komen niet overeen",
+    path: ["confirmPassword"],
+  });
+
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
 
   useEffect(() => {
     // If user is loaded and not authenticated, redirect to login
@@ -126,6 +151,40 @@ const Profile = () => {
     }
   };
 
+  const handlePasswordChange = async (values: z.infer<typeof passwordSchema>) => {
+    if (!user) return;
+    
+    try {
+      setPasswordUpdating(true);
+      
+      // First verify current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email || '',
+        password: values.currentPassword,
+      });
+      
+      if (signInError) {
+        toast.error('Huidig wachtwoord is onjuist');
+        return;
+      }
+      
+      // Update the password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: values.newPassword,
+      });
+      
+      if (updateError) throw updateError;
+      
+      toast.success('Wachtwoord succesvol gewijzigd');
+      setChangePasswordOpen(false);
+      passwordForm.reset();
+    } catch (error: any) {
+      toast.error(`Fout bij het wijzigen van wachtwoord: ${error.message}`);
+    } finally {
+      setPasswordUpdating(false);
+    }
+  };
+
   const getInitials = (name: string | undefined) => {
     if (!name) return 'U';
     return name
@@ -151,7 +210,7 @@ const Profile = () => {
       <div className="container max-w-3xl py-8">
         <h1 className="text-3xl font-bold mb-6">Mijn Profiel</h1>
         
-        <Card>
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle>Profielinformatie</CardTitle>
             <CardDescription>
@@ -272,6 +331,110 @@ const Profile = () => {
               </Button>
             </CardFooter>
           )}
+        </Card>
+        
+        {/* Password Change Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Lock className="mr-2 h-5 w-5" />
+              Wachtwoord Wijzigen
+            </CardTitle>
+            <CardDescription>
+              Update je wachtwoord om je account te beveiligen.
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            {!changePasswordOpen ? (
+              <Button 
+                variant="outline" 
+                onClick={() => setChangePasswordOpen(true)}
+              >
+                Wachtwoord wijzigen
+              </Button>
+            ) : (
+              <Form {...passwordForm}>
+                <form 
+                  onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={passwordForm.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Huidig wachtwoord</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="Voer je huidige wachtwoord in" 
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nieuw wachtwoord</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="Voer je nieuwe wachtwoord in" 
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bevestig nieuw wachtwoord</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="Bevestig je nieuwe wachtwoord" 
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setChangePasswordOpen(false);
+                        passwordForm.reset();
+                      }}
+                    >
+                      Annuleren
+                    </Button>
+                    <Button 
+                      type="submit"
+                      disabled={passwordUpdating}
+                    >
+                      {passwordUpdating ? 'Wachtwoord wijzigen...' : 'Wachtwoord wijzigen'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            )}
+          </CardContent>
         </Card>
       </div>
     </Layout>
