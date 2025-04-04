@@ -1,3 +1,4 @@
+
 import { supabase } from './client'
 import { Customer, CustomerDocument } from './types'
 import { DOCUMENTS_PER_PAGE } from './client'
@@ -60,12 +61,19 @@ export async function getCustomerCount(): Promise<number> {
 }
 
 export async function getDocumentCount(): Promise<number> {
+  // Get the current date in YYYY-MM-DD format
+  const today = new Date();
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString();
+
   const { count, error } = await supabase
     .from('customer_documents')
     .select('*', { count: 'exact', head: true })
+    .gte('created_at', startOfDay)
+    .lte('created_at', endOfDay);
   
   if (error) {
-    console.error('Error fetching document count:', error)
+    console.error('Error fetching today\'s document count:', error)
     return 0
   }
   
