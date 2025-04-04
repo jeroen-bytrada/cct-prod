@@ -67,7 +67,6 @@ const Sidebar: React.FC = () => {
           >
             <Settings size={20} className="transition-transform duration-200 group-hover:scale-110" />
             <span>Instellingen</span>
-            {!isAdmin && <span className="ml-1 text-xs bg-gray-200 text-gray-700 px-1 rounded">Admin</span>}
           </NavLink>
         </nav>
       </div>

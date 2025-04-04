@@ -27,8 +27,6 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/clients" element={<Clients />} />
               <Route path="/profile" element={<Profile />} />
-            </Route>
-            <Route element={<ProtectedRoute requireAdmin={true} />}>
               <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="/auth" element={<Auth />} />

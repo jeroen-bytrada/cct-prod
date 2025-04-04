@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -17,11 +18,9 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, AlertCircle, UserCog } from 'lucide-react';
+import { ChevronDown, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { setUserRole, removeUserRole, getAllUsers, UserWithRole } from '@/lib/supabase';
 import { MAX_HISTORY_RECORDS } from '@/lib/supabase/client';
 
 const settingsFormSchema = z.object({
@@ -38,8 +37,6 @@ type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
 const Settings = () => {
   const { isAdmin } = useAuth();
-  const [users, setUsers] = useState<UserWithRole[]>([]);
-  const [loading, setLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
@@ -57,32 +54,10 @@ const Settings = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
     fetchSettings();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      
-      if (!isAdmin) {
-        setLoading(false);
-        return;
-      }
-      
-      const usersWithRoles = await getAllUsers();
-      setUsers(usersWithRoles);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchSettings = async () => {
-    if (!isAdmin) return;
-    
     try {
       setSettingsLoading(true);
       setSettingsError(null);
@@ -130,41 +105,11 @@ const Settings = () => {
     }
   };
 
-  const toggleUserRole = async (userId: string, currentRole: string) => {
-    try {
-      const newRole = currentRole === 'admin' ? 'user' : 'admin';
-      let success = false;
-      
-      if (currentRole === 'admin') {
-        success = await removeUserRole(userId, 'admin');
-        
-        if (success) {
-          success = await setUserRole(userId, 'user');
-        }
-      } else {
-        success = await setUserRole(userId, 'admin');
-      }
-      
-      if (!success) {
-        toast.error('Gebruikersrol wijzigen mislukt');
-        return;
-      }
-      
-      toast.success(`Gebruikersrol gewijzigd naar ${newRole}`);
-      
-      setUsers(users.map(user => 
-        user.id === userId 
-          ? { ...user, role: newRole } 
-          : user
-      ));
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      toast.error('Gebruikersrol wijzigen mislukt');
-    }
-  };
-
   const onSubmitSettings = async (values: SettingsFormValues) => {
-    if (!isAdmin) return;
+    if (!isAdmin) {
+      toast.error('Je hebt geen rechten om instellingen te wijzigen');
+      return;
+    }
     
     try {
       const { error } = await supabase
@@ -198,250 +143,186 @@ const Settings = () => {
       <div className="flex-1 p-8 flex flex-col">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Instellingen</h1>
         
-        {!isAdmin ? (
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <h2 className="text-lg font-medium mb-2">Gebruikersinstellingen</h2>
-            <p className="text-gray-600">
-              Je gebruikersaccount heeft geen administratieve rechten.
-            </p>
-          </div>
-        ) : (
-          <Tabs defaultValue="app-settings" className="w-full">
-            <TabsList>
-              <TabsTrigger value="app-settings">Applicatie-instellingen</TabsTrigger>
-              <TabsTrigger value="user-management">Gebruikersbeheer</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="app-settings" className="mt-4">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h2 className="text-lg font-medium mb-4">Applicatieconfiguratie</h2>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h2 className="text-lg font-medium mb-4">Applicatieconfiguratie</h2>
+          
+          {settingsError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {settingsError}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {settingsLoading ? (
+            <div className="py-4 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-buzzaroo-green"></div>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmitSettings)} className="space-y-6">
+                <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">Target instellingen</h3>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                        <span className="sr-only">Schakelen</span>
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                  
+                  <CollapsibleContent className="pt-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="target_all"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Target Totaal Documenten</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value === null ? '' : field.value}
+                              onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
+                              disabled={!isAdmin}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Doelwaarde voor alle documenten
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="target_top"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Target Totaal Top 1</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value === null ? '' : field.value}
+                              onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
+                              disabled={!isAdmin}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Doelwaarde voor top documenten
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="target_invoice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Target Totaal Snelstart Facturen</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value === null ? '' : field.value}
+                              onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
+                              disabled={!isAdmin}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Doelwaarde voor facturen
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
                 
-                {settingsError && (
-                  <Alert variant="destructive" className="mb-4">
+                <Collapsible open={isChartOpen} onOpenChange={setIsChartOpen} className="border rounded-md p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">Grafiek instellingen</h3>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isChartOpen ? 'rotate-180' : ''}`} />
+                        <span className="sr-only">Schakelen</span>
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                  
+                  <CollapsibleContent className="pt-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="history_limit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Aantal eenheden historie in grafieken</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value === null ? MAX_HISTORY_RECORDS : field.value}
+                              onChange={e => field.onChange(e.target.value === '' ? MAX_HISTORY_RECORDS : Number(e.target.value))} 
+                              disabled={!isAdmin}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Aantal historische meetpunten dat wordt weergegeven in de grafieken (tussen 5 en 50)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="topx"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Top X</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value === null ? 5 : field.value}
+                              onChange={e => field.onChange(e.target.value === '' ? 5 : Number(e.target.value))} 
+                              disabled={!isAdmin}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Definieer hoeveel items in de Top X worden meegenomen (tussen 1 en 100)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+                
+                {isAdmin && (
+                  <Button type="submit" className="mt-4">
+                    Instellingen Opslaan
+                  </Button>
+                )}
+                
+                {!isAdmin && (
+                  <Alert className="mt-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {settingsError}
+                      Je hebt alleen leesrechten voor deze instellingen. Neem contact op met een beheerder om wijzigingen aan te brengen.
                     </AlertDescription>
                   </Alert>
                 )}
-                
-                {settingsLoading ? (
-                  <div className="py-4 flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-buzzaroo-green"></div>
-                  </div>
-                ) : (
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmitSettings)} className="space-y-6">
-                      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-md p-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-md font-medium">Target instellingen</h3>
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                              <span className="sr-only">Schakelen</span>
-                            </Button>
-                          </CollapsibleTrigger>
-                        </div>
-                        
-                        <CollapsibleContent className="pt-4 space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="target_all"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Target Totaal Documenten</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field} 
-                                    value={field.value === null ? '' : field.value}
-                                    onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Doelwaarde voor alle documenten
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="target_top"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Target Totaal Top 1</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field} 
-                                    value={field.value === null ? '' : field.value}
-                                    onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Doelwaarde voor top documenten
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="target_invoice"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Target Totaal Snelstart Facturen</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field} 
-                                    value={field.value === null ? '' : field.value}
-                                    onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))} 
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Doelwaarde voor facturen
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </CollapsibleContent>
-                      </Collapsible>
-                      
-                      <Collapsible open={isChartOpen} onOpenChange={setIsChartOpen} className="border rounded-md p-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-md font-medium">Grafiek instellingen</h3>
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <ChevronDown className={`h-4 w-4 transition-transform ${isChartOpen ? 'rotate-180' : ''}`} />
-                              <span className="sr-only">Schakelen</span>
-                            </Button>
-                          </CollapsibleTrigger>
-                        </div>
-                        
-                        <CollapsibleContent className="pt-4 space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="history_limit"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Aantal eenheden historie in grafieken</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field} 
-                                    value={field.value === null ? MAX_HISTORY_RECORDS : field.value}
-                                    onChange={e => field.onChange(e.target.value === '' ? MAX_HISTORY_RECORDS : Number(e.target.value))} 
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Aantal historische meetpunten dat wordt weergegeven in de grafieken (tussen 5 en 50)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="topx"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Top X</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    type="number" 
-                                    {...field} 
-                                    value={field.value === null ? 5 : field.value}
-                                    onChange={e => field.onChange(e.target.value === '' ? 5 : Number(e.target.value))} 
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Definieer hoeveel items in de Top X worden meegenomen (tussen 1 en 100)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </CollapsibleContent>
-                      </Collapsible>
-                      
-                      <Button type="submit" className="mt-4">
-                        Instellingen Opslaan
-                      </Button>
-                    </form>
-                  </Form>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="user-management" className="mt-4">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <div className="flex items-center mb-4">
-                  <UserCog className="h-5 w-5 mr-2 text-gray-600" />
-                  <h2 className="text-lg font-medium">Gebruikersbeheer</h2>
-                </div>
-                
-                {loading ? (
-                  <div className="py-8 flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-buzzaroo-green"></div>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="text-left border-b">
-                          <th className="pb-2 font-medium text-gray-600">E-mail</th>
-                          <th className="pb-2 font-medium text-gray-600">Naam</th>
-                          <th className="pb-2 font-medium text-gray-600">Rol</th>
-                          <th className="pb-2 font-medium text-gray-600">Acties</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {users.length === 0 ? (
-                          <tr>
-                            <td colSpan={4} className="py-4 text-center text-gray-500">
-                              Geen gebruikers gevonden
-                            </td>
-                          </tr>
-                        ) : (
-                          users.map(user => (
-                            <tr key={user.id} className="border-b last:border-0">
-                              <td className="py-3">{user.email}</td>
-                              <td className="py-3">{user.fullName || '-'}</td>
-                              <td className="py-3">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  user.role === 'admin' 
-                                    ? 'bg-purple-100 text-purple-800' 
-                                    : 'bg-blue-100 text-blue-800'
-                                }`}>
-                                  {user.role}
-                                </span>
-                              </td>
-                              <td className="py-3">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => toggleUserRole(user.id, user.role)}
-                                >
-                                  {user.role === 'admin' ? 'Admin Rechten Intrekken' : 'Admin Maken'}
-                                </Button>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
+              </form>
+            </Form>
+          )}
+        </div>
       </div>
     </Layout>
   );
