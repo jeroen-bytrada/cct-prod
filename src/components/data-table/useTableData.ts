@@ -20,6 +20,11 @@ export function useTableData() {
     key: 'cs_documents_total', 
     direction: 'desc' 
   });
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
   const { toast } = useToast();
   
   // Reference to previous customer data to compare for changes
@@ -57,6 +62,31 @@ export function useTableData() {
     }
   }, [toast, sortConfig]);
 
+  // Pagination logic
+  const getPaginatedData = () => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredCustomers.slice(startIndex, endIndex);
+  };
+
+  const goToNextPage = () => {
+    const maxPage = Math.ceil(filteredCustomers.length / pageSize);
+    if (currentPage < maxPage) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const totalPages = () => {
+    return Math.ceil(filteredCustomers.length / pageSize);
+  };
+
+  // Sort data function
   const sortData = (data: Customer[], config: SortConfig): Customer[] => {
     if (!config.key) return data;
     
@@ -142,6 +172,9 @@ export function useTableData() {
     if (searchText.trim() === '') {
       const sortedData = sortData(customers, sortConfig);
       setFilteredCustomers(sortedData);
+      
+      // Reset to first page when search changes
+      setCurrentPage(1);
       return;
     }
 
@@ -154,16 +187,27 @@ export function useTableData() {
     
     const sortedFiltered = sortData(filtered, sortConfig);
     setFilteredCustomers(sortedFiltered);
+    
+    // Reset to first page when search results change
+    setCurrentPage(1);
   }, [searchText, customers, sortConfig]);
 
   return {
     customers,
     filteredCustomers,
+    paginatedCustomers: getPaginatedData(),
     loading,
     searchText,
     setSearchText,
     sortConfig,
     handleSort,
-    fetchCustomers
+    fetchCustomers,
+    // Pagination related
+    currentPage,
+    pageSize,
+    goToNextPage,
+    goToPreviousPage,
+    totalPages,
+    totalCount: filteredCustomers.length
   };
 }

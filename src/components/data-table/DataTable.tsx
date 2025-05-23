@@ -14,12 +14,18 @@ interface DataTableProps {
 const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
   const {
     filteredCustomers,
+    paginatedCustomers,
     loading,
     searchText,
     setSearchText,
     sortConfig,
     handleSort,
-    fetchCustomers
+    fetchCustomers,
+    currentPage,
+    pageSize,
+    goToNextPage,
+    goToPreviousPage,
+    totalCount
   } = useTableData();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -78,7 +84,7 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
             onSort={handleSort} 
           />
           <TableBody 
-            customers={filteredCustomers} 
+            customers={paginatedCustomers} 
             loading={loading} 
             onViewDocuments={handleViewDocuments} 
           />
@@ -86,8 +92,12 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
       </div>
 
       <TableFooter 
-        totalCount={filteredCustomers.length} 
-        visibleCount={filteredCustomers.length} 
+        totalCount={totalCount}
+        visibleCount={paginatedCustomers.length}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        onPreviousPage={goToPreviousPage}
+        onNextPage={goToNextPage}
       />
 
       <CustomerDocumentsModal
