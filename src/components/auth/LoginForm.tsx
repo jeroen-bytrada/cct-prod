@@ -6,11 +6,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
+  onForgotPassword: () => void;
   loading: boolean;
   error: string | null;
 }
 
-const LoginForm = ({ onSubmit, loading, error }: LoginFormProps) => {
+const LoginForm = ({ onSubmit, onForgotPassword, loading, error }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -56,6 +57,17 @@ const LoginForm = ({ onSubmit, loading, error }: LoginFormProps) => {
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Bezig met inloggen...' : 'Inloggen'}
       </Button>
+      
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          className="text-sm text-blue-600 hover:text-blue-800 underline"
+          disabled={loading}
+        >
+          Wachtwoord vergeten?
+        </button>
+      </div>
     </form>
   );
 };
