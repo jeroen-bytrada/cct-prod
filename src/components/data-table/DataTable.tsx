@@ -25,7 +25,8 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
     pageSize,
     goToNextPage,
     goToPreviousPage,
-    totalCount
+    totalCount,
+    changePageSize
   } = useTableData();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -98,6 +99,7 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
         pageSize={pageSize}
         onPreviousPage={goToPreviousPage}
         onNextPage={goToNextPage}
+        onPageSizeChange={changePageSize}
       />
 
       <CustomerDocumentsModal

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Customer, getCustomers, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -84,6 +83,11 @@ export function useTableData() {
 
   const totalPages = () => {
     return Math.ceil(filteredCustomers.length / pageSize);
+  };
+
+  const changePageSize = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
   };
 
   // Sort data function
@@ -208,6 +212,7 @@ export function useTableData() {
     goToNextPage,
     goToPreviousPage,
     totalPages,
-    totalCount: filteredCustomers.length
+    totalCount: filteredCustomers.length,
+    changePageSize
   };
 }

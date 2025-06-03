@@ -2,6 +2,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import PageSizeSelector from './PageSizeSelector';
 
 interface TableFooterProps {
   totalCount: number;
@@ -10,6 +11,7 @@ interface TableFooterProps {
   pageSize: number;
   onPreviousPage: () => void;
   onNextPage: () => void;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
 const TableFooter: React.FC<TableFooterProps> = ({ 
@@ -18,7 +20,8 @@ const TableFooter: React.FC<TableFooterProps> = ({
   currentPage,
   pageSize,
   onPreviousPage,
-  onNextPage
+  onNextPage,
+  onPageSizeChange
 }) => {
   const startRange = totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0;
   const endRange = Math.min(currentPage * pageSize, totalCount);
@@ -27,8 +30,14 @@ const TableFooter: React.FC<TableFooterProps> = ({
   
   return (
     <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 mt-auto">
-      <div className="text-sm text-gray-500">
-        Getoond {totalCount > 0 ? `${startRange}-${endRange} van ${totalCount}` : '0 van 0'}
+      <div className="flex items-center space-x-4">
+        <div className="text-sm text-gray-500">
+          Getoond {totalCount > 0 ? `${startRange}-${endRange} van ${totalCount}` : '0 van 0'}
+        </div>
+        <PageSizeSelector 
+          pageSize={pageSize}
+          onPageSizeChange={onPageSizeChange}
+        />
       </div>
       <div className="flex items-center space-x-2">
         <Button 
