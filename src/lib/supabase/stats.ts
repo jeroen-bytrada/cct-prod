@@ -5,6 +5,26 @@ import { MAX_HISTORY_RECORDS } from './client'
 
 // Stats-related queries
 export async function getStats(): Promise<Stats | null> {
+  // Get current stats using the secure function
+  const { data, error } = await supabase
+    .rpc('get_cct_stats')
+  
+  if (error) {
+    console.error('Error fetching current stats:', error)
+    // Fallback to latest from history if secure function fails
+    return getStatsFromHistory()
+  }
+  
+  return data && data.length > 0 ? {
+    id: data[0].id,
+    total: data[0].total,
+    total_15: data[0].total_15,
+    total_in_proces: data[0].total_in_proces
+  } : null
+}
+
+// Fallback function to get stats from history
+async function getStatsFromHistory(): Promise<Stats | null> {
   const { data, error } = await supabase
     .from('cct_stats_hist')
     .select('*')
@@ -13,7 +33,7 @@ export async function getStats(): Promise<Stats | null> {
     .maybeSingle()
   
   if (error) {
-    console.error('Error fetching stats:', error)
+    console.error('Error fetching stats from history:', error)
     return null
   }
   

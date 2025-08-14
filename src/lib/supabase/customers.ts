@@ -6,9 +6,7 @@ import { DOCUMENTS_PER_PAGE } from './client'
 // Customer-related queries
 export async function getCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase
-    .from('cct_customers')
-    .select('*')
-    .eq('is_active', true)  // Only get active customers
+    .rpc('get_cct_customers')
   
   if (error) {
     console.error('Error fetching customers:', error)
@@ -26,38 +24,33 @@ export async function getCustomers(): Promise<Customer[]> {
 
 export async function getCustomerById(customerId: string): Promise<Customer | null> {
   const { data, error } = await supabase
-    .from('cct_customers')
-    .select('*')
-    .eq('id', customerId)
-    .eq('is_active', true)  // Only get active customers
-    .single();
+    .rpc('get_cct_customers');
   
   if (error) {
     console.error('Error fetching customer by ID:', error);
     return null;
   }
   
-  // Add cs_documents_total to the customer data
-  return data ? {
-    ...data,
+  // Find the specific customer by ID and add cs_documents_total
+  const customer = data?.find(c => c.id === customerId);
+  return customer ? {
+    ...customer,
     cs_documents_total: 
-      (data.cs_documents_in_process || 0) + 
-      (data.cs_documents_other || 0)
+      (customer.cs_documents_in_process || 0) + 
+      (customer.cs_documents_other || 0)
   } : null;
 }
 
 export async function getCustomerCount(): Promise<number> {
-  const { count, error } = await supabase
-    .from('cct_customers')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_active', true)  // Only count active customers
+  const { data, error } = await supabase
+    .rpc('get_cct_customers')
   
   if (error) {
     console.error('Error fetching customer count:', error)
     return 0
   }
   
-  return count || 0
+  return data?.length || 0
 }
 
 export async function getDocumentCount(): Promise<number> {
@@ -148,7 +141,7 @@ export async function updateCustomer(
 ): Promise<boolean> {
   try {
     const { error } = await supabase
-      .from('cct_customers')
+      .from('customers')
       .update({
         customer_name: customerData.customer_name,
         administration_name: customerData.administration_name,

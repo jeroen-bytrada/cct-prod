@@ -204,34 +204,7 @@ export type Database = {
       }
     }
     Views: {
-      cct_customers: {
-        Row: {
-          administration_mail: string | null
-          administration_name: string | null
-          created_at: string | null
-          cs_documents_in_process: number | null
-          cs_documents_other: number | null
-          cs_last_update: string | null
-          customer_name: string | null
-          id: string | null
-          is_active: boolean | null
-          source: string | null
-          source_root: string | null
-        }
-        Relationships: []
-      }
-      cct_stats: {
-        Row: {
-          id: number | null
-          total: number | null
-          total_15: number | null
-          total_in_proces: number | null
-          total_in_proces_15: number | null
-          total_other: number | null
-          total_other_15: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_cct_customers: {
