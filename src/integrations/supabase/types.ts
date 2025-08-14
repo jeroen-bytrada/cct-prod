@@ -80,13 +80,6 @@ export type Database = {
             foreignKeyName: "customer_documents_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "cct_customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_documents_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
@@ -225,32 +218,6 @@ export type Database = {
           source: string | null
           source_root: string | null
         }
-        Insert: {
-          administration_mail?: string | null
-          administration_name?: string | null
-          created_at?: string | null
-          cs_documents_in_process?: number | null
-          cs_documents_other?: number | null
-          cs_last_update?: string | null
-          customer_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          source?: string | null
-          source_root?: string | null
-        }
-        Update: {
-          administration_mail?: string | null
-          administration_name?: string | null
-          created_at?: string | null
-          cs_documents_in_process?: number | null
-          cs_documents_other?: number | null
-          cs_last_update?: string | null
-          customer_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          source?: string | null
-          source_root?: string | null
-        }
         Relationships: []
       }
       cct_stats: {
@@ -267,6 +234,34 @@ export type Database = {
       }
     }
     Functions: {
+      get_cct_customers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          administration_mail: string
+          administration_name: string
+          created_at: string
+          cs_documents_in_process: number
+          cs_documents_other: number
+          cs_last_update: string
+          customer_name: string
+          id: string
+          is_active: boolean
+          source: string
+          source_root: string
+        }[]
+      }
+      get_cct_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: number
+          total: number
+          total_15: number
+          total_in_proces: number
+          total_in_proces_15: number
+          total_other: number
+          total_other_15: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
