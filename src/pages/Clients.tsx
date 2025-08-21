@@ -26,7 +26,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { updateCustomer } from '@/lib/supabase';
+import { updateCustomer, getCustomers, Customer } from '@/lib/supabase';
 import { 
   Dialog, 
   DialogContent, 
@@ -34,17 +34,6 @@ import {
   DialogTitle, 
   DialogFooter 
 } from '@/components/ui/dialog';
-
-type Customer = {
-  id: string;
-  customer_name: string;
-  administration_name: string | null;
-  administration_mail: string | null;
-  source: string | null;
-  source_root: string | null;
-  is_active: boolean | null;
-  created_at: string | null;
-};
 
 type SortDirection = 'asc' | 'desc';
 
@@ -56,6 +45,9 @@ type SortConfig = {
 const emptyCustomer: Customer = {
   id: '',
   customer_name: '',
+  cs_documents_in_process: 0,
+  cs_documents_other: 0,
+  cs_last_update: '',
   administration_name: null,
   administration_mail: null,
   source: null,
@@ -173,14 +165,10 @@ const Clients: React.FC = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('customers')
-        .select('id, customer_name, administration_name, administration_mail, source, source_root, is_active, created_at');
+      const data = await getCustomers();
       
-      if (error) throw error;
-      
-      setCustomers(data || []);
-      const sortedData = sortData(data || [], sortConfig);
+      setCustomers(data);
+      const sortedData = sortData(data, sortConfig);
       setFilteredCustomers(sortedData);
     } catch (error) {
       console.error('Error fetching customers:', error);
