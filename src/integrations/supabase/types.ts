@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -76,6 +76,13 @@ export type Database = {
           uuid?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "cct_customers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_documents_customer_id_fkey"
             columns: ["customer_id"]
@@ -204,7 +211,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      cct_customers: {
+        Row: {
+          administration_mail: string | null
+          administration_name: string | null
+          created_at: string | null
+          cs_documents_in_process: number | null
+          cs_documents_other: number | null
+          cs_documents_total: number | null
+          cs_last_update: string | null
+          customer_name: string | null
+          id: string | null
+          is_active: boolean | null
+          source: string | null
+          source_root: string | null
+          str_cs_documents_total: string | null
+        }
+        Insert: {
+          administration_mail?: string | null
+          administration_name?: string | null
+          created_at?: string | null
+          cs_documents_in_process?: number | null
+          cs_documents_other?: number | null
+          cs_documents_total?: never
+          cs_last_update?: string | null
+          customer_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          source?: string | null
+          source_root?: string | null
+          str_cs_documents_total?: never
+        }
+        Update: {
+          administration_mail?: string | null
+          administration_name?: string | null
+          created_at?: string | null
+          cs_documents_in_process?: number | null
+          cs_documents_other?: number | null
+          cs_documents_total?: never
+          cs_last_update?: string | null
+          customer_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          source?: string | null
+          source_root?: string | null
+          str_cs_documents_total?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_cct_customers: {
