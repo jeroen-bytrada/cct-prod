@@ -26,7 +26,8 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { updateCustomer } from '@/lib/supabase';
+import { updateCustomer, getCustomers } from '@/lib/supabase';
+import { Customer } from '@/lib/supabase/types';
 import { 
   Dialog, 
   DialogContent, 
@@ -34,17 +35,6 @@ import {
   DialogTitle, 
   DialogFooter 
 } from '@/components/ui/dialog';
-
-type Customer = {
-  id: string;
-  customer_name: string;
-  administration_name: string | null;
-  administration_mail: string | null;
-  source: string | null;
-  source_root: string | null;
-  is_active: boolean | null;
-  created_at: string | null;
-};
 
 type SortDirection = 'asc' | 'desc';
 
@@ -61,7 +51,10 @@ const emptyCustomer: Customer = {
   source: null,
   source_root: null,
   is_active: true,
-  created_at: null
+  created_at: null,
+  cs_documents_in_process: null,
+  cs_documents_other: null,
+  cs_last_update: null
 };
 
 const Clients: React.FC = () => {
@@ -173,11 +166,7 @@ const Clients: React.FC = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('customers')
-        .select('id, customer_name, administration_name, administration_mail, source, source_root, is_active, created_at');
-      
-      if (error) throw error;
+      const data = await getCustomers();
       
       setCustomers(data || []);
       const sortedData = sortData(data || [], sortConfig);
