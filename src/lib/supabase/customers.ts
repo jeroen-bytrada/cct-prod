@@ -5,21 +5,45 @@ import { DOCUMENTS_PER_PAGE } from './client'
 
 // Customer-related queries
 export async function getCustomers(): Promise<Customer[]> {
-  const { data, error } = await supabase
-    .rpc('get_cct_customers')
-  
-  if (error) {
-    console.error('Error fetching customers:', error)
+  try {
+    const { data, error } = await supabase
+      .rpc('get_cct_customers')
+    
+    if (error) {
+      console.error('Error fetching customers via RPC:', error)
+      console.log('Falling back to direct table query with auth check')
+      
+      // Fallback to direct query with is_active filter
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+      
+      if (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError)
+        return []
+      }
+      
+      return (fallbackData || []).map(customer => ({
+        ...customer,
+        cs_documents_total: 
+          (customer.cs_documents_in_process || 0) + 
+          (customer.cs_documents_other || 0)
+      }))
+    }
+    
+    // Map the RPC data to include cs_documents_total
+    return (data || []).map(customer => ({
+      ...customer,
+      cs_documents_total: 
+        (customer.cs_documents_in_process || 0) + 
+        (customer.cs_documents_other || 0)
+    }))
+  } catch (error) {
+    console.error('Unexpected error in getCustomers:', error)
     return []
   }
-  
-  // Map the data to include cs_documents_total
-  return (data || []).map(customer => ({
-    ...customer,
-    cs_documents_total: 
-      (customer.cs_documents_in_process || 0) + 
-      (customer.cs_documents_other || 0)
-  }))
 }
 
 export async function getCustomerById(customerId: string): Promise<Customer | null> {

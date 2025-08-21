@@ -32,7 +32,10 @@ export function useTableData() {
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('Fetching customers with active filter...');
       const data = await getCustomers();
+      
+      console.log(`Fetched ${data.length} active customers`);
       
       // Check if data has actually changed
       const customersChanged = !isEqual(data, prevCustomersRef.current);
@@ -46,11 +49,19 @@ export function useTableData() {
         
         // Update reference to current values
         prevCustomersRef.current = data;
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('customers_updated', { 
+          detail: { customers: data } 
+        }));
       } else {
         console.log('Customer data fetched, no changes detected');
       }
     } catch (error) {
       console.error('Failed to fetch customers:', error);
+      // Clear data on error to prevent showing stale inactive customers
+      setCustomers([]);
+      setFilteredCustomers([]);
       toast({
         title: "Error",
         description: "Failed to load customer data. Please try again.",
