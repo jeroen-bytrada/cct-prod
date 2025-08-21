@@ -65,6 +65,31 @@ export async function getCustomerById(customerId: string): Promise<Customer | nu
   } : null;
 }
 
+// Get ALL customers (no filtering) - used by Clients page
+export async function getAllCustomers(): Promise<Customer[]> {
+  try {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Error fetching all customers:', error)
+      return []
+    }
+    
+    return (data || []).map(customer => ({
+      ...customer,
+      cs_documents_total: 
+        (customer.cs_documents_in_process || 0) + 
+        (customer.cs_documents_other || 0)
+    }))
+  } catch (error) {
+    console.error('Unexpected error in getAllCustomers:', error)
+    return []
+  }
+}
+
 export async function getCustomerCount(): Promise<number> {
   const { data, error } = await supabase
     .rpc('get_cct_customers')

@@ -26,7 +26,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { updateCustomer, getCustomers } from '@/lib/supabase';
+import { updateCustomer, getAllCustomers } from '@/lib/supabase';
 import { Customer } from '@/lib/supabase/types';
 import { 
   Dialog, 
@@ -166,7 +166,7 @@ const Clients: React.FC = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const data = await getCustomers();
+      const data = await getAllCustomers();
       
       setCustomers(data || []);
       const sortedData = sortData(data || [], sortConfig);
