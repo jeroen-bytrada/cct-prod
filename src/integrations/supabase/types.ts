@@ -262,6 +262,18 @@ export type Database = {
         }
         Relationships: []
       }
+      cct_stats: {
+        Row: {
+          id: number | null
+          total: number | null
+          total_in_process: number | null
+          total_in_process_x: number | null
+          total_other: number | null
+          total_other_x: number | null
+          total_x: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_cct_customers: {
