@@ -185,6 +185,7 @@ export async function updateCustomer(
     source?: string | null,
     source_root?: string | null,
     is_active?: boolean | null,
+    cct_processed?: boolean | null,
     id?: string
   }
 ): Promise<boolean> {
@@ -198,6 +199,7 @@ export async function updateCustomer(
         source: customerData.source,
         source_root: customerData.source_root,
         is_active: customerData.is_active,
+        cct_processed: customerData.cct_processed,
         ...(customerData.id && customerData.id !== customerId ? { id: customerData.id } : {})
       })
       .eq('id', customerId);

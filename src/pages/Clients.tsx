@@ -51,6 +51,7 @@ const emptyCustomer: Customer = {
   source: null,
   source_root: null,
   is_active: true,
+  cct_processed: false,
   created_at: null,
   cs_documents_in_process: null,
   cs_documents_other: null,
@@ -298,7 +299,8 @@ const Clients: React.FC = () => {
             administration_mail: editingCustomer.administration_mail,
             source: editingCustomer.source,
             source_root: editingCustomer.source_root,
-            is_active: editingCustomer.is_active
+            is_active: editingCustomer.is_active,
+            cct_processed: editingCustomer.cct_processed
           });
           
           if (!success) {
@@ -401,13 +403,19 @@ const Clients: React.FC = () => {
                     >
                       Actief {getSortIcon('is_active')}
                     </TableHead>
+                    <TableHead 
+                      className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort('cct_processed')}
+                    >
+                      Verwerking CCT {getSortIcon('cct_processed')}
+                    </TableHead>
                     <TableHead className="py-2 px-4"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-gray-100">
                   {filteredCustomers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-2 px-4 text-center text-gray-500">
+                      <TableCell colSpan={7} className="py-2 px-4 text-center text-gray-500">
                         {customers.length === 0 ? "No customer data available" : "No matching customers found"}
                       </TableCell>
                     </TableRow>
@@ -431,6 +439,12 @@ const Clients: React.FC = () => {
                         </TableCell>
                         <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
                           {customer.is_active ? 
+                            <Check size={16} className="text-green-500" /> :
+                            <X size={16} className="text-red-500" />
+                          }
+                        </TableCell>
+                        <TableCell className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
+                          {customer.cct_processed ? 
                             <Check size={16} className="text-green-500" /> :
                             <X size={16} className="text-red-500" />
                           }
@@ -567,6 +581,20 @@ const Clients: React.FC = () => {
                   id="is_active"
                   checked={!!editingCustomer.is_active}
                   onChange={(e) => updateField('is_active', e.target.checked)}
+                  className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-6 items-center gap-4">
+              <label htmlFor="cct_processed" className="text-right font-medium col-span-1">
+                Verwerking CCT
+              </label>
+              <div className="col-span-5 flex items-center">
+                <input
+                  type="checkbox"
+                  id="cct_processed"
+                  checked={!!editingCustomer.cct_processed}
+                  onChange={(e) => updateField('cct_processed', e.target.checked)}
                   className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
                 />
               </div>

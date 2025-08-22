@@ -14,7 +14,7 @@ const TableBody: React.FC<TableBodyProps> = ({ customers, loading, onViewDocumen
     return (
       <tbody>
         <tr>
-          <td colSpan={9} className="py-4 px-4 text-center text-gray-500">
+          <td colSpan={8} className="py-4 px-4 text-center text-gray-500">
             Loading customer data...
           </td>
         </tr>
@@ -26,7 +26,7 @@ const TableBody: React.FC<TableBodyProps> = ({ customers, loading, onViewDocumen
     return (
       <tbody>
         <tr>
-          <td colSpan={9} className="py-4 px-4 text-center text-gray-500">
+          <td colSpan={8} className="py-4 px-4 text-center text-gray-500">
             No matching customers found
           </td>
         </tr>
