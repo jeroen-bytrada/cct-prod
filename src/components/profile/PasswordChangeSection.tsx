@@ -19,11 +19,16 @@ const PasswordChangeSection = ({ user }: PasswordChangeSectionProps) => {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [passwordUpdating, setPasswordUpdating] = useState(false);
 
-  // Password validation schema
+  // Password validation schema - Enhanced security with 8+ chars minimum
   const passwordSchema = z.object({
-    currentPassword: z.string().min(6, 'Huidig wachtwoord moet minimaal 6 tekens bevatten'),
-    newPassword: z.string().min(6, 'Nieuw wachtwoord moet minimaal 6 tekens bevatten'),
-    confirmPassword: z.string().min(6, 'Bevestiging moet minimaal 6 tekens bevatten'),
+    currentPassword: z.string().min(1, 'Huidig wachtwoord is vereist'),
+    newPassword: z.string()
+      .min(8, 'Nieuw wachtwoord moet minimaal 8 tekens bevatten')
+      .regex(/[A-Z]/, 'Wachtwoord moet minimaal één hoofdletter bevatten')
+      .regex(/[a-z]/, 'Wachtwoord moet minimaal één kleine letter bevatten')
+      .regex(/\d/, 'Wachtwoord moet minimaal één cijfer bevatten')
+      .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Wachtwoord moet minimaal één speciaal teken bevatten'),
+    confirmPassword: z.string().min(1, 'Bevestiging is vereist'),
   }).refine((data) => data.newPassword === data.confirmPassword, {
     message: "Wachtwoorden komen niet overeen",
     path: ["confirmPassword"],

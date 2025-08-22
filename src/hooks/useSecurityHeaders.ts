@@ -25,8 +25,8 @@ export const useSecurityHeaders = () => {
       "base-uri 'self';"
     );
 
-    // X-Frame-Options
-    setMetaTag('X-Frame-Options', 'DENY');
+    // X-Frame-Options - Allow SAMEORIGIN for editor compatibility
+    setMetaTag('X-Frame-Options', 'SAMEORIGIN');
 
     // X-Content-Type-Options
     setMetaTag('X-Content-Type-Options', 'nosniff');
