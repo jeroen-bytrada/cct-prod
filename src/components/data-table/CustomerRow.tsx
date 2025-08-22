@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, RefreshCw } from 'lucide-react';
+import { FileText, Check } from 'lucide-react';
 import { Customer } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { updateCustomerLastUpdate } from '@/lib/supabase/customers';
@@ -75,10 +75,10 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
         {customer.cs_documents_other}
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
-        <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
           <span>{formatDate(customer.cs_last_update)}</span>
           {customer.last_updated_by && (
-            <Badge variant="secondary" className="text-xs w-fit">
+            <Badge variant="secondary" className="text-xs">
               {customer.last_updated_by}
             </Badge>
           )}
@@ -87,15 +87,15 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
       <td className="py-2 px-4 whitespace-nowrap text-sm text-right">
         <div className="flex items-center gap-2 justify-end">
           <button 
-            className="text-blue-600 hover:text-blue-800 transition-colors disabled:opacity-50"
+            className="text-green-600 hover:text-green-800 transition-colors disabled:opacity-50"
             onClick={handleUpdateLastUpdate}
             disabled={isUpdating}
             title="Bijwerken"
           >
-            <RefreshCw size={16} className={isUpdating ? 'animate-spin' : ''} />
+            <Check size={16} className={isUpdating ? 'animate-pulse' : ''} />
           </button>
           <button 
-            className="text-green-600 hover:text-green-800 transition-colors"
+            className="text-blue-600 hover:text-blue-800 transition-colors"
             onClick={() => onViewDocuments(customer.id)}
             title="Documenten bekijken"
           >
