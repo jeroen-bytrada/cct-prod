@@ -34,7 +34,7 @@ const TableColumns: React.FC<TableColumnsProps> = ({ sortConfig, onSort }) => {
             onSort={onSort}
             className={
               ['cs_documents_total', 'cs_documents_in_process', 'cs_documents_other', 'cs_documents_inbox'].includes(column.key) 
-                ? 'w-24' 
+                ? 'w-32 min-w-32' 
                 : ''
             }
           />
