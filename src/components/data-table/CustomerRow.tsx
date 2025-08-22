@@ -96,7 +96,7 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
           <span>{formatDate(customer.cs_last_update)}</span>
         </div>
       </td>
-      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-32 min-w-32 text-center">
+      <td className="py-2 pl-1 pr-4 whitespace-nowrap text-sm text-gray-900 w-32 min-w-32">
         {customer.last_updated_by && (
           <Badge 
             variant="secondary" 
