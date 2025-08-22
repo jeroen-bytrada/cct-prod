@@ -276,6 +276,7 @@ export type Database = {
           customer_name: string
           id: string
           is_active: boolean
+          last_updated_by: string
           source: string
           source_root: string
         }[]
