@@ -571,11 +571,11 @@ const Clients: React.FC = () => {
                 className="col-span-5"
               />
             </div>
-            <div className="grid grid-cols-6 items-center gap-4">
-              <label htmlFor="is_active" className="text-right font-medium col-span-1">
-                Actief
-              </label>
-              <div className="col-span-5 flex items-center">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex items-center gap-3">
+                <label htmlFor="is_active" className="font-medium">
+                  Actief
+                </label>
                 <input
                   type="checkbox"
                   id="is_active"
@@ -584,12 +584,10 @@ const Clients: React.FC = () => {
                   className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-6 items-center gap-4">
-              <label htmlFor="cct_processed" className="text-right font-medium col-span-1">
-                Verwerking CCT
-              </label>
-              <div className="col-span-5 flex items-center">
+              <div className="flex items-center gap-3">
+                <label htmlFor="cct_processed" className="font-medium">
+                  Verwerking CCT
+                </label>
                 <input
                   type="checkbox"
                   id="cct_processed"
