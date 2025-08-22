@@ -103,6 +103,7 @@ export type Database = {
           customer_name: string | null
           id: string
           is_active: boolean | null
+          last_updated_by: string | null
           source: string | null
           source_root: string | null
         }
@@ -116,6 +117,7 @@ export type Database = {
           customer_name?: string | null
           id: string
           is_active?: boolean | null
+          last_updated_by?: string | null
           source?: string | null
           source_root?: string | null
         }
@@ -129,6 +131,7 @@ export type Database = {
           customer_name?: string | null
           id?: string
           is_active?: boolean | null
+          last_updated_by?: string | null
           source?: string | null
           source_root?: string | null
         }
