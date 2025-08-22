@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Check } from 'lucide-react';
 import { Customer } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { updateCustomerLastUpdate } from '@/lib/supabase/customers';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { getUserBadgeColor } from '@/lib/supabase/userBadgeColors';
 
 interface CustomerRowProps {
   customer: Customer;
@@ -14,7 +15,20 @@ interface CustomerRowProps {
 
 const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [badgeColor, setBadgeColor] = useState<string>('#e5e7eb');
   const { toast } = useToast();
+
+  // Fetch the user's badge color when component mounts or when last_updated_by changes
+  useEffect(() => {
+    const fetchBadgeColor = async () => {
+      if (customer.last_updated_by) {
+        const color = await getUserBadgeColor(customer.last_updated_by);
+        setBadgeColor(color);
+      }
+    };
+    
+    fetchBadgeColor();
+  }, [customer.last_updated_by]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -81,7 +95,11 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
         <div className="flex items-center gap-2">
           <span>{formatDate(customer.cs_last_update)}</span>
           {customer.last_updated_by && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge 
+              variant="secondary" 
+              className="text-xs text-black border-0"
+              style={{ backgroundColor: badgeColor }}
+            >
               {customer.last_updated_by}
             </Badge>
           )}

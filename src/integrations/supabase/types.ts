@@ -145,6 +145,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          badge_color: string | null
           created_at: string
           email: string
           full_name: string | null
@@ -152,6 +153,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          badge_color?: string | null
           created_at?: string
           email: string
           full_name?: string | null
@@ -159,6 +161,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          badge_color?: string | null
           created_at?: string
           email?: string
           full_name?: string | null

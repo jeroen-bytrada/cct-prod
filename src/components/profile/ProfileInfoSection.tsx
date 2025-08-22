@@ -16,9 +16,29 @@ interface ProfileInfoSectionProps {
   setFullName: (name: string) => void;
 }
 
+// Predefined badge colors that work well with black text
+const BADGE_COLORS = [
+  { name: 'Grijs', value: '#e5e7eb' },
+  { name: 'Blauw', value: '#dbeafe' },
+  { name: 'Groen', value: '#dcfce7' },
+  { name: 'Geel', value: '#fef3c7' },
+  { name: 'Roze', value: '#fce7f3' },
+  { name: 'Paars', value: '#e9d5ff' },
+  { name: 'Oranje', value: '#fed7aa' },
+  { name: 'Rood', value: '#fecaca' },
+];
+
 const ProfileInfoSection = ({ user, profile, fullName, setFullName }: ProfileInfoSectionProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBadgeColor, setSelectedBadgeColor] = useState('#e5e7eb');
+
+  // Update selectedBadgeColor when profile changes
+  React.useEffect(() => {
+    if (profile?.badge_color) {
+      setSelectedBadgeColor(profile.badge_color);
+    }
+  }, [profile]);
 
   const handleUpdateProfile = async () => {
     if (!user) return;
@@ -35,10 +55,13 @@ const ProfileInfoSection = ({ user, profile, fullName, setFullName }: ProfileInf
       
       if (authError) throw authError;
       
-      // Also update the public profile
+      // Also update the public profile including badge color
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ full_name: fullName })
+        .update({ 
+          full_name: fullName,
+          badge_color: selectedBadgeColor
+        })
         .eq('id', user.id);
         
       if (profileError) throw profileError;
@@ -96,6 +119,41 @@ const ProfileInfoSection = ({ user, profile, fullName, setFullName }: ProfileInf
             Je e-mailadres kan niet worden gewijzigd.
           </p>
         </div>
+
+        <div>
+          <Label htmlFor="badgeColor">Badge Kleur</Label>
+          <p className="text-xs text-gray-500 mb-2">
+            Kies een kleur voor je badge wanneer je updates maakt
+          </p>
+          {isEditing ? (
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {BADGE_COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  onClick={() => setSelectedBadgeColor(color.value)}
+                  className={`p-2 rounded-md border-2 transition-all ${
+                    selectedBadgeColor === color.value 
+                      ? 'border-blue-500 shadow-md' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                >
+                  <span className="text-xs font-medium text-black">{color.name}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-1">
+              <div 
+                className="inline-flex px-3 py-1 rounded-md text-xs font-medium"
+                style={{ backgroundColor: selectedBadgeColor }}
+              >
+                <span className="text-black">Voorbeeld Badge</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {isEditing && (
@@ -104,7 +162,7 @@ const ProfileInfoSection = ({ user, profile, fullName, setFullName }: ProfileInf
             variant="outline"
             onClick={() => {
               setIsEditing(false);
-              // Reset to original value from profile or user metadata
+              // Reset to original values from profile or user metadata
               if (profile?.full_name) {
                 setFullName(profile.full_name);
               } else if (user?.user_metadata.full_name) {
@@ -112,6 +170,7 @@ const ProfileInfoSection = ({ user, profile, fullName, setFullName }: ProfileInf
               } else {
                 setFullName('');
               }
+              setSelectedBadgeColor(profile?.badge_color || '#e5e7eb');
             }}
           >
             Annuleren
