@@ -19,8 +19,8 @@ const TableColumns: React.FC<TableColumnsProps> = ({ sortConfig, onSort }) => {
     { key: 'cs_documents_in_process' as keyof Customer, label: 'Snelstart' },
     { key: 'cs_documents_other' as keyof Customer, label: 'Calculate' },
     { key: 'cs_documents_inbox' as keyof Customer, label: 'Inbox' },
-    { key: 'last_updated_by' as keyof Customer, label: 'Door' },
     { key: 'cs_last_update' as keyof Customer, label: 'Bijgewerkt' },
+    { key: 'last_updated_by' as keyof Customer, label: 'Door' },
   ];
 
   return (
