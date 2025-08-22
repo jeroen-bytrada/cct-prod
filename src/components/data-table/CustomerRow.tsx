@@ -88,7 +88,7 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
         <div className="flex items-center gap-2 justify-end">
           <button 
             className={`
-              w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-50
+              w-6 h-6 rounded-full flex items-center justify-center transition-colors disabled:opacity-50
               ${customer.last_updated_by === null || customer.last_updated_by === "CCT" 
                 ? 'bg-green-600 text-white hover:bg-green-700' 
                 : 'bg-white text-green-600 border-2 border-green-600 hover:bg-green-50'
@@ -98,7 +98,7 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
             disabled={isUpdating}
             title="Bijwerken"
           >
-            <Check size={14} className={isUpdating ? 'animate-pulse' : ''} />
+            <Check size={16} className={isUpdating ? 'animate-pulse' : ''} />
           </button>
           <button 
             className="text-blue-600 hover:text-blue-800 transition-colors"
