@@ -240,3 +240,19 @@ export async function updateCustomerLastUpdate(customerId: string): Promise<bool
     return false;
   }
 }
+
+// Update Verwerking CCT (cct_processed) flag
+export async function updateCustomerCctProcessed(customerId: string, cctProcessed: boolean): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('customers')
+      .update({ cct_processed: cctProcessed })
+      .eq('id', customerId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error updating cct_processed:', error);
+    return false;
+  }
+}

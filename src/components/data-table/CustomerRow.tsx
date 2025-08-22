@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { FileText, Check } from 'lucide-react';
 import { Customer } from '@/lib/supabase';
 import { format } from 'date-fns';
-import { updateCustomerLastUpdate } from '@/lib/supabase/customers';
+import { updateCustomerLastUpdate, updateCustomerCctProcessed } from '@/lib/supabase/customers';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 interface CustomerRowProps {
   customer: Customer;
@@ -14,6 +15,7 @@ interface CustomerRowProps {
 
 const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) => {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
   const { toast } = useToast();
 
   const formatDate = (dateString: string) => {
@@ -54,6 +56,34 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
     }
   };
 
+  const handleToggleCctProcessed = async (checked: boolean) => {
+    setIsToggling(true);
+    try {
+      const success = await updateCustomerCctProcessed(customer.id, checked);
+      if (success) {
+        toast({
+          title: 'Bijgewerkt',
+          description: 'Verwerking CCT is aangepast',
+        });
+        window.dispatchEvent(new CustomEvent('stats_update'));
+      } else {
+        toast({
+          title: 'Fout',
+          description: 'Kon Verwerking CCT niet opslaan',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Fout',
+        description: 'Er is een fout opgetreden',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <tr 
       key={customer.id} 
@@ -76,6 +106,14 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
         {customer.cs_documents_inbox || 0}
+      </td>
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
+        <Switch
+          checked={!!customer.cct_processed}
+          onCheckedChange={handleToggleCctProcessed}
+          disabled={isToggling}
+          aria-label="Verwerking CCT"
+        />
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
         <div className="flex items-center gap-2">

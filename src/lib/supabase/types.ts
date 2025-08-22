@@ -12,6 +12,7 @@ export type Customer = {
   source?: string | null
   source_root?: string | null
   is_active?: boolean | null
+  cct_processed?: boolean | null
   created_at?: string | null
   last_updated_by?: string | null
 }

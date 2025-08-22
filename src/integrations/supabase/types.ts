@@ -96,6 +96,7 @@ export type Database = {
         Row: {
           administration_mail: string | null
           administration_name: string | null
+          cct_processed: boolean | null
           created_at: string | null
           cs_documents_in_process: number | null
           cs_documents_inbox: number | null
@@ -111,6 +112,7 @@ export type Database = {
         Insert: {
           administration_mail?: string | null
           administration_name?: string | null
+          cct_processed?: boolean | null
           created_at?: string | null
           cs_documents_in_process?: number | null
           cs_documents_inbox?: number | null
@@ -126,6 +128,7 @@ export type Database = {
         Update: {
           administration_mail?: string | null
           administration_name?: string | null
+          cct_processed?: boolean | null
           created_at?: string | null
           cs_documents_in_process?: number | null
           cs_documents_inbox?: number | null
@@ -284,6 +287,7 @@ export type Database = {
         Returns: {
           administration_mail: string
           administration_name: string
+          cct_processed: boolean
           created_at: string
           cs_documents_in_process: number
           cs_documents_inbox: number
