@@ -91,18 +91,40 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-32 min-w-32 text-center">
         {customer.cs_documents_inbox || 0}
       </td>
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-center w-20 min-w-20">
+        <div className="flex justify-center">
+          <div 
+            className={`
+              w-4 h-4 rounded-full flex items-center justify-center
+              ${customer.last_updated_by === null || customer.last_updated_by === "CCT" 
+                ? 'bg-green-600' 
+                : 'bg-white border-2 border-green-600'
+              }
+            `}
+            title={customer.last_updated_by === null || customer.last_updated_by === "CCT" ? 'Systeem bijgewerkt' : 'Gebruiker bijgewerkt'}
+          >
+            {customer.last_updated_by === null || customer.last_updated_by === "CCT" ? (
+              <Check size={10} className="text-white" />
+            ) : (
+              <Check size={10} className="text-green-600" />
+            )}
+          </div>
+        </div>
+      </td>
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-32 min-w-32 text-center">
+        {customer.last_updated_by && (
+          <Badge 
+            variant="secondary" 
+            className="text-xs text-black border-0"
+            style={{ backgroundColor: badgeColor }}
+          >
+            {customer.last_updated_by}
+          </Badge>
+        )}
+      </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
         <div className="flex items-center gap-2">
           <span>{formatDate(customer.cs_last_update)}</span>
-          {customer.last_updated_by && (
-            <Badge 
-              variant="secondary" 
-              className="text-xs text-black border-0"
-              style={{ backgroundColor: badgeColor }}
-            >
-              {customer.last_updated_by}
-            </Badge>
-          )}
         </div>
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-right">

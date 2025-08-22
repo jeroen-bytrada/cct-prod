@@ -29,6 +29,14 @@ export function useTableData() {
   // Reference to previous customer data to compare for changes
   const prevCustomersRef = useRef<Customer[]>([]);
 
+  // Helper function to add computed fields to customers
+  const addComputedFields = (customers: Customer[]): Customer[] => {
+    return customers.map(customer => ({
+      ...customer,
+      update_status: (customer.last_updated_by === 'CCT' || !customer.last_updated_by) ? 'system' : 'user'
+    }));
+  };
+
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true);
@@ -37,22 +45,25 @@ export function useTableData() {
       
       console.log(`Fetched ${data.length} active customers`);
       
+      // Add computed fields
+      const dataWithComputedFields = addComputedFields(data);
+      
       // Check if data has actually changed
-      const customersChanged = !isEqual(data, prevCustomersRef.current);
+      const customersChanged = !isEqual(dataWithComputedFields, prevCustomersRef.current);
       
       if (customersChanged) {
         console.log('Customer data changed, updating table');
-        setCustomers(data);
+        setCustomers(dataWithComputedFields);
         
-        const sortedData = sortData(data, sortConfig);
+        const sortedData = sortData(dataWithComputedFields, sortConfig);
         setFilteredCustomers(sortedData);
         
         // Update reference to current values
-        prevCustomersRef.current = data;
+        prevCustomersRef.current = dataWithComputedFields;
         
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('customers_updated', { 
-          detail: { customers: data } 
+          detail: { customers: dataWithComputedFields } 
         }));
       } else {
         console.log('Customer data fetched, no changes detected');
@@ -197,7 +208,8 @@ export function useTableData() {
     const filtered = customers.filter(
       customer => 
         customer.id.toLowerCase().includes(searchLower) || 
-        customer.customer_name.toLowerCase().includes(searchLower)
+        customer.customer_name.toLowerCase().includes(searchLower) ||
+        (customer.last_updated_by && customer.last_updated_by.toLowerCase().includes(searchLower))
     );
     
     const sortedFiltered = sortData(filtered, sortConfig);
