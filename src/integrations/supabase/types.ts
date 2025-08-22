@@ -98,6 +98,7 @@ export type Database = {
           administration_name: string | null
           created_at: string | null
           cs_documents_in_process: number | null
+          cs_documents_inbox: number | null
           cs_documents_other: number | null
           cs_last_update: string | null
           customer_name: string | null
@@ -112,6 +113,7 @@ export type Database = {
           administration_name?: string | null
           created_at?: string | null
           cs_documents_in_process?: number | null
+          cs_documents_inbox?: number | null
           cs_documents_other?: number | null
           cs_last_update?: string | null
           customer_name?: string | null
@@ -126,6 +128,7 @@ export type Database = {
           administration_name?: string | null
           created_at?: string | null
           cs_documents_in_process?: number | null
+          cs_documents_inbox?: number | null
           cs_documents_other?: number | null
           cs_last_update?: string | null
           customer_name?: string | null
@@ -283,6 +286,7 @@ export type Database = {
           administration_name: string
           created_at: string
           cs_documents_in_process: number
+          cs_documents_inbox: number
           cs_documents_other: number
           cs_last_update: string
           customer_name: string
