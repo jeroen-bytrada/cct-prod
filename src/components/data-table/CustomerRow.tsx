@@ -75,7 +75,7 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
         {customer.cs_documents_other}
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
-        -
+        {customer.cs_documents_inbox || 0}
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
         <div className="flex items-center gap-2">

@@ -5,6 +5,7 @@ export type Customer = {
   cs_documents_total?: number // Make it optional
   cs_documents_in_process: number
   cs_documents_other: number
+  cs_documents_inbox?: number
   cs_last_update: string
   administration_name?: string | null
   administration_mail?: string | null
