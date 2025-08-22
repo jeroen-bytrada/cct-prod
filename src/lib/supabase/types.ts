@@ -15,7 +15,6 @@ export type Customer = {
   cct_processed?: boolean | null
   created_at?: string | null
   last_updated_by?: string | null
-  update_status?: 'system' | 'user' // Computed field for sorting
 }
 
 export type CustomerDocument = {

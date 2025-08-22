@@ -19,8 +19,7 @@ const TableColumns: React.FC<TableColumnsProps> = ({ sortConfig, onSort }) => {
     { key: 'cs_documents_in_process' as keyof Customer, label: 'Snelstart' },
     { key: 'cs_documents_other' as keyof Customer, label: 'Calculate' },
     { key: 'cs_documents_inbox' as keyof Customer, label: 'Inbox' },
-    { key: 'update_status' as keyof Customer, label: 'Status' },
-    { key: 'last_updated_by' as keyof Customer, label: 'Bijgewerkt door' },
+    { key: 'last_updated_by' as keyof Customer, label: 'Door' },
     { key: 'cs_last_update' as keyof Customer, label: 'Bijgewerkt' },
   ];
 
@@ -37,8 +36,6 @@ const TableColumns: React.FC<TableColumnsProps> = ({ sortConfig, onSort }) => {
             className={
               ['cs_documents_total', 'cs_documents_in_process', 'cs_documents_other', 'cs_documents_inbox'].includes(column.key) 
                 ? 'w-32 min-w-32' 
-                : column.key === 'update_status' 
-                ? 'w-20 min-w-20' 
                 : column.key === 'last_updated_by' 
                 ? 'w-32 min-w-32' 
                 : ''

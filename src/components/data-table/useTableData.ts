@@ -29,14 +29,6 @@ export function useTableData() {
   // Reference to previous customer data to compare for changes
   const prevCustomersRef = useRef<Customer[]>([]);
 
-  // Helper function to add computed fields to customers
-  const addComputedFields = (customers: Customer[]): Customer[] => {
-    return customers.map(customer => ({
-      ...customer,
-      update_status: (customer.last_updated_by === 'CCT' || !customer.last_updated_by) ? 'system' : 'user'
-    }));
-  };
-
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true);
@@ -45,25 +37,22 @@ export function useTableData() {
       
       console.log(`Fetched ${data.length} active customers`);
       
-      // Add computed fields
-      const dataWithComputedFields = addComputedFields(data);
-      
       // Check if data has actually changed
-      const customersChanged = !isEqual(dataWithComputedFields, prevCustomersRef.current);
+      const customersChanged = !isEqual(data, prevCustomersRef.current);
       
       if (customersChanged) {
         console.log('Customer data changed, updating table');
-        setCustomers(dataWithComputedFields);
+        setCustomers(data);
         
-        const sortedData = sortData(dataWithComputedFields, sortConfig);
+        const sortedData = sortData(data, sortConfig);
         setFilteredCustomers(sortedData);
         
         // Update reference to current values
-        prevCustomersRef.current = dataWithComputedFields;
+        prevCustomersRef.current = data;
         
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('customers_updated', { 
-          detail: { customers: dataWithComputedFields } 
+          detail: { customers: data } 
         }));
       } else {
         console.log('Customer data fetched, no changes detected');
