@@ -74,6 +74,9 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
         {customer.cs_documents_other}
       </td>
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
+        -
+      </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
         <div className="flex items-center gap-2">
           <span>{formatDate(customer.cs_last_update)}</span>
