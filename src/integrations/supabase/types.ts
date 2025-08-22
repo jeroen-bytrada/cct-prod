@@ -266,11 +266,11 @@ export type Database = {
         Row: {
           id: number | null
           total: number | null
-          total_in_process: number | null
-          total_in_process_x: number | null
+          total_15: number | null
+          total_in_proces: number | null
+          total_in_process_15: number | null
           total_other: number | null
-          total_other_x: number | null
-          total_x: number | null
+          total_other_15: number | null
         }
         Relationships: []
       }
