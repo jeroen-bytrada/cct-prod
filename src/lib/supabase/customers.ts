@@ -209,3 +209,34 @@ export async function updateCustomer(
     return false;
   }
 }
+
+// Update customer last update timestamp and user
+export async function updateCustomerLastUpdate(customerId: string): Promise<boolean> {
+  try {
+    // Get current user's profile for name
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', (await supabase.auth.getUser()).data.user?.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+      return false;
+    }
+
+    const { error } = await supabase
+      .from('customers')
+      .update({
+        cs_last_update: new Date().toISOString(),
+        last_updated_by: profile?.full_name || 'Unknown User'
+      })
+      .eq('id', customerId);
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error updating customer last update:', error);
+    return false;
+  }
+}

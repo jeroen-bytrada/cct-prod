@@ -12,6 +12,7 @@ export type Customer = {
   source_root?: string | null
   is_active?: boolean | null
   created_at?: string | null
+  last_updated_by?: string | null
 }
 
 export type CustomerDocument = {

@@ -1,8 +1,11 @@
 
-import React from 'react';
-import { FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, RefreshCw } from 'lucide-react';
 import { Customer } from '@/lib/supabase';
 import { format } from 'date-fns';
+import { updateCustomerLastUpdate } from '@/lib/supabase/customers';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface CustomerRowProps {
   customer: Customer;
@@ -10,12 +13,44 @@ interface CustomerRowProps {
 }
 
 const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) => {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
       return format(date, 'dd.MM.yyyy - HH:mm');
     } catch (e) {
       return dateString;
+    }
+  };
+
+  const handleUpdateLastUpdate = async () => {
+    setIsUpdating(true);
+    try {
+      const success = await updateCustomerLastUpdate(customer.id);
+      if (success) {
+        toast({
+          title: "Bijgewerkt",
+          description: "Klant is succesvol bijgewerkt",
+        });
+        // Trigger a custom event to refresh data
+        window.dispatchEvent(new CustomEvent('stats_update'));
+      } else {
+        toast({
+          title: "Fout",
+          description: "Kon klant niet bijwerken",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Fout",
+        description: "Er is een fout opgetreden",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -40,15 +75,33 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
         {customer.cs_documents_other}
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">
-        {formatDate(customer.cs_last_update)}
+        <div className="flex flex-col gap-1">
+          <span>{formatDate(customer.cs_last_update)}</span>
+          {customer.last_updated_by && (
+            <Badge variant="secondary" className="text-xs w-fit">
+              {customer.last_updated_by}
+            </Badge>
+          )}
+        </div>
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-right">
-        <button 
-          className="text-green-600 hover:text-green-800 transition-colors"
-          onClick={() => onViewDocuments(customer.id)}
-        >
-          <FileText size={16} />
-        </button>
+        <div className="flex items-center gap-2 justify-end">
+          <button 
+            className="text-blue-600 hover:text-blue-800 transition-colors disabled:opacity-50"
+            onClick={handleUpdateLastUpdate}
+            disabled={isUpdating}
+            title="Bijwerken"
+          >
+            <RefreshCw size={16} className={isUpdating ? 'animate-spin' : ''} />
+          </button>
+          <button 
+            className="text-green-600 hover:text-green-800 transition-colors"
+            onClick={() => onViewDocuments(customer.id)}
+            title="Documenten bekijken"
+          >
+            <FileText size={16} />
+          </button>
+        </div>
       </td>
     </tr>
   );
