@@ -65,16 +65,16 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
         {customer.customer_name}
       </td>
-      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
         {customer.cs_documents_total}
       </td>
-      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
         {customer.cs_documents_in_process}
       </td>
-      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
         {customer.cs_documents_other}
       </td>
-      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-900 w-24">
         -
       </td>
       <td className="py-2 px-4 whitespace-nowrap text-sm text-gray-500">

@@ -32,6 +32,11 @@ const TableColumns: React.FC<TableColumnsProps> = ({ sortConfig, onSort }) => {
             label={column.label}
             sortConfig={sortConfig}
             onSort={onSort}
+            className={
+              ['cs_documents_total', 'cs_documents_in_process', 'cs_documents_other', 'inbox'].includes(column.key) 
+                ? 'w-24' 
+                : ''
+            }
           />
         ))}
         <th className="py-3 px-4"></th>

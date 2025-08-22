@@ -11,10 +11,11 @@ interface ColumnHeaderProps {
     direction: 'asc' | 'desc';
   };
   onSort: (column: keyof Customer) => void;
+  className?: string;
 }
 
-const ColumnHeader: React.FC<ColumnHeaderProps> = ({ column, label, sortConfig, onSort }) => {
-  const columnHeaderStyle = "py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none";
+const ColumnHeader: React.FC<ColumnHeaderProps> = ({ column, label, sortConfig, onSort, className }) => {
+  const columnHeaderStyle = `py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none ${className || ''}`;
   
   const getSortIcon = () => {
     if (sortConfig.key !== column) {
