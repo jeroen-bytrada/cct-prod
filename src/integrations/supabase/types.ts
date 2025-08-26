@@ -241,7 +241,7 @@ export type Database = {
           total: number | null
           total_15: number | null
           total_in_proces: number | null
-          total_in_proces_15: number | null
+          total_in_process_15: number | null
           total_other: number | null
           total_other_15: number | null
         }
