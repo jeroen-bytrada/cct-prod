@@ -108,7 +108,14 @@ export async function removeUserRole(userId: string, role: 'admin' | 'user'): Pr
 // New function to fetch all users with their roles
 export async function getAllUsers(): Promise<UserWithRole[]> {
   try {
-    // First get all authenticated users from auth.users
+    // Enforce admin-only access on client side as well
+    const isAdmin = await checkUserRole('admin');
+    if (!isAdmin) {
+      console.warn('Unauthorized getAllUsers() access attempt');
+      return [];
+    }
+
+    // First get all authenticated users from auth.users (requires service role on server)
     const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
     
     if (authError) {

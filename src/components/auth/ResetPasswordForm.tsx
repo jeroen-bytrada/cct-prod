@@ -22,10 +22,24 @@ const ResetPasswordForm = ({ onSubmit, loading, error }: ResetPasswordFormProps)
       setValidationError('Wachtwoorden komen niet overeen');
       return;
     }
-    
-    if (password.length < 6) {
-      setValidationError('Wachtwoord moet minimaal 6 karakters lang zijn');
+
+    if (password.length < 8) {
+      setValidationError('Wachtwoord moet minimaal 8 karakters lang zijn');
       return;
+    }
+
+    const complexityChecks = [
+      { regex: /[A-Z]/, msg: 'Minimaal één hoofdletter vereist' },
+      { regex: /[a-z]/, msg: 'Minimaal één kleine letter vereist' },
+      { regex: /\d/, msg: 'Minimaal één cijfer vereist' },
+      { regex: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, msg: 'Minimaal één speciaal teken vereist' },
+    ];
+
+    for (const check of complexityChecks) {
+      if (!check.regex.test(password)) {
+        setValidationError(check.msg);
+        return;
+      }
     }
     
     setValidationError(null);
@@ -51,7 +65,7 @@ const ResetPasswordForm = ({ onSubmit, loading, error }: ResetPasswordFormProps)
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
           required
-          minLength={6}
+          minLength={8}
         />
       </div>
       
@@ -66,7 +80,7 @@ const ResetPasswordForm = ({ onSubmit, loading, error }: ResetPasswordFormProps)
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="••••••••"
           required
-          minLength={6}
+          minLength={8}
         />
       </div>
       
