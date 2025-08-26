@@ -29,7 +29,8 @@ export async function getCustomers(): Promise<Customer[]> {
         ...customer,
         cs_documents_total: 
           (customer.cs_documents_in_process || 0) + 
-          (customer.cs_documents_other || 0)
+          (customer.cs_documents_other || 0) + 
+          (customer.cs_documents_inbox || 0)
       }))
     }
     
@@ -38,7 +39,8 @@ export async function getCustomers(): Promise<Customer[]> {
       ...customer,
       cs_documents_total: 
         (customer.cs_documents_in_process || 0) + 
-        (customer.cs_documents_other || 0)
+        (customer.cs_documents_other || 0) + 
+        (customer.cs_documents_inbox || 0)
     }))
   } catch (error) {
     console.error('Unexpected error in getCustomers:', error)
@@ -61,7 +63,8 @@ export async function getCustomerById(customerId: string): Promise<Customer | nu
     ...customer,
     cs_documents_total: 
       (customer.cs_documents_in_process || 0) + 
-      (customer.cs_documents_other || 0)
+      (customer.cs_documents_other || 0) + 
+      (customer.cs_documents_inbox || 0)
   } : null;
 }
 
@@ -82,7 +85,8 @@ export async function getAllCustomers(): Promise<Customer[]> {
       ...customer,
       cs_documents_total: 
         (customer.cs_documents_in_process || 0) + 
-        (customer.cs_documents_other || 0)
+        (customer.cs_documents_other || 0) + 
+        (customer.cs_documents_inbox || 0)
     }))
   } catch (error) {
     console.error('Unexpected error in getAllCustomers:', error)
