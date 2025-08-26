@@ -80,13 +80,6 @@ export type Database = {
             foreignKeyName: "customer_documents_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "cct_customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_documents_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
@@ -230,47 +223,15 @@ export type Database = {
           cct_processed: boolean | null
           created_at: string | null
           cs_documents_in_process: number | null
+          cs_documents_inbox: number | null
           cs_documents_other: number | null
-          cs_documents_total: number | null
           cs_last_update: string | null
           customer_name: string | null
           id: string | null
           is_active: boolean | null
+          last_updated_by: string | null
           source: string | null
           source_root: string | null
-          str_cs_documents_total: string | null
-        }
-        Insert: {
-          administration_mail?: string | null
-          administration_name?: string | null
-          cct_processed?: boolean | null
-          created_at?: string | null
-          cs_documents_in_process?: number | null
-          cs_documents_other?: number | null
-          cs_documents_total?: never
-          cs_last_update?: string | null
-          customer_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          source?: string | null
-          source_root?: string | null
-          str_cs_documents_total?: never
-        }
-        Update: {
-          administration_mail?: string | null
-          administration_name?: string | null
-          cct_processed?: boolean | null
-          created_at?: string | null
-          cs_documents_in_process?: number | null
-          cs_documents_other?: number | null
-          cs_documents_total?: never
-          cs_last_update?: string | null
-          customer_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          source?: string | null
-          source_root?: string | null
-          str_cs_documents_total?: never
         }
         Relationships: []
       }
@@ -280,7 +241,7 @@ export type Database = {
           total: number | null
           total_15: number | null
           total_in_proces: number | null
-          total_in_process_15: number | null
+          total_in_proces_15: number | null
           total_other: number | null
           total_other_15: number | null
         }
