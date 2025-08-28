@@ -7,6 +7,7 @@ import { updateCustomerLastUpdate } from '@/lib/supabase/customers';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { getUserBadgeColor } from '@/lib/supabase/userBadgeColors';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CustomerRowProps {
   customer: Customer;
@@ -16,18 +17,41 @@ interface CustomerRowProps {
 const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [badgeColor, setBadgeColor] = useState<string>('#e5e7eb');
+  const [displayName, setDisplayName] = useState<string>('');
   const { toast } = useToast();
 
-  // Fetch the user's badge color when component mounts or when last_updated_by changes
+  // Fetch the user's badge color and display name when component mounts or when last_updated_by changes
   useEffect(() => {
-    const fetchBadgeColor = async () => {
+    const fetchUserData = async () => {
       if (customer.last_updated_by) {
+        // Fetch badge color
         const color = await getUserBadgeColor(customer.last_updated_by);
         setBadgeColor(color);
+
+        // If last_updated_by contains '@', it's likely an email - fetch the full name
+        if (customer.last_updated_by.includes('@')) {
+          try {
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('email', customer.last_updated_by)
+              .single();
+            
+            if (!error && profile?.full_name) {
+              setDisplayName(profile.full_name);
+            } else {
+              setDisplayName(customer.last_updated_by);
+            }
+          } catch (error) {
+            setDisplayName(customer.last_updated_by);
+          }
+        } else {
+          setDisplayName(customer.last_updated_by);
+        }
       }
     };
     
-    fetchBadgeColor();
+    fetchUserData();
   }, [customer.last_updated_by]);
 
   const formatDate = (dateString: string) => {
@@ -103,7 +127,7 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
             className="text-xs text-black border-0"
             style={{ backgroundColor: badgeColor }}
           >
-            {customer.last_updated_by}
+            {displayName || customer.last_updated_by}
           </Badge>
         )}
       </td>
