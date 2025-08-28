@@ -555,9 +555,6 @@ const Clients: React.FC = () => {
                     onChange={(e) => updateField('is_active', e.target.checked)}
                     className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
                   />
-                  <label htmlFor="is_active" className="font-medium">
-                    Actief
-                  </label>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
