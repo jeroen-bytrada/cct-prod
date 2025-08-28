@@ -263,57 +263,27 @@ const Clients: React.FC = () => {
           description: "New customer added successfully",
         });
       } else {
-        if (originalId !== editingCustomer.id) {
-          // If ID changed, we need to delete old record and create new one
-          const { data: originalCustomer, error: fetchError } = await supabase
-            .from('customers')
-            .select('created_at, cs_documents_in_process, cs_documents_other, cs_last_update')
-            .eq('id', originalId)
-            .single();
-          
-          if (fetchError) throw fetchError;
-          
-          const { error: deleteError } = await supabase
-            .from('customers')
-            .delete()
-            .eq('id', originalId);
-          
-          if (deleteError) throw deleteError;
-          
-          const { error: insertError } = await supabase
-            .from('customers')
-            .insert([{
-              ...editingCustomer,
-              created_at: originalCustomer?.created_at,
-              cs_documents_in_process: originalCustomer?.cs_documents_in_process,
-              cs_documents_other: originalCustomer?.cs_documents_other,
-              cs_last_update: originalCustomer?.cs_last_update
-            }]);
-          
-          if (insertError) throw insertError;
-        } else {
-          // Use the new updateCustomer function when ID hasn't changed
-          const success = await updateCustomer(originalId, {
-            customer_name: editingCustomer.customer_name,
-            administration_name: editingCustomer.administration_name,
-            administration_mail: editingCustomer.administration_mail,
-            source: editingCustomer.source,
-            source_root: editingCustomer.source_root,
-            is_active: editingCustomer.is_active,
-            cct_processed: editingCustomer.cct_processed
-          });
-          
-          if (!success) {
-            throw new Error("Failed to update customer");
-          }
+        const success = await updateCustomer(originalId, {
+          id: editingCustomer.id,
+          customer_name: editingCustomer.customer_name,
+          administration_name: editingCustomer.administration_name,
+          administration_mail: editingCustomer.administration_mail,
+          source: editingCustomer.source,
+          source_root: editingCustomer.source_root,
+          is_active: editingCustomer.is_active,
+          cct_processed: editingCustomer.cct_processed
+        });
+
+        if (!success) {
+          throw new Error("Failed to update customer");
         }
-        
+
         toast({
           title: "Success",
           description: "Customer updated successfully",
         });
       }
-      
+
       fetchCustomers();
       setIsDialogOpen(false);
     } catch (error) {
