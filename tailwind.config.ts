@@ -72,7 +72,7 @@ export default {
 					red: '#FF5252',
 					blue: '#3E7BFA',
 					purple: '#6941C6',
-					yellow: '#FFB547',
+					yellow: '#F3C744',
 					background: '#F9FAEF',
 					lightgreen: '#E6F4EA'
 				}
