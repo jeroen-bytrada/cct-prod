@@ -3,12 +3,16 @@ import React, { useEffect, useState } from 'react';
 import SearchBar from '@/components/SearchBar';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserProfile } from '@/lib/supabase/user';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { AppSettings } from '@/lib/supabase/types';
 
 interface DashboardHeaderProps {
   username?: string;
+  settings?: Omit<AppSettings, 'id'> | null;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings }) => {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState(username || 'Guest');
 
@@ -36,7 +40,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username }) => {
         <h1 className="text-2xl font-bold text-gray-900">Welkom, {displayName} 👋</h1>
         <p className="text-sm text-gray-600">Openstaande documenten in Snelstart en Dropbox</p>
       </div>
-      <SearchBar />
+      <div className="flex items-center gap-4">
+        {settings?.last_update_run && (
+          <Badge variant="yellow" className="text-sm">
+            Laatste run: {format(new Date(settings.last_update_run), 'dd-MM-yyyy HH:mm')}
+          </Badge>
+        )}
+        <SearchBar />
+      </div>
     </div>
   );
 };

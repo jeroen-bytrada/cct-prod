@@ -19,12 +19,7 @@ export function useDashboardData() {
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [documentCount, setDocumentCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<{ 
-    target_all: number | null, 
-    target_invoice: number | null, 
-    target_top: number | null,
-    topx: number | null
-  } | null>(null);
+  const [settings, setSettings] = useState<Omit<AppSettings, 'id'> | null>(null);
   const { toast } = useToast();
   
   // References to previous values to compare for actual changes
