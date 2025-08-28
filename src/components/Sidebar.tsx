@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, Users, Settings, LogOut } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -7,10 +7,29 @@ import Logo from './Logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { getUserProfile } from '@/lib/supabase/user';
 
 const Sidebar: React.FC = () => {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const profile = await getUserProfile();
+        if (profile?.full_name) {
+          setDisplayName(profile.full_name);
+        } else if (user.user_metadata?.full_name) {
+          setDisplayName(user.user_metadata.full_name);
+        } else if (user.email) {
+          setDisplayName(user.email);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -83,9 +102,9 @@ const Sidebar: React.FC = () => {
               >
                 <Avatar className="h-7 w-7 transition duration-300">
                   <AvatarImage src={user.user_metadata.avatar_url} />
-                  <AvatarFallback>{getInitials(user.user_metadata.full_name || user.email)}</AvatarFallback>
+                  <AvatarFallback>{getInitials(displayName || user.email)}</AvatarFallback>
                 </Avatar>
-                <span className="truncate">{user.user_metadata.full_name || user.email}</span>
+                <span className="truncate">{displayName || user.email}</span>
               </button>
               
               <Button 
