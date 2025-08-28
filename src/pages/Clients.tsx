@@ -544,29 +544,33 @@ const Clients: React.FC = () => {
             </div>
             <div className="grid grid-cols-6 items-center gap-4">
               <div className="col-span-6 grid grid-cols-2 gap-8">
-                <div className="flex items-center gap-3">
-                  <label htmlFor="is_active" className="font-medium">
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <label className="text-right font-medium col-span-2">
                     Actief
                   </label>
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    checked={!!editingCustomer.is_active}
-                    onChange={(e) => updateField('is_active', e.target.checked)}
-                    className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
-                  />
+                  <div className="col-span-1 flex items-center">
+                    <input
+                      type="checkbox"
+                      id="is_active"
+                      checked={!!editingCustomer.is_active}
+                      onChange={(e) => updateField('is_active', e.target.checked)}
+                      className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <label htmlFor="cct_processed" className="font-medium">
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <label className="text-right font-medium col-span-2">
                     Verwerking CCT
                   </label>
-                  <input
-                    type="checkbox"
-                    id="cct_processed"
-                    checked={!!editingCustomer.cct_processed}
-                    onChange={(e) => updateField('cct_processed', e.target.checked)}
-                    className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
-                  />
+                  <div className="col-span-1 flex items-center">
+                    <input
+                      type="checkbox"
+                      id="cct_processed"
+                      checked={!!editingCustomer.cct_processed}
+                      onChange={(e) => updateField('cct_processed', e.target.checked)}
+                      className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
