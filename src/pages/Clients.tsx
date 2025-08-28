@@ -543,12 +543,11 @@ const Clients: React.FC = () => {
               />
             </div>
             <div className="grid grid-cols-6 items-center gap-4">
-              <div className="col-span-1"></div>
-              <div className="col-span-5 grid grid-cols-2 gap-8">
+              <label className="text-right font-medium col-span-1">
+                Actief
+              </label>
+              <div className="col-span-5 grid grid-cols-2 gap-6">
                 <div className="flex items-center gap-3">
-                  <label htmlFor="is_active" className="font-medium">
-                    Actief
-                  </label>
                   <input
                     type="checkbox"
                     id="is_active"
@@ -556,11 +555,11 @@ const Clients: React.FC = () => {
                     onChange={(e) => updateField('is_active', e.target.checked)}
                     className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
                   />
+                  <label htmlFor="is_active" className="font-medium">
+                    Actief
+                  </label>
                 </div>
                 <div className="flex items-center gap-3">
-                  <label htmlFor="cct_processed" className="font-medium">
-                    Verwerking CCT
-                  </label>
                   <input
                     type="checkbox"
                     id="cct_processed"
@@ -568,6 +567,9 @@ const Clients: React.FC = () => {
                     onChange={(e) => updateField('cct_processed', e.target.checked)}
                     className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
                   />
+                  <label htmlFor="cct_processed" className="font-medium">
+                    Verwerking CCT
+                  </label>
                 </div>
               </div>
             </div>
