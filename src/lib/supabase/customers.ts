@@ -194,7 +194,9 @@ export async function updateCustomer(
   }
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
+    console.log('updateCustomer called with:', { customerId, customerData });
+    
+    const { data, error } = await supabase
       .from('customers')
       .update({
         customer_name: customerData.customer_name,
@@ -206,9 +208,20 @@ export async function updateCustomer(
         cct_processed: customerData.cct_processed,
         ...(customerData.id && customerData.id !== customerId ? { id: customerData.id } : {})
       })
-      .eq('id', customerId);
+      .eq('id', customerId)
+      .select(); // Add select to see what data is returned
     
-    if (error) throw error;
+    console.log('Update result:', { data, error });
+    
+    if (error) {
+      console.error('Supabase update error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      throw error;
+    }
     return true;
   } catch (error) {
     console.error('Error updating customer:', error);
