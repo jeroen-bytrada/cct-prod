@@ -543,10 +543,7 @@ const Clients: React.FC = () => {
               />
             </div>
             <div className="grid grid-cols-6 items-center gap-4">
-              <label className="text-right font-medium col-span-1">
-                Actief
-              </label>
-              <div className="col-span-5 grid grid-cols-2 gap-6">
+              <div className="col-span-6 grid grid-cols-2 gap-6">
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
