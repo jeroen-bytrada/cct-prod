@@ -80,13 +80,6 @@ export type Database = {
             foreignKeyName: "customer_documents_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "cct_customers_secure"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customer_documents_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
@@ -223,57 +216,6 @@ export type Database = {
       }
     }
     Views: {
-      cct_customers_secure: {
-        Row: {
-          administration_mail: string | null
-          administration_name: string | null
-          cct_processed: boolean | null
-          created_at: string | null
-          cs_documents_in_process: number | null
-          cs_documents_inbox: number | null
-          cs_documents_other: number | null
-          cs_last_update: string | null
-          customer_name: string | null
-          id: string | null
-          is_active: boolean | null
-          last_updated_by: string | null
-          source: string | null
-          source_root: string | null
-        }
-        Insert: {
-          administration_mail?: string | null
-          administration_name?: string | null
-          cct_processed?: boolean | null
-          created_at?: string | null
-          cs_documents_in_process?: number | null
-          cs_documents_inbox?: number | null
-          cs_documents_other?: number | null
-          cs_last_update?: string | null
-          customer_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_updated_by?: string | null
-          source?: string | null
-          source_root?: string | null
-        }
-        Update: {
-          administration_mail?: string | null
-          administration_name?: string | null
-          cct_processed?: boolean | null
-          created_at?: string | null
-          cs_documents_in_process?: number | null
-          cs_documents_inbox?: number | null
-          cs_documents_other?: number | null
-          cs_last_update?: string | null
-          customer_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_updated_by?: string | null
-          source?: string | null
-          source_root?: string | null
-        }
-        Relationships: []
-      }
       cct_stats: {
         Row: {
           id: number | null
