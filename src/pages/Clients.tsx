@@ -318,11 +318,12 @@ const Clients: React.FC = () => {
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Error saving customer:', error);
+      const errMsg = error instanceof Error ? error.message : typeof error === 'string' ? error : JSON.stringify(error);
       toast({
         title: "Error",
-        description: isNewCustomer 
-          ? "Failed to add new customer. Please try again." 
-          : "Failed to update customer. Please try again.",
+        description: (isNewCustomer 
+          ? "Failed to add new customer. " 
+          : "Failed to update customer. ") + (errMsg ? `Details: ${errMsg}` : "Please try again."),
         variant: "destructive",
       });
     }

@@ -212,7 +212,7 @@ export async function updateCustomer(
     return true;
   } catch (error) {
     console.error('Error updating customer:', error);
-    return false;
+    throw error;
   }
 }
 
