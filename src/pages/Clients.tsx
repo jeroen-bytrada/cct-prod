@@ -543,31 +543,32 @@ const Clients: React.FC = () => {
               />
             </div>
             <div className="grid grid-cols-6 items-center gap-4">
-              <label className="text-right font-medium col-span-1">
-                Actief
-              </label>
-              <div className="col-span-5 flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={!!editingCustomer.is_active}
-                  onChange={(e) => updateField('is_active', e.target.checked)}
-                  className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-6 items-center gap-4">
-              <label className="text-right font-medium col-span-1">
-                Verwerking CCT
-              </label>
-              <div className="col-span-5 flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="cct_processed"
-                  checked={!!editingCustomer.cct_processed}
-                  onChange={(e) => updateField('cct_processed', e.target.checked)}
-                  className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
-                />
+              <div className="col-span-1"></div>
+              <div className="col-span-5 grid grid-cols-2 gap-8">
+                <div className="flex items-center gap-3">
+                  <label htmlFor="is_active" className="font-medium">
+                    Actief
+                  </label>
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    checked={!!editingCustomer.is_active}
+                    onChange={(e) => updateField('is_active', e.target.checked)}
+                    className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <label htmlFor="cct_processed" className="font-medium">
+                    Verwerking CCT
+                  </label>
+                  <input
+                    type="checkbox"
+                    id="cct_processed"
+                    checked={!!editingCustomer.cct_processed}
+                    onChange={(e) => updateField('cct_processed', e.target.checked)}
+                    className="h-4 w-4 text-buzzaroo-green focus:ring-buzzaroo-green border-gray-300 rounded"
+                  />
+                </div>
               </div>
             </div>
           </div>
