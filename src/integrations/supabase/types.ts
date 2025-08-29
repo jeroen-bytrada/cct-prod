@@ -261,6 +261,21 @@ export type Database = {
           total_other_15: number
         }[]
       }
+      get_profile_display_info_by_ids: {
+        Args: { ids: string[] }
+        Returns: {
+          badge_color: string
+          full_name: string
+          id: string
+        }[]
+      }
+      get_profile_display_info_by_names: {
+        Args: { names: string[] }
+        Returns: {
+          badge_color: string
+          full_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

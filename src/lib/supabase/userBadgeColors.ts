@@ -17,19 +17,16 @@ export async function getUserBadgeColor(fullName: string | null): Promise<string
   }
 
   try {
-    // Query the profiles table to get the badge color for this user
+    // Use RPC to get the badge color for this user
     const { data, error } = await supabase
-      .from('profiles')
-      .select('badge_color')
-      .eq('full_name', fullName)
-      .maybeSingle(); // Use maybeSingle to avoid errors when no user is found
+      .rpc('get_profile_display_info_by_names', { names: [fullName] });
 
     if (error) {
       console.error('Error fetching user badge color:', error);
       return defaultColor;
     }
 
-    const color = data?.badge_color || defaultColor;
+    const color = data?.[0]?.badge_color || defaultColor;
     
     // Cache the result
     badgeColorCache.set(fullName, color);
@@ -72,9 +69,7 @@ export async function getBadgeColorsForUsers(userNames: (string | null)[]): Prom
   if (uncachedNames.length > 0) {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('full_name, badge_color')
-        .in('full_name', uncachedNames);
+        .rpc('get_profile_display_info_by_names', { names: uncachedNames });
 
       if (error) {
         console.error('Error batch fetching user badge colors:', error);

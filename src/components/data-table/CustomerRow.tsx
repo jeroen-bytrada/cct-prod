@@ -25,16 +25,24 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
     const fetchUserData = async () => {
       if (customer.last_updated_by) {
         try {
-          // Try to fetch by user ID first (new format)
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('full_name, badge_color')
-            .eq('id', customer.last_updated_by)
-            .single();
+          // Check if last_updated_by looks like a UUID (new format)
+          const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customer.last_updated_by);
           
-          if (!error && profile) {
-            setDisplayName(profile.full_name || 'Unknown User');
-            setBadgeColor(profile.badge_color || '#e5e7eb');
+          if (isUUID) {
+            // Try to fetch by user ID using RPC (new format)
+            const { data: profiles, error } = await supabase
+              .rpc('get_profile_display_info_by_ids', { ids: [customer.last_updated_by] });
+            
+            if (!error && profiles && profiles.length > 0) {
+              const profile = profiles[0];
+              setDisplayName(profile.full_name || 'Unknown User');
+              setBadgeColor(profile.badge_color || '#e5e7eb');
+            } else {
+              // Fallback for old data format (name or email)
+              setDisplayName(customer.last_updated_by);
+              const color = await getUserBadgeColor(customer.last_updated_by);
+              setBadgeColor(color);
+            }
           } else {
             // Fallback for old data format (name or email)
             setDisplayName(customer.last_updated_by);
