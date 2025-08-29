@@ -10,6 +10,24 @@ type SortConfig = {
   direction: SortDirection;
 };
 
+const PAGE_SIZE_STORAGE_KEY = 'datatable-page-size';
+
+const getStoredPageSize = (): number => {
+  try {
+    const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
+    if (stored) {
+      const parsed = parseInt(stored, 10);
+      // Validate the stored value is a reasonable page size
+      if (parsed > 0 && parsed <= 100) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to read page size from localStorage:', error);
+  }
+  return 10; // Default fallback
+};
+
 export function useTableData() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
@@ -22,7 +40,7 @@ export function useTableData() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(getStoredPageSize());
   
   const { toast } = useToast();
   
@@ -97,6 +115,12 @@ export function useTableData() {
   };
 
   const changePageSize = (newPageSize: number) => {
+    try {
+      localStorage.setItem(PAGE_SIZE_STORAGE_KEY, newPageSize.toString());
+    } catch (error) {
+      console.warn('Failed to save page size to localStorage:', error);
+    }
+    
     setPageSize(newPageSize);
     setCurrentPage(1); // Reset to first page when changing page size
   };
