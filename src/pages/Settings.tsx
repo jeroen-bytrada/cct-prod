@@ -22,7 +22,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { MAX_HISTORY_RECORDS } from '@/lib/supabase/client';
-import { useVersionInfo } from '@/hooks/useVersionInfo';
 
 const settingsFormSchema = z.object({
   target_all: z.coerce.number().nullable().optional(),
@@ -38,7 +37,6 @@ type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
 const Settings = () => {
   const { isAdmin } = useAuth();
-  const versionInfo = useVersionInfo();
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
@@ -146,10 +144,7 @@ const Settings = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Instellingen</h1>
         
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <div className="flex items-baseline gap-3 mb-4">
-            <h2 className="text-lg font-medium">Applicatieconfiguratie</h2>
-            <span className="text-sm text-muted-foreground">({versionInfo.displayString})</span>
-          </div>
+          <h2 className="text-lg font-medium mb-4">Applicatieconfiguratie</h2>
           
           {settingsError && (
             <Alert variant="destructive" className="mb-4">
