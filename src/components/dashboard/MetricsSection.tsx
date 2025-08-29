@@ -61,7 +61,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
         <MetricCard title="Aantal Klanten" value={loading ? "..." : customerCount.toString()} hideStats={true} showIcon={true} iconComponent={<Users size={16} />} className="h-[91px]" // Fine-tuned height
       />
         
-        <MetricCard title="Totaal verwerkte documenten Vandaag" value={loading ? "..." : documentCount.toString()} hideStats={true} showIcon={true} iconComponent={<FileText size={16} />} className="h-[91px]" // Fine-tuned height
+        <MetricCard title="Toegevoegde bestanden vandaag" value={loading ? "..." : documentCount.toString()} hideStats={true} showIcon={true} iconComponent={<FileText size={16} />} className="h-[91px]" // Fine-tuned height
       />
       </div>
       
