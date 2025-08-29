@@ -232,15 +232,11 @@ export async function updateCustomer(
 // Update customer last update timestamp and user
 export async function updateCustomerLastUpdate(customerId: string): Promise<boolean> {
   try {
-    // Get current user's profile for name
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', (await supabase.auth.getUser()).data.user?.id)
-      .single();
+    // Get current user ID
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError);
+    if (userError || !user) {
+      console.error('Error getting current user:', userError);
       return false;
     }
 
@@ -248,7 +244,7 @@ export async function updateCustomerLastUpdate(customerId: string): Promise<bool
       .from('customers')
       .update({
         cs_last_update: new Date().toISOString(),
-        last_updated_by: profile?.full_name || 'Unknown User'
+        last_updated_by: user.id
       })
       .eq('id', customerId);
     

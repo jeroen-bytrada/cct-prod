@@ -24,29 +24,28 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
   useEffect(() => {
     const fetchUserData = async () => {
       if (customer.last_updated_by) {
-        // Fetch badge color
-        const color = await getUserBadgeColor(customer.last_updated_by);
-        setBadgeColor(color);
-
-        // If last_updated_by contains '@', it's likely an email - fetch the full name
-        if (customer.last_updated_by.includes('@')) {
-          try {
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('email', customer.last_updated_by)
-              .single();
-            
-            if (!error && profile?.full_name) {
-              setDisplayName(profile.full_name);
-            } else {
-              setDisplayName(customer.last_updated_by);
-            }
-          } catch (error) {
+        try {
+          // Try to fetch by user ID first (new format)
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('full_name, badge_color')
+            .eq('id', customer.last_updated_by)
+            .single();
+          
+          if (!error && profile) {
+            setDisplayName(profile.full_name || 'Unknown User');
+            setBadgeColor(profile.badge_color || '#e5e7eb');
+          } else {
+            // Fallback for old data format (name or email)
             setDisplayName(customer.last_updated_by);
+            const color = await getUserBadgeColor(customer.last_updated_by);
+            setBadgeColor(color);
           }
-        } else {
+        } catch (error) {
+          // Fallback for old data format
           setDisplayName(customer.last_updated_by);
+          const color = await getUserBadgeColor(customer.last_updated_by);
+          setBadgeColor(color);
         }
       }
     };
