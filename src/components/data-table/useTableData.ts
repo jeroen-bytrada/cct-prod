@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Customer, getCustomers, supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { isEqual } from 'lodash';
+import { getBadgeColorsForUsers } from '@/lib/supabase/userBadgeColors';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -55,22 +56,25 @@ export function useTableData() {
       
       console.log(`Fetched ${data.length} active customers`);
       
+      // Process display names for search functionality
+      const customersWithDisplayNames = await processCustomerDisplayNames(data);
+      
       // Check if data has actually changed
-      const customersChanged = !isEqual(data, prevCustomersRef.current);
+      const customersChanged = !isEqual(customersWithDisplayNames, prevCustomersRef.current);
       
       if (customersChanged) {
         console.log('Customer data changed, updating table');
-        setCustomers(data);
+        setCustomers(customersWithDisplayNames);
         
-        const sortedData = sortData(data, sortConfig);
+        const sortedData = sortData(customersWithDisplayNames, sortConfig);
         setFilteredCustomers(sortedData);
         
         // Update reference to current values
-        prevCustomersRef.current = data;
+        prevCustomersRef.current = customersWithDisplayNames;
         
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('customers_updated', { 
-          detail: { customers: data } 
+          detail: { customers: customersWithDisplayNames } 
         }));
       } else {
         console.log('Customer data fetched, no changes detected');
@@ -89,6 +93,79 @@ export function useTableData() {
       setLoading(false);
     }
   }, [toast, sortConfig]);
+
+  // Process display names for all customers
+  const processCustomerDisplayNames = async (customers: Customer[]): Promise<Customer[]> => {
+    // Separate UUID-based and name-based last_updated_by values
+    const uuidCustomers: Customer[] = [];
+    const nameCustomers: Customer[] = [];
+    const uuids: string[] = [];
+    const names: string[] = [];
+
+    customers.forEach(customer => {
+      if (customer.last_updated_by) {
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customer.last_updated_by);
+        
+        if (isUUID) {
+          uuidCustomers.push(customer);
+          uuids.push(customer.last_updated_by);
+        } else {
+          nameCustomers.push(customer);
+          names.push(customer.last_updated_by);
+        }
+      }
+    });
+
+    // Batch fetch profile data for UUIDs
+    let profileMap = new Map<string, string>();
+    if (uuids.length > 0) {
+      try {
+        const { data: profiles, error } = await supabase
+          .rpc('get_profile_display_info_by_ids', { ids: uuids });
+        
+        if (!error && profiles) {
+          profiles.forEach(profile => {
+            profileMap.set(profile.id, profile.full_name || 'Unknown User');
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to fetch profile display names:', error);
+      }
+    }
+
+    // Batch fetch badge colors for names (which also gives us the display names)
+    let nameMap = new Map<string, string>();
+    if (names.length > 0) {
+      try {
+        await getBadgeColorsForUsers(names); // This populates the cache
+        names.forEach(name => {
+          nameMap.set(name, name); // For names, the display name is the same as the stored name
+        });
+      } catch (error) {
+        console.warn('Failed to process name-based users:', error);
+      }
+    }
+
+    // Return customers with display names added
+    return customers.map(customer => {
+      let displayName: string | null = null;
+      
+      if (customer.last_updated_by) {
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customer.last_updated_by);
+        
+        if (isUUID) {
+          displayName = profileMap.get(customer.last_updated_by) || null;
+        } else {
+          displayName = nameMap.get(customer.last_updated_by) || customer.last_updated_by;
+        }
+      }
+      
+      return {
+        ...customer,
+        display_name: displayName
+      };
+    });
+  };
 
   // Pagination logic
   const getPaginatedData = () => {
@@ -222,7 +299,8 @@ export function useTableData() {
       customer => 
         customer.id.toLowerCase().includes(searchLower) || 
         customer.customer_name.toLowerCase().includes(searchLower) ||
-        (customer.last_updated_by && customer.last_updated_by.toLowerCase().includes(searchLower))
+        (customer.last_updated_by && customer.last_updated_by.toLowerCase().includes(searchLower)) ||
+        (customer.display_name && customer.display_name.toLowerCase().includes(searchLower))
     );
     
     const sortedFiltered = sortData(filtered, sortConfig);

@@ -15,6 +15,7 @@ export type Customer = {
   cct_processed?: boolean | null
   created_at?: string | null
   last_updated_by?: string | null
+  display_name?: string | null // Add display name for search functionality
 }
 
 export type CustomerDocument = {
