@@ -102,7 +102,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
                 : 'bg-yellow-50 text-yellow-700 border-yellow-300 hover:bg-yellow-100'
             }`}
             onClick={handleRunClick}
-            disabled={isRunning || !settings?.wh_run}
+            disabled={isRunning}
           >
             Laatste run: {format(new Date(settings.last_update_run), 'dd-MM-yyyy HH:mm')}
           </Button>
