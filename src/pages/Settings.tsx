@@ -22,7 +22,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { MAX_HISTORY_RECORDS } from '@/lib/supabase/client';
-import { useGitBranch } from '@/hooks/useGitBranch';
+import { useVersionInfo } from '@/hooks/useVersionInfo';
 
 const settingsFormSchema = z.object({
   target_all: z.coerce.number().nullable().optional(),
@@ -38,7 +38,7 @@ type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
 const Settings = () => {
   const { isAdmin } = useAuth();
-  const currentBranch = useGitBranch();
+  const versionInfo = useVersionInfo();
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
@@ -148,7 +148,7 @@ const Settings = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div className="flex items-baseline gap-3 mb-4">
             <h2 className="text-lg font-medium">Applicatieconfiguratie</h2>
-            <span className="text-sm text-gray-400">({currentBranch})</span>
+            <span className="text-sm text-muted-foreground">({versionInfo.displayString})</span>
           </div>
           
           {settingsError && (
