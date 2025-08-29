@@ -67,4 +67,5 @@ export type AppSettings = {
   history_limit: number | null
   topx: number | null
   last_update_run: string
+  wh_run: string | null
 }

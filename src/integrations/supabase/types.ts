@@ -172,6 +172,7 @@ export type Database = {
           target_invoice: number | null
           target_top: number | null
           topx: number | null
+          wh_run: string | null
         }
         Insert: {
           history_limit?: number | null
@@ -181,6 +182,7 @@ export type Database = {
           target_invoice?: number | null
           target_top?: number | null
           topx?: number | null
+          wh_run?: string | null
         }
         Update: {
           history_limit?: number | null
@@ -190,6 +192,7 @@ export type Database = {
           target_invoice?: number | null
           target_top?: number | null
           topx?: number | null
+          wh_run?: string | null
         }
         Relationships: []
       }

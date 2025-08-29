@@ -31,6 +31,7 @@ const settingsFormSchema = z.object({
     .transform(val => val === null ? MAX_HISTORY_RECORDS : val),
   topx: z.coerce.number().min(1, "Minimaal 1").max(100, "Maximaal 100").nullable().optional()
     .transform(val => val === null ? 5 : val),
+  wh_run: z.string().url("Voer een geldige URL in").nullable().optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
@@ -50,6 +51,7 @@ const Settings = () => {
       target_top: null,
       history_limit: MAX_HISTORY_RECORDS,
       topx: 5,
+      wh_run: null,
     },
   });
 
@@ -90,6 +92,7 @@ const Settings = () => {
           target_top: data.target_top,
           history_limit: data.history_limit || MAX_HISTORY_RECORDS,
           topx: data.topx || 5,
+          wh_run: data.wh_run,
         });
       } else {
         console.error('No settings data returned but no error was thrown');
@@ -120,6 +123,7 @@ const Settings = () => {
           target_top: values.target_top,
           history_limit: values.history_limit,
           topx: values.topx,
+          wh_run: values.wh_run,
         })
         .eq('id', 1);
         
@@ -303,6 +307,38 @@ const Settings = () => {
                       )}
                     />
                   </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible className="border rounded-md p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">Webhook instellingen</h3>
+                  </div>
+                  
+                  <div className="pt-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="wh_run"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Webhook URL voor run trigger</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="url" 
+                              {...field} 
+                              value={field.value || ''}
+                              onChange={e => field.onChange(e.target.value || null)} 
+                              disabled={!isAdmin}
+                              placeholder="https://example.com/webhook"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            URL die wordt aangeroepen wanneer op "Laatste run" wordt geklikt
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </Collapsible>
                 
                 {isAdmin && (
