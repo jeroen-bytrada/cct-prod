@@ -59,18 +59,33 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
       return; // Prevent multiple clicks
     }
 
-    setIsRunning(true);
-    
     try {
-      const response = await fetch(settings.wh_run, {
+      // Validate URL and prevent mixed-content on HTTPS
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(settings.wh_run);
+      } catch {
+        toast.error('Ongeldige webhook URL');
+        return;
+      }
+
+      if (window.location.protocol === 'https:' && parsedUrl.protocol === 'http:') {
+        toast.error('Webhook URL moet HTTPS zijn (mixed content wordt geblokkeerd)');
+        return;
+      }
+
+      setIsRunning(true);
+
+      const response = await fetch(parsedUrl.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
-          triggered_by: user?.email || 'unknown'
-        })
+          triggered_by: user?.email || 'unknown',
+        }),
+        // mode defaults to 'cors' in browsers for cross-origin
       });
 
       if (response.ok) {
@@ -80,7 +95,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
       }
     } catch (error) {
       console.error('Error triggering run:', error);
-      toast.error(`Fout bij starten run: ${error instanceof Error ? error.message : 'Onbekende fout'}`);
+      const message =
+        error instanceof Error && (error.name === 'TypeError' || /Failed to fetch/i.test(error.message))
+          ? 'Kon webhook niet bereiken (CORS of netwerkfout). Controleer de URL en CORS-instellingen van de server.'
+          : `Fout bij starten run: ${error instanceof Error ? error.message : 'Onbekende fout'}`;
+      toast.error(message);
       setIsRunning(false); // Re-enable button on error
     }
   }, [settings?.wh_run, isRunning, user?.email]);
