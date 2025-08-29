@@ -7,7 +7,9 @@ import { execSync } from "child_process";
 // Get Git information during build
 const getGitInfo = () => {
   try {
-    const commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    // Get full commit hash and take first 7 characters to match GitHub format
+    const fullCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+    const commit = fullCommit.substring(0, 7);
     const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
     return { commit, branch };
   } catch {

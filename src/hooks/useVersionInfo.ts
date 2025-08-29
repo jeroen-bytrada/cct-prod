@@ -31,7 +31,9 @@ export const useVersionInfo = (): VersionInfo => {
       const branch = typeof __GIT_BRANCH__ !== 'undefined' ? __GIT_BRANCH__ : 'local';
       const buildTime = typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : new Date().toISOString();
       
-      const displayString = `${commit} • ${branch}`;
+      // Show just commit hash for detached HEAD (common in deployments)
+      // Otherwise show commit • branch
+      const displayString = branch === 'HEAD' ? commit : `${commit} • ${branch}`;
       
       setVersionInfo({
         commit,
