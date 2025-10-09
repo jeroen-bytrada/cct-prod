@@ -260,29 +260,10 @@ export function useTableData() {
     setFilteredCustomers(sortedData);
   };
 
+  // Fetch customers only on initial mount - no real-time updates
   useEffect(() => {
     fetchCustomers();
-    
-    const customersChannel = supabase
-      .channel('datatable-customers-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'customers'
-        },
-        (payload) => {
-          console.log('Customer data changed:', payload);
-          fetchCustomers();
-        }
-      )
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(customersChannel);
-    };
-  }, [toast, fetchCustomers]);
+  }, [fetchCustomers]);
 
   useEffect(() => {
     if (searchText.trim() === '') {
