@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { AppSettings } from '@/lib/supabase/types';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardHeaderProps {
   username?: string;
@@ -59,50 +60,26 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
       return; // Prevent multiple clicks
     }
 
+    setIsRunning(true);
+
     try {
-      // Validate URL and prevent mixed-content on HTTPS
-      let parsedUrl: URL;
-      try {
-        parsedUrl = new URL(settings.wh_run);
-      } catch {
-        toast.error('Ongeldige webhook URL');
-        return;
+      const { data, error } = await supabase.functions.invoke('trigger-webhook');
+
+      if (error) {
+        throw error;
       }
 
-      if (window.location.protocol === 'https:' && parsedUrl.protocol === 'http:') {
-        toast.error('Webhook URL moet HTTPS zijn (mixed content wordt geblokkeerd)');
-        return;
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
-      setIsRunning(true);
-
-      const response = await fetch(parsedUrl.toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          timestamp: new Date().toISOString(),
-          triggered_by: user?.email || 'unknown',
-        }),
-        // mode defaults to 'cors' in browsers for cross-origin
-      });
-
-      if (response.ok) {
-        toast.success('Run gestart');
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+      toast.success('Run gestart');
     } catch (error) {
       console.error('Error triggering run:', error);
-      const message =
-        error instanceof Error && (error.name === 'TypeError' || /Failed to fetch/i.test(error.message))
-          ? 'Kon webhook niet bereiken (CORS of netwerkfout). Controleer de URL en CORS-instellingen van de server.'
-          : `Fout bij starten run: ${error instanceof Error ? error.message : 'Onbekende fout'}`;
-      toast.error(message);
+      toast.error(`Fout bij starten run: ${error instanceof Error ? error.message : 'Onbekende fout'}`);
       setIsRunning(false); // Re-enable button on error
     }
-  }, [settings?.wh_run, isRunning, user?.email]);
+  }, [settings?.wh_run, isRunning]);
 
   return (
     <div className="flex justify-between items-center w-full mb-6">
