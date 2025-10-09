@@ -53,13 +53,25 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log(`Calling webhook: ${settings.wh_run}`)
+    console.log('Calling webhook...')
 
-    // Call the webhook
+    // Get the webhook secret from environment variables
+    const webhookSecret = Deno.env.get('N8N_WEBHOOK_SECRET')
+    
+    if (!webhookSecret) {
+      console.error('N8N_WEBHOOK_SECRET not configured')
+      return new Response(
+        JSON.stringify({ error: 'Webhook authentication not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Call the webhook with authentication header
     const webhookResponse = await fetch(settings.wh_run, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Webhook-Secret': webhookSecret,
       },
       body: JSON.stringify({
         timestamp: new Date().toISOString(),
