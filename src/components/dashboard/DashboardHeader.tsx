@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import SearchBar from '@/components/SearchBar';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserProfile } from '@/lib/supabase/user';
@@ -19,7 +19,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState(username || 'Guest');
   const [isRunning, setIsRunning] = useState(false);
-  const [lastRunTime, setLastRunTime] = useState<string | null>(null);
+  const lastRunTimeRef = useRef<string | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -43,12 +43,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
   useEffect(() => {
     if (settings?.last_update_run) {
       const newRunTime = settings.last_update_run;
-      if (lastRunTime && newRunTime !== lastRunTime) {
-        setIsRunning(false); // Re-enable button when last_update_run changes
+      // Re-enable button when last_update_run changes (webhook completed)
+      if (lastRunTimeRef.current && newRunTime !== lastRunTimeRef.current) {
+        console.log('Laatste run updated, re-enabling button');
+        setIsRunning(false);
       }
-      setLastRunTime(newRunTime);
+      lastRunTimeRef.current = newRunTime;
     }
-  }, [settings?.last_update_run, lastRunTime]);
+  }, [settings?.last_update_run]);
 
   const handleRunClick = useCallback(async () => {
     if (!settings?.wh_run) {

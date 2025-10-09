@@ -124,38 +124,8 @@ export function useDashboardData() {
   useEffect(() => {
     fetchData();
     
-    const customersChannel = supabase
-      .channel('customers-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'customers'
-        },
-        (payload) => {
-          console.log('Customer table changed:', payload);
-          fetchData();
-        }
-      )
-      .subscribe();
-      
-    const statsHistChannel = supabase
-      .channel('stats-hist-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'cct_stats_hist'
-        },
-        (payload) => {
-          console.log('Stats history updated:', payload);
-          fetchData();
-        }
-      )
-      .subscribe();
-      
+    // Only subscribe to settings changes for "Laatste run" timestamp updates
+    // All other dashboard data will be static until page reload
     const settingsChannel = supabase
       .channel('settings-changes')
       .on(
@@ -171,28 +141,9 @@ export function useDashboardData() {
         }
       )
       .subscribe();
-      
-    const documentsChannel = supabase
-      .channel('documents-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'customer_documents'
-        },
-        (payload) => {
-          console.log('Documents table changed:', payload);
-          fetchData();
-        }
-      )
-      .subscribe();
     
     return () => {
-      supabase.removeChannel(customersChannel);
-      supabase.removeChannel(statsHistChannel);
       supabase.removeChannel(settingsChannel);
-      supabase.removeChannel(documentsChannel);
     };
   }, [fetchData, fetchSettings, toast]);
 
