@@ -9,16 +9,19 @@ import { format } from 'date-fns';
 import { AppSettings } from '@/lib/supabase/types';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { RefreshCw } from 'lucide-react';
 
 interface DashboardHeaderProps {
   username?: string;
   settings?: Omit<AppSettings, 'id'> | null;
+  onRefresh?: () => Promise<void>;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings, onRefresh }) => {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState(username || 'Guest');
   const [isRunning, setIsRunning] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const lastRunTimeRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -83,6 +86,27 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
     }
   }, [settings?.wh_run, isRunning]);
 
+  const handleRefreshClick = useCallback(async () => {
+    if (!onRefresh) return;
+    
+    setIsRefreshing(true);
+    
+    try {
+      // Refresh dashboard data
+      await onRefresh();
+      
+      // Dispatch event to refresh table
+      window.dispatchEvent(new CustomEvent('manual_refresh'));
+      
+      toast.success('Dashboard vernieuwd');
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+      toast.error('Fout bij vernieuwen');
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [onRefresh]);
+
   return (
     <div className="flex justify-between items-center w-full mb-6">
       <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -90,21 +114,35 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ username, settings })
         <p className="text-sm text-gray-600">Openstaande documenten in Snelstart en Dropbox</p>
       </div>
       <div className="flex items-center gap-4">
-        {settings?.last_update_run && (
+        <div className="flex items-center gap-2">
+          {settings?.last_update_run && (
+            <Button
+              variant={isRunning ? "secondary" : "outline"}
+              size="sm"
+              className={`text-sm transition-colors ${
+                isRunning 
+                  ? 'bg-yellow-100 text-yellow-800 border-yellow-200 cursor-not-allowed' 
+                  : 'bg-yellow-50 text-yellow-700 border-yellow-300 hover:bg-yellow-100'
+              }`}
+              onClick={handleRunClick}
+              disabled={isRunning}
+            >
+              Laatste run: {format(new Date(settings.last_update_run), 'dd-MM-yyyy HH:mm')}
+            </Button>
+          )}
+          
           <Button
-            variant={isRunning ? "secondary" : "outline"}
-            size="sm"
-            className={`text-sm transition-colors ${
-              isRunning 
-                ? 'bg-yellow-100 text-yellow-800 border-yellow-200 cursor-not-allowed' 
-                : 'bg-yellow-50 text-yellow-700 border-yellow-300 hover:bg-yellow-100'
-            }`}
-            onClick={handleRunClick}
-            disabled={isRunning}
+            onClick={handleRefreshClick}
+            disabled={isRefreshing}
+            variant="outline"
+            size="icon"
+            className="h-9 w-9"
+            title="Vernieuw dashboard"
           >
-            Laatste run: {format(new Date(settings.last_update_run), 'dd-MM-yyyy HH:mm')}
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
-        )}
+        </div>
+        
         <SearchBar />
       </div>
     </div>

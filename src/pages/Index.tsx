@@ -23,7 +23,7 @@ const Index: React.FC = () => {
     <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 ml-[190px] p-8 flex flex-col">
-        <DashboardHeader settings={settings} />
+        <DashboardHeader settings={settings} onRefresh={fetchData} />
         
         <MetricsSection 
           loading={loading}

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TableHeader from './TableHeader';
 import TableColumns from './TableColumns';
 import TableBody from './TableBody';
@@ -36,6 +36,20 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
     setSelectedCustomerId(customerId);
     setDocumentsModalOpen(true);
   };
+
+  // Listen for manual refresh event
+  useEffect(() => {
+    const handleManualRefresh = () => {
+      console.log('Manual refresh triggered, refreshing table data');
+      fetchCustomers();
+    };
+
+    window.addEventListener('manual_refresh', handleManualRefresh);
+    
+    return () => {
+      window.removeEventListener('manual_refresh', handleManualRefresh);
+    };
+  }, [fetchCustomers]);
 
 
   return (
