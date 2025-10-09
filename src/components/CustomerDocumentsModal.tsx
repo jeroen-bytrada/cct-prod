@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Search, ExternalLink, X, Calendar } from 'lucide-react';
+import { Search, X, Calendar } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -376,19 +376,18 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                   <TableHead className="w-[180px]">Toegevoegd</TableHead>
                   <TableHead>Documentnaam</TableHead>
                   <TableHead className="w-[120px]">Type</TableHead>
-                  <TableHead className="w-[80px]">Link</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       Documenten laden...
                     </TableCell>
                   </TableRow>
                 ) : filteredDocuments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                       Geen documenten gevonden
                     </TableCell>
                   </TableRow>
@@ -411,21 +410,6 @@ const CustomerDocumentsModal: React.FC<CustomerDocumentsModalProps> = ({
                         >
                           {getDocumentTypeLabel(doc.document_type)}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {doc.document_path ? (
-                          <a 
-                            href={doc.document_path} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="text-blue-600 hover:text-blue-800 inline-flex items-center"
-                          >
-                            <ExternalLink size={16} className="mr-1" />
-                            Bekijk
-                          </a>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))
