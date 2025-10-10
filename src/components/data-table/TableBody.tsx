@@ -1,15 +1,16 @@
 
 import React from 'react';
 import CustomerRow from './CustomerRow';
-import { Customer } from '@/lib/supabase';
+import { Customer, AppSettings } from '@/lib/supabase';
 
 interface TableBodyProps {
   customers: Customer[];
   loading: boolean;
   onViewDocuments: (customerId: string) => void;
+  settings: AppSettings | null;
 }
 
-const TableBody: React.FC<TableBodyProps> = ({ customers, loading, onViewDocuments }) => {
+const TableBody: React.FC<TableBodyProps> = ({ customers, loading, onViewDocuments, settings }) => {
   if (loading) {
     return (
       <tbody>
@@ -40,7 +41,8 @@ const TableBody: React.FC<TableBodyProps> = ({ customers, loading, onViewDocumen
         <CustomerRow 
           key={customer.id}
           customer={customer} 
-          onViewDocuments={onViewDocuments} 
+          onViewDocuments={onViewDocuments}
+          settings={settings}
         />
       ))}
     </tbody>

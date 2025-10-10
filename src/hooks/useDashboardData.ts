@@ -19,7 +19,7 @@ export function useDashboardData() {
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [documentCount, setDocumentCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<Omit<AppSettings, 'id'> | null>(null);
+  const [settings, setSettings] = useState<AppSettings | null>(null);
   const { toast } = useToast();
   
   // References to previous values to compare for actual changes
@@ -100,9 +100,8 @@ export function useDashboardData() {
       const settingsData = await getSettings();
       
       if (settingsData) {
-        const { id, ...settingsWithoutId } = settingsData;
-        setSettings(settingsWithoutId);
-        console.log('Settings loaded successfully:', settingsWithoutId);
+        setSettings(settingsData);
+        console.log('Settings loaded successfully:', settingsData);
       } else {
         console.error('Settings data is null - this should never happen');
         toast({

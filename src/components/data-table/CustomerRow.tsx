@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FileText, Check } from 'lucide-react';
-import { Customer } from '@/lib/supabase';
+import { Customer, AppSettings } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { updateCustomerLastUpdate } from '@/lib/supabase/customers';
 import { useToast } from '@/hooks/use-toast';
@@ -12,13 +12,34 @@ import { supabase } from '@/integrations/supabase/client';
 interface CustomerRowProps {
   customer: Customer;
   onViewDocuments: (customerId: string) => void;
+  settings: AppSettings | null;
 }
 
-const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) => {
+const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments, settings }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [badgeColor, setBadgeColor] = useState<string>('#e5e7eb');
   const [displayName, setDisplayName] = useState<string>('');
   const { toast } = useToast();
+
+  const getUpdateStatus = (): 'overdue' | 'needs-update' | 'updated' => {
+    const overdueThreshold = settings?.overdue_warning_days || 7;
+    const lastUpdateDate = new Date(customer.cs_last_update);
+    const currentDate = new Date();
+    const daysDifference = Math.floor((currentDate.getTime() - lastUpdateDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Priority 1: Check if overdue (RED status)
+    if (daysDifference >= overdueThreshold) {
+      return 'overdue';
+    }
+    
+    // Priority 2: Check if needs first update (GREEN-filled status)
+    if (customer.last_updated_by === null || customer.last_updated_by === "CCT") {
+      return 'needs-update';
+    }
+    
+    // Priority 3: Already updated (WHITE-outlined status)
+    return 'updated';
+  };
 
   // Fetch the user's badge color and display name when component mounts or when last_updated_by changes
   useEffect(() => {
@@ -143,16 +164,22 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments }) 
           <button 
             className={`
               w-4 h-4 rounded-full flex items-center justify-center transition-colors disabled:opacity-50
-              ${customer.last_updated_by === null || customer.last_updated_by === "CCT" 
+              ${getUpdateStatus() === 'overdue' 
+                ? 'bg-red-600 text-white hover:bg-red-700 border-2 border-white ring-2 ring-red-600' 
+                : getUpdateStatus() === 'needs-update'
                 ? 'bg-green-600 text-white hover:bg-green-700' 
                 : 'bg-white text-green-600 border-2 border-green-600 hover:bg-green-50'
               }
             `}
             onClick={handleUpdateLastUpdate}
             disabled={isUpdating}
-            title="Bijwerken"
+            title={getUpdateStatus() === 'overdue' ? 'Te laat! Bijwerken vereist' : 'Bijwerken'}
           >
-            <Check size={12} className={isUpdating ? 'animate-pulse' : ''} />
+            {getUpdateStatus() === 'overdue' ? (
+              <span className="text-[10px] font-bold leading-none">!</span>
+            ) : (
+              <Check size={12} className={isUpdating ? 'animate-pulse' : ''} />
+            )}
           </button>
           <button 
             className="text-blue-600 hover:text-blue-800 transition-colors"

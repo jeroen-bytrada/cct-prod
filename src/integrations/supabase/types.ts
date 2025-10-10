@@ -168,6 +168,7 @@ export type Database = {
           history_limit: number | null
           id: number
           last_update_run: string
+          overdue_warning_days: number | null
           target_all: number | null
           target_invoice: number | null
           target_top: number | null
@@ -178,6 +179,7 @@ export type Database = {
           history_limit?: number | null
           id?: number
           last_update_run?: string
+          overdue_warning_days?: number | null
           target_all?: number | null
           target_invoice?: number | null
           target_top?: number | null
@@ -188,6 +190,7 @@ export type Database = {
           history_limit?: number | null
           id?: number
           last_update_run?: string
+          overdue_warning_days?: number | null
           target_all?: number | null
           target_invoice?: number | null
           target_top?: number | null

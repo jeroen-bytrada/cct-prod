@@ -32,6 +32,8 @@ const settingsFormSchema = z.object({
   topx: z.coerce.number().min(1, "Minimaal 1").max(100, "Maximaal 100").nullable().optional()
     .transform(val => val === null ? 5 : val),
   wh_run: z.string().url("Voer een geldige URL in").nullable().optional(),
+  overdue_warning_days: z.coerce.number().min(1, "Minimaal 1 dag").max(365, "Maximaal 365 dagen").nullable().optional()
+    .transform(val => val === null ? 7 : val),
 });
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
@@ -52,6 +54,7 @@ const Settings = () => {
       history_limit: MAX_HISTORY_RECORDS,
       topx: 5,
       wh_run: null,
+      overdue_warning_days: 7,
     },
   });
 
@@ -93,6 +96,7 @@ const Settings = () => {
           history_limit: data.history_limit || MAX_HISTORY_RECORDS,
           topx: data.topx || 5,
           wh_run: data.wh_run,
+          overdue_warning_days: data.overdue_warning_days || 7,
         });
       } else {
         console.error('No settings data returned but no error was thrown');
@@ -124,6 +128,7 @@ const Settings = () => {
           history_limit: values.history_limit,
           topx: values.topx,
           wh_run: values.wh_run,
+          overdue_warning_days: values.overdue_warning_days,
         })
         .eq('id', 1);
         
@@ -307,6 +312,37 @@ const Settings = () => {
                       )}
                     />
                   </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible className="border rounded-md p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">Tabel status instellingen</h3>
+                  </div>
+                  
+                  <div className="pt-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="overdue_warning_days"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dagen voor rode waarschuwing</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              value={field.value === null ? 7 : field.value}
+                              onChange={e => field.onChange(e.target.value === '' ? 7 : Number(e.target.value))} 
+                              disabled={!isAdmin}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Aantal dagen na laatste update waarna een rode waarschuwingsindicator verschijnt (tussen 1 en 365)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </Collapsible>
 
                 <Collapsible className="border rounded-md p-4">

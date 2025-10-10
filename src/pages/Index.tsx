@@ -36,7 +36,7 @@ const Index: React.FC = () => {
         />
         
         <div className="mt-6 flex-grow flex flex-col">
-          <DataTable refreshData={fetchData} />
+          <DataTable refreshData={fetchData} settings={settings} />
         </div>
       </div>
     </div>

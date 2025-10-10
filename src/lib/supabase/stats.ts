@@ -87,7 +87,7 @@ export async function getSettings(): Promise<AppSettings | null> {
     // Explicitly fetch the single settings record with ID 1
     const { data, error } = await supabase
       .from('settings')
-      .select('id, target_all, target_invoice, target_top, history_limit, topx, last_update_run, wh_run')
+      .select('id, target_all, target_invoice, target_top, history_limit, topx, last_update_run, wh_run, overdue_warning_days')
       .eq('id', 1)
       .maybeSingle() // Use maybeSingle() to handle the case where no record is found
     
@@ -114,7 +114,8 @@ export async function getSettings(): Promise<AppSettings | null> {
       history_limit: data.history_limit || MAX_HISTORY_RECORDS, // Default to MAX_HISTORY_RECORDS if not set
       topx: data.topx || 5, // Default to 5 if not set
       last_update_run: data.last_update_run,
-      wh_run: data.wh_run
+      wh_run: data.wh_run,
+      overdue_warning_days: data.overdue_warning_days || 7
     }
   } catch (error) {
     console.error('Critical error in getSettings:', error)

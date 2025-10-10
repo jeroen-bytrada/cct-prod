@@ -68,4 +68,5 @@ export type AppSettings = {
   topx: number | null
   last_update_run: string
   wh_run: string | null
+  overdue_warning_days: number | null
 }

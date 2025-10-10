@@ -6,12 +6,14 @@ import TableBody from './TableBody';
 import TableFooter from './TableFooter';
 import { useTableData } from './useTableData';
 import CustomerDocumentsModal from '@/components/CustomerDocumentsModal';
+import { AppSettings } from '@/lib/supabase';
 
 interface DataTableProps {
   refreshData?: () => Promise<void>;
+  settings: AppSettings | null;
 }
 
-const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
+const DataTable: React.FC<DataTableProps> = ({ refreshData, settings }) => {
   const {
     filteredCustomers,
     paginatedCustomers,
@@ -69,7 +71,8 @@ const DataTable: React.FC<DataTableProps> = ({ refreshData }) => {
           <TableBody 
             customers={paginatedCustomers} 
             loading={loading} 
-            onViewDocuments={handleViewDocuments} 
+            onViewDocuments={handleViewDocuments}
+            settings={settings}
           />
         </table>
       </div>
