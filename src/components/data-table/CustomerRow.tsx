@@ -165,7 +165,7 @@ const CustomerRow: React.FC<CustomerRowProps> = ({ customer, onViewDocuments, se
             className={`
               w-4 h-4 rounded-full flex items-center justify-center transition-colors disabled:opacity-50
               ${getUpdateStatus() === 'overdue' 
-                ? 'bg-red-600 text-white hover:bg-red-700 border-2 border-white ring-2 ring-red-600' 
+                ? 'bg-red-600 text-white hover:bg-red-700' 
                 : getUpdateStatus() === 'needs-update'
                 ? 'bg-green-600 text-white hover:bg-green-700' 
                 : 'bg-white text-green-600 border-2 border-green-600 hover:bg-green-50'
