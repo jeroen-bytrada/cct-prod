@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 type AuthContextType = {
   session: Session | null;
@@ -79,9 +80,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+
+      // Validate input
+      const signInSchema = z.object({
+        email: z.string().trim().email('Invalid email format').max(255, 'Email too long'),
+        password: z.string().min(1, 'Password is required'),
+      });
+
+      const validatedData = signInSchema.parse({ email, password });
+
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validatedData.email,
+        password: validatedData.password,
       });
 
       if (error) {
@@ -90,6 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast.success('Successfully signed in!');
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        throw new Error(firstError.message);
+      }
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -98,14 +114,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setLoading(true);
+
+      // Validate input with comprehensive checks
+      const signUpSchema = z.object({
+        fullName: z.string()
+          .trim()
+          .min(1, 'Full name is required')
+          .max(100, 'Full name must be less than 100 characters')
+          .regex(/^[a-zA-Z\s\-']+$/, 'Full name can only contain letters, spaces, hyphens, and apostrophes'),
+        email: z.string()
+          .trim()
+          .email('Invalid email format')
+          .max(255, 'Email must be less than 255 characters'),
+        password: z.string()
+          .min(8, 'Password must be at least 8 characters')
+          .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+          .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+          .regex(/[0-9]/, 'Password must contain at least one number')
+          .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+      });
+
+      const validatedData = signUpSchema.parse({ fullName, email, password });
       
-      // First check if signups are disabled on this instance
       const { error, data } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validatedData.email,
+        password: validatedData.password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: validatedData.fullName,
           },
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -122,6 +158,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast.success('Registration successful! Please check your email for confirmation.');
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0];
+        throw new Error(firstError.message);
+      }
+      throw error;
     } finally {
       setLoading(false);
     }

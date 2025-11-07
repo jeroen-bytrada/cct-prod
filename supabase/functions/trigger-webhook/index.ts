@@ -55,6 +55,53 @@ Deno.serve(async (req) => {
 
     console.log('Calling webhook...')
 
+    // Validate webhook URL to prevent SSRF attacks
+    const isValidWebhookUrl = (url: string): boolean => {
+      try {
+        const parsed = new URL(url)
+        
+        // Block localhost and local IPs
+        if (
+          parsed.hostname === 'localhost' ||
+          parsed.hostname === '127.0.0.1' ||
+          parsed.hostname.startsWith('169.254.') ||
+          parsed.hostname.startsWith('10.') ||
+          parsed.hostname.startsWith('192.168.') ||
+          parsed.hostname.startsWith('172.16.') ||
+          parsed.hostname.startsWith('172.17.') ||
+          parsed.hostname.startsWith('172.18.') ||
+          parsed.hostname.startsWith('172.19.') ||
+          parsed.hostname.startsWith('172.20.') ||
+          parsed.hostname.startsWith('172.21.') ||
+          parsed.hostname.startsWith('172.22.') ||
+          parsed.hostname.startsWith('172.23.') ||
+          parsed.hostname.startsWith('172.24.') ||
+          parsed.hostname.startsWith('172.25.') ||
+          parsed.hostname.startsWith('172.26.') ||
+          parsed.hostname.startsWith('172.27.') ||
+          parsed.hostname.startsWith('172.28.') ||
+          parsed.hostname.startsWith('172.29.') ||
+          parsed.hostname.startsWith('172.30.') ||
+          parsed.hostname.startsWith('172.31.')
+        ) {
+          return false
+        }
+        
+        // Only allow HTTPS for security
+        return parsed.protocol === 'https:'
+      } catch {
+        return false
+      }
+    }
+
+    if (!isValidWebhookUrl(settings.wh_run)) {
+      console.error('Invalid webhook URL:', settings.wh_run)
+      return new Response(
+        JSON.stringify({ error: 'Invalid webhook URL. Only HTTPS URLs to public domains are allowed.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Get the webhook secret from environment variables
     const webhookSecret = Deno.env.get('N8N_WEBHOOK_SECRET')
     
