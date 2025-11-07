@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -237,7 +237,7 @@ export type Database = {
     }
     Functions: {
       get_cct_customers: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           administration_mail: string
           administration_name: string
@@ -256,7 +256,7 @@ export type Database = {
         }[]
       }
       get_cct_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           id: number
           total: number
